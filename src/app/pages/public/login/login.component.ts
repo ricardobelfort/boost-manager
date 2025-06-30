@@ -53,6 +53,13 @@ export class LoginComponent {
       });
       return;
     }
+
+    this.router.navigate(['/dashboard']);
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Sucesso',
+      detail: `Bem-vindo(a), ${email}! Você está logado.`,
+    });
   }
 
   get email() {

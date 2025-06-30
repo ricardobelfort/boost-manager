@@ -11,6 +11,11 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     loadChildren: () => import('./pages/private/private.routes').then((r) => r.PRIVATE_ROUTES),
+    data: {
+      title: 'Dashboard',
+      breadcrumb: 'Dashboard',
+      icon: 'pi pi-fw pi-home',
+    },
   },
   { path: '**', component: PageNotFoundComponent },
 ];
