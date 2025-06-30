@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { MenubarComponent } from '@shared/components/menubar/menubar.component';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [MenubarComponent],
+  imports: [MenubarComponent, RouterOutlet],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
+  styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent {
-
-}
+export class DashboardComponent {}
