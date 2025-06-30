@@ -7,7 +7,7 @@
     </div>
     <form [formGroup]="loginForm" class="w-full min-w-full flex flex-col gap-4">
       <div>
-        <label for="email" class="block text-sm text-gray-700">
+        <label for="email" class="block text-base text-gray-700">
           <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">E-mail</span>
           <input
             class="w-full mt-1 border border-gray-300 px-3 py-3 rounded-sm shadow-xs focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500"
@@ -19,7 +19,7 @@
             required
           />
         </label>
-        <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="text-xs text-red-500 mt-1">
+        <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="text-sm text-red-500 mt-1">
           <div *ngIf="email?.hasError('required')">O e-mail é obrigatório.</div>
           <div *ngIf="email?.hasError('email')">Formato de e-mail inválido.</div>
           <div *ngIf="email?.hasError('minlength')">O e-mail deve ter pelo menos 5 caracteres.</div>
@@ -27,8 +27,13 @@
       </div>
 
       <div>
-        <label for="password" class="block text-sm text-gray-700">
+        <label for="password" class="block text-base text-gray-700">
           <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">Senha</span>
+          <i
+            class="pi pi-info-circle ml-2 text-gray-400 hover:text-lime-500 cursor-pointer"
+            pTooltip="A senha deve conter:&#10;Pelo menos 8 caracteres sendo letras maiúsculas, minúsculas e números."
+            tooltipPosition="right"
+          ></i>
           <div class="relative">
             <input
               [type]="showPassword ? 'text' : 'password'"
@@ -52,35 +57,35 @@
           </div>
         </label>
 
-        @if (passwordTouched) {
-          <div class="mt-2 p-3 border border-gray-300 rounded-sm shadow-xs text-sm">
-            <p class="font-medium text-gray-700">A senha deve conter:</p>
-            <ul class="mt-1">
-              <li class="flex items-center" [class.text-lime-600]="passwordHasMinLength()">
-                <span class="mr-2">✔</span> Pelo menos 8 caracteres
-              </li>
-              <li class="flex items-center" [class.text-lime-600]="passwordHasLowerCase()">
-                <span class="mr-2">✔</span> Letras minúsculas (a-z)
-              </li>
-              <li class="flex items-center" [class.text-lime-600]="passwordHasUpperCase()">
-                <span class="mr-2">✔</span> Letras maiúsculas (A-Z)
-              </li>
-              <li class="flex items-center" [class.text-lime-600]="passwordHasNumber()">
-                <span class="mr-2">✔</span> Números (0-9)
-              </li>
-            </ul>
-          </div>
-        }
+        <div class="h-2 w-full rounded mt-2 bg-gray-200 overflow-hidden">
+          <div
+            class="h-2 rounded transition-all duration-300"
+            [ngClass]="passwordStrengthClass"
+            [style.width]="passwordStrengthWidth"
+          ></div>
+        </div>
 
-        <div *ngIf="password?.invalid && (password?.dirty || password?.touched)" class="text-xs text-red-500 mt-1 mb-2">
+        <div *ngIf="password?.invalid && (password?.dirty || password?.touched)" class="text-sm text-red-500 mt-1 mb-2">
           <div *ngIf="password?.hasError('required')">A senha é obrigatória.</div>
           <div *ngIf="email?.hasError('minlength')">A senha deve ter pelo menos 8 caracteres.</div>
         </div>
       </div>
 
-      <a routerLink="/auth/recovery" class="text-sm text-lime-600 hover:text-lime-500 cursor-pointer"
-        >Esqueceu sua senha</a
-      >
+      <div class="flex items-center justify-between my-1">
+        <label class="flex items-center cursor-pointer select-none text-base text-gray-700">
+          <input
+            type="checkbox"
+            class="form-checkbox h-4 w-4 text-lime-500 transition duration-150 mr-2"
+            formControlName="rememberMe"
+          />
+          Lembrar-me
+        </label>
+        <a
+          routerLink="/auth/recovery"
+          class="text-base text-lime-600 hover:text-lime-500 cursor-pointer underline underline-offset-4"
+          >Esqueceu sua senha</a
+        >
+      </div>
 
       <div class="w-full flex flex-col">
         <p-button
@@ -90,13 +95,13 @@
           size="large"
           [style]="{ width: '100%', fontSize: '14px' }"
         />
-        <!-- <p-divider align="center">
-          <b class="font-normal text-xs text-gray-400">Ou</b>
+        <p-divider align="center">
+          <b class="font-normal text-sm text-gray-400">Ou</b>
         </p-divider>
-        <p class="text-sm font-normal text-gray-700 text-center">
+        <p class="text-base font-normal text-gray-700 text-center">
           🚀 Não tem uma conta?
           <a routerLink="/auth/signup" class="font-bold text-lime-500 hover:text-lime-600">Criar Conta</a>
-        </p> -->
+        </p>
       </div>
     </form>
   </div>

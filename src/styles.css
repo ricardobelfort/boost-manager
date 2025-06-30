@@ -1,5 +1,6 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap'); */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 @import "primeicons/primeicons.css";
 @layer tailwind, primeng;
 
@@ -11,6 +12,7 @@
 :root {
   --font-worksans: "Work Sans";
   --font-ibmplexsans: "IBM Plex Sans";
+  --font-nunito: "Nunito";
   --rem: 14px;
   --lineHeight: 1;
   --bg-body: #F7F9FC;
@@ -29,7 +31,7 @@ html, body {
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-ibmplexsans), sans-serif;
+  font-family: var(--font-nunito), sans-serif;
   font-weight: normal;
   color: #1d2327;
   -webkit-font-smoothing: antialiased;

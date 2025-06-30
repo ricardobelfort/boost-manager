@@ -8,6 +8,7 @@ import { DialogModule } from 'primeng/dialog';
 import { DividerModule } from 'primeng/divider';
 import { IftaLabelModule } from 'primeng/iftalabel';
 import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +22,7 @@ import { TagModule } from 'primeng/tag';
     RouterLink,
     DialogModule,
     IftaLabelModule,
+    TooltipModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
@@ -30,12 +32,17 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
 
+  passwordStrengthClass = '';
+  passwordStrengthWidth = '0%';
+  rememberMe = false;
+
   loginForm = this.fb.group({
     email: ['', [Validators.email, Validators.required, Validators.minLength(5)]],
     password: [
       '',
       [Validators.required, Validators.minLength(8), Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$')],
     ],
+    rememberMe: [false],
   });
 
   showPassword = false;
@@ -73,6 +80,30 @@ export class LoginComponent {
       this.passwordTouched = true;
     } else {
       this.passwordTouched = false;
+    }
+
+    // Calcule a força
+    let strength = 0;
+    if (passwordValue.length >= 8) strength++;
+    if (/[a-z]/.test(passwordValue)) strength++;
+    if (/[A-Z]/.test(passwordValue)) strength++;
+    if (/\d/.test(passwordValue)) strength++;
+
+    if (strength <= 1) {
+      this.passwordStrengthClass = 'bg-red-400';
+      this.passwordStrengthWidth = '25%';
+    } else if (strength === 2) {
+      this.passwordStrengthClass = 'bg-yellow-400';
+      this.passwordStrengthWidth = '50%';
+    } else if (strength === 3) {
+      this.passwordStrengthClass = 'bg-blue-400';
+      this.passwordStrengthWidth = '75%';
+    } else if (strength === 4) {
+      this.passwordStrengthClass = 'bg-lime-500';
+      this.passwordStrengthWidth = '100%';
+    } else {
+      this.passwordStrengthClass = 'bg-gray-200';
+      this.passwordStrengthWidth = '0%';
     }
   }
 
