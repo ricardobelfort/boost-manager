@@ -1,41 +1,10 @@
 <div class="bg-gray-50 min-h-screen w-full overflow-x-hidden py-8">
   <div class="max-w-[1140px] mx-auto px-4">
-    <p-menubar [model]="items" class="shadow-sm border-b bg-white" styleClass="border-0">
-      <ng-template pTemplate="start">
-        <div class="flex items-center gap-2">
-          <img src="assets/images/boost.png" width="32" alt="" />
-          <span class="text-lg font-semibold text-black">Boost Manager</span>
-        </div>
-      </ng-template>
-
-      <ng-template #item let-item>
-        <ng-container>
-          <a class="p-menubar-item-link">
-            <span [class]="item.icon"></span>
-            <span class="ml-2">{{ item.label }}</span>
-          </a>
-        </ng-container>
-      </ng-template>
-
-      <ng-template pTemplate="end">
-        <div class="flex justify-between items-center gap-3 pr-4">
-          <div class="flex items-center gap-3 pr-4">
-            <i class="pi pi pi-user text-black text-xl"></i>
-            <button pButton label="Sair" icon="pi pi-sign-out" class="p-button-text text-md">Minha Conta</button>
-          </div>
-          <div class="flex items-center gap-3">
-            <i class="pi pi-sign-out text-black text-xl"></i>
-            <button pButton label="Sair" icon="pi pi-sign-out" class="p-button-text text-md" (click)="logout()">
-              Sair
-            </button>
-          </div>
-        </div>
-      </ng-template>
-    </p-menubar>
+    <app-menubar></app-menubar>
 
     <div class="bg-gray-50 min-h-screen py-8">
       <div class="max-w-[1140px] mx-auto">
-        <h2 class="text-3xl font-bold text-black mb-6">Resumo</h2>
+        <h2 class="text-3xl font-bold text-black mb-4">Resumo</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Card: Vendas -->

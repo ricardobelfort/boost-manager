@@ -1,0 +1,24 @@
+<p-menubar [model]="items" class="shadow-sm border-b bg-white" styleClass="border-0">
+  <ng-template pTemplate="start">
+    <div class="flex items-center gap-2">
+      <img src="assets/images/boost.png" width="30" alt="" />
+      <!-- <span class="text-lg font-semibold text-black">Boost Manager</span> -->
+    </div>
+  </ng-template>
+
+  <ng-template #item let-item>
+    <ng-container>
+      <a class="p-menubar-item-link">
+        <span [class]="item.icon"></span>
+        <span>{{ item.label }}</span>
+      </a>
+    </ng-container>
+  </ng-template>
+
+  <ng-template pTemplate="end">
+    <div class="card flex justify-center">
+      <p-menu #menu [model]="profileItems" [popup]="true" />
+      <p-button (click)="menu.toggle($event)" icon="pi pi-cog"/>
+    </div>
+  </ng-template>
+</p-menubar>
