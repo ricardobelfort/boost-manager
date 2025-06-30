@@ -6,11 +6,13 @@ export interface Order {
   orderNumber?: string;
   booster: string;
   serviceType: string;
+  weaponQuantity?: number;
   supplier: string;
   accountEmail: string;
   accountPassword: string;
   recoveryCode1: string;
-  recoveryCode2: string;
+  recoveryEmail: string;
+  platform: string;
   startDate: string;
   endDate: string;
   status: string;

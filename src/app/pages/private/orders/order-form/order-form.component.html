@@ -15,13 +15,9 @@
 
   <p-divider />
 
-  <form
-    [formGroup]="orderForm"
-    (ngSubmit)="onSubmit()"
-    class="flex flex-col gap-6"
-  >
+  <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
     <!-- Linha 1: selects -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div>
         <label class="font-medium text-gray-700 mb-2 block">Booster</label>
         <p-select
@@ -37,6 +33,24 @@
           class="text-red-500"
         >
           Selecione um booster.
+        </small>
+      </div>
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block">Fornecedor</label>
+        <p-select
+          styleClass="w-full"
+          [options]="suppliers"
+          formControlName="supplier"
+          placeholder="Selecione um fornecedor"
+        ></p-select>
+        <small
+          *ngIf="
+            orderForm.get('supplier')?.invalid &&
+            (orderForm.get('supplier')?.dirty || orderForm.get('supplier')?.touched)
+          "
+          class="text-red-500"
+        >
+          Selecione um fornecedor.
         </small>
       </div>
       <div>
@@ -58,22 +72,44 @@
         </small>
       </div>
       <div>
-        <label class="font-medium text-gray-700 mb-2 block">Fornecedor</label>
-        <p-select
-          styleClass="w-full"
-          [options]="suppliers"
-          formControlName="supplier"
-          placeholder="Selecione um fornecedor"
-        ></p-select>
-        <small
-          *ngIf="
-            orderForm.get('supplier')?.invalid &&
-            (orderForm.get('supplier')?.dirty || orderForm.get('supplier')?.touched)
-          "
-          class="text-red-500"
-        >
-          Selecione um fornecedor.
-        </small>
+        <div *ngIf="orderForm.get('serviceType')?.value?.toLowerCase()?.includes('camuflagem')">
+          <label class="font-medium text-gray-700 mb-2 block">Qtd. Armas</label>
+          <p-inputnumber
+            formControlName="weaponQuantity"
+            [min]="1"
+            [max]="33"
+            [showButtons]="true"
+            styleClass="w-full"
+            placeholder="Ex: 1"
+          ></p-inputnumber>
+          <small
+            *ngIf="
+              orderForm.get('weaponQuantity')?.errors?.['required'] &&
+              (orderForm.get('weaponQuantity')?.dirty || orderForm.get('weaponQuantity')?.touched)
+            "
+            class="text-red-500"
+          >
+            Informe a quantidade de armas.
+          </small>
+          <small
+            *ngIf="
+              orderForm.get('weaponQuantity')?.errors?.['min'] &&
+              (orderForm.get('weaponQuantity')?.dirty || orderForm.get('weaponQuantity')?.touched)
+            "
+            class="text-red-500"
+          >
+            Mínimo 1 arma.
+          </small>
+          <small
+            *ngIf="
+              orderForm.get('weaponQuantity')?.errors?.['max'] &&
+              (orderForm.get('weaponQuantity')?.dirty || orderForm.get('weaponQuantity')?.touched)
+            "
+            class="text-red-500"
+          >
+            Máximo 33 armas.
+          </small>
+        </div>
       </div>
     </div>
 
@@ -129,12 +165,12 @@
           </small>
         </div>
         <div class="flex flex-col">
-          <label class="font-medium text-gray-700 mb-2 block">Código de Recuperação 1</label>
+          <label class="font-medium text-gray-700 mb-2 block">Código de Backup 1</label>
           <input
             styleClass="w-full"
             pInputText
             formControlName="recoveryCode1"
-            placeholder="Digite o código de recuperação 1"
+            placeholder="Digite o código de backup 1"
             type="text"
           />
           <small
@@ -148,12 +184,12 @@
           </small>
         </div>
         <div class="flex flex-col">
-          <label class="font-medium text-gray-700 mb-2 block">Código de Recuperação 2</label>
+          <label class="font-medium text-gray-700 mb-2 block">E-mail de recuperação</label>
           <input
             styleClass="w-full"
             pInputText
-            formControlName="recoveryCode2"
-            placeholder="Digite o código de recuperação 2"
+            formControlName="recoveryEmail"
+            placeholder="Digite o e-mail de recuperação"
             type="text"
           />
           <small
@@ -164,6 +200,24 @@
             class="text-red-500"
           >
             O código de recuperação 2 é obrigatório.
+          </small>
+        </div>
+        <div class="flex flex-col">
+          <label class="font-medium text-gray-700 mb-2 block">Plataforma</label>
+          <p-select
+            styleClass="w-full"
+            [options]="platforms"
+            formControlName="platform"
+            placeholder="Selecione uma plataforma"
+          ></p-select>
+          <small
+            *ngIf="
+              orderForm.get('platform')?.invalid &&
+              (orderForm.get('platform')?.dirty || orderForm.get('platform')?.touched)
+            "
+            class="text-red-500"
+          >
+            Selecione uma plataforma.
           </small>
         </div>
       </div>
@@ -317,11 +371,11 @@
     <div>
       <label class="font-medium text-gray-700 mb-2 block">Descrição / Observação</label>
       <textarea
-        pInputTextarea
-        formControlName="observation"
-        placeholder="Digite uma descrição ou observação"
         rows="5"
-        class="w-full"
+        cols="30"
+        pTextarea
+        formControlName="observation"
+        class="w-full resize-y max-w-full"
       ></textarea>
       <small
         *ngIf="observation.errors?.['maxlength'] && (observation.dirty || observation.touched)"

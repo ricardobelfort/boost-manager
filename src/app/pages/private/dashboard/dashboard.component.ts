@@ -28,7 +28,7 @@ export class DashboardComponent {
   orders$: Observable<Order[]> = this.orderService.orders$;
   dollarRate$: Observable<number> = interval(10 * 60 * 1000) // 10 minutos em ms
     .pipe(
-      startWith(0), // Faz a primeira busca imediatamente
+      startWith(0),
       switchMap(() => this.fetchDollarRate())
     );
 

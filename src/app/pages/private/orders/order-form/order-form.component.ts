@@ -48,7 +48,7 @@ export class OrderFormComponent {
     { label: 'Booster 3', value: 'booster 3' },
   ];
   serviceTypes = [
-    { label: 'Camuflagem Dark Meter - 33 armas', value: 'camuflagem dark meter - 33 armas' },
+    { label: 'Camuflagem Dark Meter', value: 'camuflagem dark meter' },
     { label: 'Ranked MP do BO6', value: 'ranked mp do bo6' },
     { label: 'Ranked Warzone', value: 'ranked warzone' },
     { label: 'Bot Lobby', value: 'bot lobby' },
@@ -63,6 +63,12 @@ export class OrderFormComponent {
     { label: 'Em andamento', value: 'Em andamento' },
     { label: 'Concluído', value: 'Concluído' },
   ];
+  platforms = [
+    { label: 'PlayStation', value: 'PlayStation' },
+    { label: 'Steam', value: 'Steam' },
+    { label: 'Battle Net', value: 'Battle Net' },
+    { label: 'Xbox', value: 'Xbox' },
+  ];
 
   ngOnInit() {
     this.editingId = this.route.snapshot.paramMap.get('id') || undefined;
@@ -71,22 +77,39 @@ export class OrderFormComponent {
       if (orderParaEditar) {
         this.orderForm.patchValue({
           ...orderParaEditar,
+          weaponQuantity: typeof orderParaEditar.weaponQuantity === 'number' ? null : orderParaEditar.weaponQuantity,
           startDate: orderParaEditar.startDate ? orderParaEditar.startDate : null,
           endDate: orderParaEditar.endDate ? orderParaEditar.endDate : null,
         });
       }
     }
+
+    this.orderForm.get('serviceType')!.valueChanges.subscribe((value) => {
+      const isCamuflagem = value && value.toLowerCase().includes('camuflagem');
+      const weaponCtrl = this.orderForm.get('weaponQuantity');
+      if (isCamuflagem) {
+        weaponCtrl?.enable();
+        weaponCtrl?.setValidators([Validators.required, Validators.min(1), Validators.max(33)]);
+      } else {
+        weaponCtrl?.reset();
+        weaponCtrl?.disable();
+        weaponCtrl?.clearValidators();
+      }
+      weaponCtrl?.updateValueAndValidity();
+    });
   }
 
   orderForm = this.fb.group({
     orderNumber: [''],
     booster: ['', Validators.required],
     serviceType: ['', Validators.required],
+    weaponQuantity: [{ value: null, disabled: true }],
     supplier: ['', Validators.required],
     accountEmail: ['', [Validators.required, Validators.email]],
     accountPassword: ['', Validators.required],
     recoveryCode1: ['', Validators.required],
-    recoveryCode2: ['', Validators.required],
+    recoveryEmail: ['', Validators.required, Validators.email],
+    platform: ['', Validators.required],
     startDate: ['', Validators.required],
     endDate: ['', Validators.required],
     status: ['', Validators.required],
@@ -111,6 +134,9 @@ export class OrderFormComponent {
   get serviceType() {
     return this.orderForm.get('serviceType')!;
   }
+  get weaponQuantity() {
+    return this.orderForm.get('weaponQuantity')!;
+  }
   get supplier() {
     return this.orderForm.get('supplier')!;
   }
@@ -123,8 +149,11 @@ export class OrderFormComponent {
   get recoveryCode1() {
     return this.orderForm.get('recoveryCode1')!;
   }
-  get recoveryCode2() {
-    return this.orderForm.get('recoveryCode2')!;
+  get recoveryEmail() {
+    return this.orderForm.get('recoveryEmail')!;
+  }
+  get platform() {
+    return this.orderForm.get('platform')!;
   }
   get startDate() {
     return this.orderForm.get('startDate')!;
@@ -165,20 +194,9 @@ export class OrderFormComponent {
     } else {
       // Recupera o número do pedido existente
       const existingOrder = this.orderService.getOrderById(this.editingId);
-      orderNumber = existingOrder?.orderNumber ?? this.orderService.generateOrderNumber(); // fallback de segurança!
+      orderNumber = existingOrder?.orderNumber ?? this.orderService.generateOrderNumber();
     }
 
-    const startDateValue =
-      formValue.startDate && typeof formValue.startDate !== 'string'
-        ? (formValue.startDate as Date).toLocaleString('pt-BR', { hour12: false })
-        : formValue.startDate || '';
-
-    const endDateValue =
-      formValue.endDate && typeof formValue.endDate !== 'string'
-        ? (formValue.endDate as Date).toLocaleString('pt-BR', { hour12: false })
-        : formValue.endDate || '';
-
-    const normalizeDate = (d: any) => (d instanceof Date ? d.toISOString() : new Date(d).toISOString());
     const toIsoString = (d: any) => {
       if (!d) return '';
       // Se já for Date, converte; se for string, tenta criar Date e converter
@@ -190,11 +208,13 @@ export class OrderFormComponent {
       orderNumber,
       booster: formValue.booster ?? '',
       serviceType: formValue.serviceType ?? '',
+      weaponQuantity: formValue.weaponQuantity ?? undefined,
       supplier: formValue.supplier ?? '',
       accountEmail: formValue.accountEmail ?? '',
       accountPassword: formValue.accountPassword ?? '',
       recoveryCode1: formValue.recoveryCode1 ?? '',
-      recoveryCode2: formValue.recoveryCode2 ?? '',
+      recoveryEmail: formValue.recoveryEmail ?? '',
+      platform: formValue.platform ?? '',
       startDate: toIsoString(formValue.startDate),
       endDate: toIsoString(formValue.endDate),
       status: formValue.status ?? '',
