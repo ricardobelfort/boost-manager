@@ -1,1 +1,103 @@
-<p>login works!</p>
+<div class="w-full h-full flex justify-center items-center">
+  <div class="w-[400px] p-8 flex flex-col items-center bg-white rounded-2xl shadow-xs relative">
+    <div class="flex flex-col items-center mb-1">
+      <img src="assets/images/boost.png" width="64" class="mb-4" alt="" />
+      <h1 class="text-2xl font-bold">Boost Manager</h1>
+      <p class="text-xl font-normal text-gray-700 text-center mb-8">Insira seus credenciais</p>
+    </div>
+    <form [formGroup]="loginForm" class="w-full min-w-full flex flex-col gap-4">
+      <div>
+        <label for="email" class="block text-sm text-gray-700">
+          <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">E-mail</span>
+          <input
+            class="w-full mt-1 border border-gray-300 px-3 py-3 rounded-sm shadow-xs focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+            type="email"
+            formControlName="email"
+            placeholder="Seu e-mail"
+            autocomplete="off"
+            id="email"
+            required
+          />
+        </label>
+        <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="text-xs text-red-500 mt-1">
+          <div *ngIf="email?.hasError('required')">O e-mail é obrigatório.</div>
+          <div *ngIf="email?.hasError('email')">Formato de e-mail inválido.</div>
+          <div *ngIf="email?.hasError('minlength')">O e-mail deve ter pelo menos 5 caracteres.</div>
+        </div>
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm text-gray-700">
+          <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">Senha</span>
+          <div class="relative">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              (input)="onPasswordInput()"
+              formControlName="password"
+              id="password"
+              placeholder="Sua senha"
+              autocomplete="off"
+              required
+              class="w-full mt-1 border border-gray-300 px-3 py-3 rounded-sm shadow-xs focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 pr-10"
+            />
+
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-700 focus:outline-none mt-0.5"
+            >
+              <i class="pi pi-eye" *ngIf="!showPassword"></i>
+              <i class="pi pi-eye-slash" *ngIf="showPassword"></i>
+            </button>
+          </div>
+        </label>
+
+        @if (passwordTouched) {
+          <div class="mt-2 p-3 border border-gray-300 rounded-sm shadow-xs text-sm">
+            <p class="font-medium text-gray-700">A senha deve conter:</p>
+            <ul class="mt-1">
+              <li class="flex items-center" [class.text-green-600]="passwordHasMinLength()">
+                <span class="mr-2">✔</span> Pelo menos 8 caracteres
+              </li>
+              <li class="flex items-center" [class.text-green-600]="passwordHasLowerCase()">
+                <span class="mr-2">✔</span> Letras minúsculas (a-z)
+              </li>
+              <li class="flex items-center" [class.text-green-600]="passwordHasUpperCase()">
+                <span class="mr-2">✔</span> Letras maiúsculas (A-Z)
+              </li>
+              <li class="flex items-center" [class.text-green-600]="passwordHasNumber()">
+                <span class="mr-2">✔</span> Números (0-9)
+              </li>
+            </ul>
+          </div>
+        }
+
+        <div *ngIf="password?.invalid && (password?.dirty || password?.touched)" class="text-xs text-red-500 mt-1 mb-2">
+          <div *ngIf="password?.hasError('required')">A senha é obrigatória.</div>
+          <div *ngIf="email?.hasError('minlength')">A senha deve ter pelo menos 8 caracteres.</div>
+        </div>
+      </div>
+
+      <a routerLink="/auth/recovery" class="text-sm text-green-600 hover:text-green-500 cursor-pointer"
+        >Esqueceu sua senha</a
+      >
+
+      <div class="w-full flex flex-col">
+        <p-button
+          (onClick)="onSubmit()"
+          label="ENTRAR"
+          [disabled]="loginForm.invalid"
+          size="large"
+          [style]="{ width: '100%', fontSize: '14px' }"
+        />
+        <!-- <p-divider align="center">
+          <b class="font-normal text-xs text-gray-400">Ou</b>
+        </p-divider>
+        <p class="text-sm font-normal text-gray-700 text-center">
+          🚀 Não tem uma conta?
+          <a routerLink="/auth/signup" class="font-bold text-green-500 hover:text-green-600">Criar Conta</a>
+        </p> -->
+      </div>
+    </form>
+  </div>
+</div>
