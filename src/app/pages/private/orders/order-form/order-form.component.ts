@@ -46,9 +46,10 @@ export class OrderFormComponent {
     { label: 'Booster 3', value: 'booster 3' },
   ];
   serviceTypes = [
-    { label: 'Serviço 1', value: 'serviço 1' },
-    { label: 'Serviço 2', value: 'serviço 2' },
-    { label: 'Serviço 3', value: 'serviço 3' },
+    { label: 'Camuflagem Dark Meter - 33 armas', value: 'camuflagem dark meter - 33 armas' },
+    { label: 'Ranked MP do BO6', value: 'ranked mp do bo6' },
+    { label: 'Ranked Warzone', value: 'ranked warzone' },
+    { label: 'Bot Lobby', value: 'bot lobby' },
   ];
   suppliers = [
     { label: 'Fornecedor 1', value: 'fornecedor 1' },
@@ -62,14 +63,14 @@ export class OrderFormComponent {
   ];
 
   ngOnInit() {
-    // Exemplo de como recuperar o id do pedido da rota
     this.editingId = this.route.snapshot.paramMap.get('id') || undefined;
     if (this.editingId) {
-      // Supondo que você tenha uma função para buscar um pedido pelo id
       const orderParaEditar = this.orderService.getOrderById(this.editingId);
       if (orderParaEditar) {
         this.orderForm.patchValue({
-          ...orderParaEditar, // preenche todos os campos do pedido, incluindo orderNumber
+          ...orderParaEditar,
+          startDate: orderParaEditar.startDate ? orderParaEditar.startDate : null,
+          endDate: orderParaEditar.endDate ? orderParaEditar.endDate : null,
         });
       }
     }
@@ -165,6 +166,23 @@ export class OrderFormComponent {
       orderNumber = existingOrder?.orderNumber ?? this.orderService.generateOrderNumber(); // fallback de segurança!
     }
 
+    const startDateValue =
+      formValue.startDate && typeof formValue.startDate !== 'string'
+        ? (formValue.startDate as Date).toLocaleString('pt-BR', { hour12: false })
+        : formValue.startDate || '';
+
+    const endDateValue =
+      formValue.endDate && typeof formValue.endDate !== 'string'
+        ? (formValue.endDate as Date).toLocaleString('pt-BR', { hour12: false })
+        : formValue.endDate || '';
+
+    const normalizeDate = (d: any) => (d instanceof Date ? d.toISOString() : new Date(d).toISOString());
+    const toIsoString = (d: any) => {
+      if (!d) return '';
+      // Se já for Date, converte; se for string, tenta criar Date e converter
+      return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
+    };
+
     const order: Order = {
       id: this.editingId ? this.editingId : this.orderService.generateUUID(),
       orderNumber,
@@ -175,8 +193,8 @@ export class OrderFormComponent {
       accountPassword: formValue.accountPassword ?? '',
       recoveryCode1: formValue.recoveryCode1 ?? '',
       recoveryCode2: formValue.recoveryCode2 ?? '',
-      startDate: formValue.startDate ?? '',
-      endDate: formValue.endDate ?? '',
+      startDate: toIsoString(formValue.startDate),
+      endDate: toIsoString(formValue.endDate),
       status: formValue.status ?? '',
       totalValue: formValue.totalValue ?? 0,
       boosterValue: formValue.boosterValue ?? 0,

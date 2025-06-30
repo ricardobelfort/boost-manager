@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { DashboardCardComponent } from '@shared/components/dashboard-card/dashboard-card.component';
 import { MenubarComponent } from '@shared/components/menubar/menubar.component';
 import { OrderService } from '@shared/services/order.service';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,18 +12,37 @@ import { OrderService } from '@shared/services/order.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
   private orderService = inject(OrderService);
 
-  ordersCount = 0;
-  salesValue = 0;
-  clientsCount = 0; // Atualize de acordo com sua lógica de clientes
+  orders$ = this.orderService.orders$;
 
-  ngOnInit() {
-    const orders = this.orderService.getOrders();
-    this.ordersCount = orders.length;
-    // Soma dos valores dos pedidos (ajuste conforme sua lógica de "vendas")
-    this.salesValue = orders.reduce((acc, order) => acc + (order.totalValue || 0), 0);
-    // Atualize clientsCount se você tiver clientes distintos
-  }
+  // cards$ é um observable que já traz os valores para o template
+  cards$ = this.orders$.pipe(
+    map((orders) => [
+      {
+        title: 'Vendas',
+        value: orders
+          .reduce((acc, order) => acc + (order.totalValue || 0), 0)
+          .toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+        subtitle: 'Últimos 7 dias',
+        iconClass: 'pi pi-money-bill text-lime-500 !text-3xl',
+        valueColor: 'text-lime-500',
+      },
+      {
+        title: 'Pedidos',
+        value: orders.length,
+        subtitle: 'Últimos 7 dias',
+        iconClass: 'pi pi-box text-lime-500 !text-3xl',
+        valueColor: 'text-lime-500',
+      },
+      {
+        title: 'Clientes',
+        value: 0, // Ajuste conforme lógica real de clientes
+        subtitle: 'Últimos 7 dias',
+        iconClass: 'pi pi-users text-lime-500 !text-3xl',
+        valueColor: 'text-lime-500',
+      },
+    ])
+  );
 }
