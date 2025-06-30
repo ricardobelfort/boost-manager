@@ -1,1 +1,35 @@
-@import "tailwindcss";/* You can add global styles to this file, and also import other style files */
+/* @import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+@use "primeicons/primeicons.css";
+@layer tailwind, primeng;
+
+@layer tailwind {
+  @import 'tailwindcss';
+}
+
+@theme {
+  --font-worksans: "Work Sans";
+  --font-ibmplexsans: "IBM Plex Sans";
+  --rem: 14px;
+  --lineHeight: 1;
+  --bg-body: #F3F4F4;
+  --primary-color: #7bf2a7;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+  line-height: var(--lineHeight);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-ibmplexsans), sans-serif;
+  font-weight: normal;
+  color: #1d2327;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-body);
+}
