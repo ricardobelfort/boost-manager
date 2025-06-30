@@ -7,40 +7,32 @@
         <h2 class="!text-3xl font-bold text-black mb-4">Resumo</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <!-- Card: Vendas -->
-          <div class="bg-white rounded-xl shadow-sm p-6 flex justify-between items-start">
-            <div>
-              <h3 class="text-2xl font-semibold text-gray-800 mb-3">Vendas</h3>
-              <p class="text-4xl text-lime-500 font-bold mb-2">R$ 0,00</p>
-              <p class="text-sm text-gray-500">Últimos 7 dias</p>
-            </div>
-            <i class="pi pi-money-bill text-lime-500 !text-3xl"></i>
-          </div>
-
-          <!-- Card: Pedidos -->
-          <div class="bg-white rounded-xl shadow-sm p-6 flex justify-between items-start">
-            <div>
-              <h3 class="text-2xl font-semibold text-gray-800 mb-3">Pedidos</h3>
-              <p class="text-4xl text-lime-500 font-bold mb-2">0</p>
-              <p class="text-sm text-gray-500">Últimos 7 dias</p>
-            </div>
-            <i class="pi pi-box text-lime-500 !text-3xl"></i>
-          </div>
-
-          <!-- Card: Novos Clientes -->
-          <div class="bg-white rounded-xl shadow-sm p-6 flex justify-between items-start">
-            <div>
-              <h3 class="text-2xl font-semibold text-gray-800 mb-3">Clientes</h3>
-              <p class="text-4xl text-lime-500 font-bold mb-2">0</p>
-              <p class="text-sm text-gray-500">Últimos 7 dias</p>
-            </div>
-            <i class="pi pi-users text-lime-500 !text-3xl"></i>
-          </div>
+          <app-dashboard-card
+            title="Vendas"
+            [value]="(salesValue | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt') ?? ''"
+            subtitle="Últimos 7 dias"
+            iconClass="pi pi-money-bill text-lime-500 !text-3xl"
+            valueColor="text-lime-500"
+          />
+          <app-dashboard-card
+            title="Pedidos"
+            [value]="ordersCount"
+            subtitle="Últimos 7 dias"
+            iconClass="pi pi-box text-lime-500 !text-3xl"
+            valueColor="text-lime-500"
+          />
+          <app-dashboard-card
+            title="Clientes"
+            [value]="clientsCount"
+            subtitle="Últimos 7 dias"
+            iconClass="pi pi-users text-lime-500 !text-3xl"
+            valueColor="text-lime-500"
+          />
         </div>
       </div>
 
       <div class="max-w-[1140px] mx-auto">
-        <router-outlet/>
+        <router-outlet />
       </div>
     </div>
   </div>
