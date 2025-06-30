@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Order, OrderService } from '@shared/services/order.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DividerModule } from 'primeng/divider';
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
-
-import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { OrderFormComponent } from '../order-form/order-form.component';
 
@@ -24,6 +26,9 @@ import { OrderFormComponent } from '../order-form/order-form.component';
     FormsModule,
     ButtonModule,
     InputTextModule,
+    DividerModule,
+    InputIcon,
+    IconField,
   ],
   templateUrl: './order-list.component.html',
   styleUrl: './order-list.component.css',

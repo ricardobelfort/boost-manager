@@ -7,6 +7,7 @@ import { Order, OrderService } from '@shared/services/order.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DividerModule } from 'primeng/divider';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
@@ -23,6 +24,7 @@ import { TextareaModule } from 'primeng/textarea';
     ButtonModule,
     TextareaModule,
     ReactiveFormsModule,
+    DividerModule,
   ],
   templateUrl: './order-form.component.html',
   styleUrl: './order-form.component.css',

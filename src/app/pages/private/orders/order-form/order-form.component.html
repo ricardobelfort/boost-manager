@@ -1,321 +1,339 @@
-<div class="flex items-center justify-between mb-4">
-  <div>
-    <h2 class="!text-3xl font-bold text-black">
-      {{ editingId ? 'Editar Pedido' : 'Novo Pedido' }}
-      <span *ngIf="editingId && orderForm.value.orderNumber" class="text-gray-400 ml-2"
-        >#{{ orderForm.value.orderNumber }}</span
-      >
-    </h2>
-    <p class="text-gray-500">{{ editingId ? 'Editando um pedido existente.' : 'Aqui você pode criar um novo pedido.' }}</p>
+<div class="bg-white rounded-xl shadow-md p-8">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h2 class="!text-3xl font-bold text-black">
+        {{ editingId ? 'Editar Pedido' : 'Novo Pedido' }}
+        <span *ngIf="editingId && orderForm.value.orderNumber" class="text-gray-400 ml-2"
+          >#{{ orderForm.value.orderNumber }}</span
+        >
+      </h2>
+      <p class="text-gray-500">
+        {{ editingId ? 'Editando um pedido existente.' : 'Aqui você pode criar um novo pedido.' }}
+      </p>
+    </div>
   </div>
+
+  <p-divider />
+
+  <form
+    [formGroup]="orderForm"
+    (ngSubmit)="onSubmit()"
+    class="flex flex-col gap-6"
+  >
+    <!-- Linha 1: selects -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block">Booster</label>
+        <p-select
+          styleClass="w-full"
+          [options]="boosters"
+          formControlName="booster"
+          placeholder="Selecione um booster"
+        ></p-select>
+        <small
+          *ngIf="
+            orderForm.get('booster')?.invalid && (orderForm.get('booster')?.dirty || orderForm.get('booster')?.touched)
+          "
+          class="text-red-500"
+        >
+          Selecione um booster.
+        </small>
+      </div>
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block">Tipo de Serviço</label>
+        <p-select
+          styleClass="w-full"
+          [options]="serviceTypes"
+          formControlName="serviceType"
+          placeholder="Selecione um tipo de serviço"
+        ></p-select>
+        <small
+          *ngIf="
+            orderForm.get('serviceType')?.invalid &&
+            (orderForm.get('serviceType')?.dirty || orderForm.get('serviceType')?.touched)
+          "
+          class="text-red-500"
+        >
+          Selecione um tipo de serviço.
+        </small>
+      </div>
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block">Fornecedor</label>
+        <p-select
+          styleClass="w-full"
+          [options]="suppliers"
+          formControlName="supplier"
+          placeholder="Selecione um fornecedor"
+        ></p-select>
+        <small
+          *ngIf="
+            orderForm.get('supplier')?.invalid &&
+            (orderForm.get('supplier')?.dirty || orderForm.get('supplier')?.touched)
+          "
+          class="text-red-500"
+        >
+          Selecione um fornecedor.
+        </small>
+      </div>
+    </div>
+
+    <!-- Linha 2: dados da conta -->
+    <div>
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">Dados da Conta</h3>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="flex flex-col">
+          <label class="font-medium text-gray-700 mb-2 block">E-mail da Conta</label>
+          <input
+            styleClass="w-full"
+            pInputText
+            formControlName="accountEmail"
+            placeholder="Digite seu e-mail"
+            type="email"
+          />
+          <small
+            *ngIf="
+              orderForm.get('accountEmail')?.errors?.['required'] &&
+              (orderForm.get('accountEmail')?.dirty || orderForm.get('accountEmail')?.touched)
+            "
+            class="text-red-500"
+          >
+            O e-mail é obrigatório.
+          </small>
+          <small
+            *ngIf="
+              orderForm.get('accountEmail')?.errors?.['email'] &&
+              (orderForm.get('accountEmail')?.dirty || orderForm.get('accountEmail')?.touched)
+            "
+            class="text-red-500"
+          >
+            E-mail inválido.
+          </small>
+        </div>
+        <div class="flex flex-col">
+          <label class="font-medium text-gray-700 mb-2 block">Senha da Conta</label>
+          <input
+            styleClass="w-full"
+            pInputText
+            formControlName="accountPassword"
+            placeholder="Digite sua senha"
+            type="text"
+          />
+          <small
+            *ngIf="
+              orderForm.get('accountPassword')?.errors?.['required'] &&
+              (orderForm.get('accountPassword')?.dirty || orderForm.get('accountPassword')?.touched)
+            "
+            class="text-red-500"
+          >
+            A senha é obrigatória.
+          </small>
+        </div>
+        <div class="flex flex-col">
+          <label class="font-medium text-gray-700 mb-2 block">Código de Recuperação 1</label>
+          <input
+            styleClass="w-full"
+            pInputText
+            formControlName="recoveryCode1"
+            placeholder="Digite o código de recuperação 1"
+            type="text"
+          />
+          <small
+            *ngIf="
+              orderForm.get('recoveryCode1')?.errors?.['required'] &&
+              (orderForm.get('recoveryCode1')?.dirty || orderForm.get('recoveryCode1')?.touched)
+            "
+            class="text-red-500"
+          >
+            O código de recuperação 1 é obrigatório.
+          </small>
+        </div>
+        <div class="flex flex-col">
+          <label class="font-medium text-gray-700 mb-2 block">Código de Recuperação 2</label>
+          <input
+            styleClass="w-full"
+            pInputText
+            formControlName="recoveryCode2"
+            placeholder="Digite o código de recuperação 2"
+            type="text"
+          />
+          <small
+            *ngIf="
+              orderForm.get('recoveryCode2')?.errors?.['required'] &&
+              (orderForm.get('recoveryCode2')?.dirty || orderForm.get('recoveryCode2')?.touched)
+            "
+            class="text-red-500"
+          >
+            O código de recuperação 2 é obrigatório.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Linha 3: datas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block">Data de Início</label>
+        <p-datepicker
+          styleClass="w-full"
+          formControlName="startDate"
+          dateFormat="dd/mm/yy"
+          placeholder="Selecione a data de início"
+        ></p-datepicker>
+        <small
+          *ngIf="
+            orderForm.get('startDate')?.errors?.['required'] &&
+            (orderForm.get('startDate')?.dirty || orderForm.get('startDate')?.touched)
+          "
+          class="text-red-500"
+        >
+          A data de início é obrigatória.
+        </small>
+        <small
+          *ngIf="
+            orderForm.get('startDate')?.errors?.['minDate'] &&
+            (orderForm.get('startDate')?.dirty || orderForm.get('startDate')?.touched)
+          "
+          class="text-red-500"
+        >
+          A data de início deve ser maior ou igual à data atual.
+        </small>
+        <small
+          *ngIf="
+            orderForm.get('startDate')?.errors?.['maxDate'] &&
+            (orderForm.get('startDate')?.dirty || orderForm.get('startDate')?.touched)
+          "
+          class="text-red-500"
+        >
+          A data de início não pode ser maior que a data de fim.
+        </small>
+      </div>
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block">Data de Fim</label>
+        <p-datepicker
+          styleClass="w-full"
+          formControlName="endDate"
+          dateFormat="dd/mm/yy"
+          placeholder="Selecione a data de fim"
+        ></p-datepicker>
+        <small
+          *ngIf="
+            orderForm.get('endDate')?.errors?.['required'] &&
+            (orderForm.get('endDate')?.dirty || orderForm.get('endDate')?.touched)
+          "
+          class="text-red-500"
+        >
+          A data de fim é obrigatória.
+        </small>
+        <small
+          *ngIf="
+            orderForm.get('endDate')?.errors?.['minDate'] &&
+            (orderForm.get('endDate')?.dirty || orderForm.get('endDate')?.touched)
+          "
+          class="text-red-500"
+        >
+          A data de fim deve ser maior ou igual à data de início.
+        </small>
+        <small *ngIf="orderForm.hasError('dateRange') && (endDate.dirty || endDate.touched)" class="text-red-500">
+          A data de fim não pode ser anterior à data de início.
+        </small>
+      </div>
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block">Status</label>
+        <p-select
+          styleClass="w-full"
+          [options]="statusList"
+          formControlName="status"
+          placeholder="Selecione um status"
+        ></p-select>
+        <small
+          *ngIf="
+            orderForm.get('status')?.invalid && (orderForm.get('status')?.dirty || orderForm.get('status')?.touched)
+          "
+          class="text-red-500"
+        >
+          Selecione um status.
+        </small>
+      </div>
+    </div>
+
+    <!-- Linha 5: valores -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block" for="total-value">Valor Total do Serviço</label>
+        <p-inputnumber
+          styleClass="w-full"
+          formControlName="totalValue"
+          inputId="total-value"
+          placeholder="R$ 0,00"
+          mode="currency"
+          currency="BRL"
+          locale="pt-BR"
+          [min]="0"
+        />
+        <small *ngIf="totalValue.errors?.['required'] && (totalValue.dirty || totalValue.touched)" class="text-red-500">
+          Valor obrigatório.
+        </small>
+        <small *ngIf="totalValue.errors?.['min'] && (totalValue.dirty || totalValue.touched)" class="text-red-500">
+          Valor deve ser maior ou igual a 0.
+        </small>
+        <small *ngIf="totalValue.errors?.['max'] && (totalValue.dirty || totalValue.touched)" class="text-red-500">
+          Valor deve ser menor ou igual a 999999.99.
+        </small>
+      </div>
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block" for="booster-value">Valor para o Booster</label>
+        <p-inputnumber
+          styleClass="w-full"
+          formControlName="boosterValue"
+          inputId="booster-value"
+          placeholder="R$ 0,00"
+          mode="currency"
+          currency="BRL"
+          locale="pt-BR"
+          [min]="0"
+        />
+        <small
+          *ngIf="boosterValue.errors?.['required'] && (boosterValue.dirty || boosterValue.touched)"
+          class="text-red-500"
+        >
+          Valor obrigatório.
+        </small>
+        <small
+          *ngIf="boosterValue.errors?.['min'] && (boosterValue.dirty || boosterValue.touched)"
+          class="text-red-500"
+        >
+          Valor deve ser maior ou igual a 0.
+        </small>
+        <small
+          *ngIf="boosterValue.errors?.['max'] && (boosterValue.dirty || boosterValue.touched)"
+          class="text-red-500"
+        >
+          Valor deve ser menor ou igual a 999999.99.
+        </small>
+      </div>
+    </div>
+
+    <!-- Observação -->
+    <div>
+      <label class="font-medium text-gray-700 mb-2 block">Descrição / Observação</label>
+      <textarea
+        pInputTextarea
+        formControlName="observation"
+        placeholder="Digite uma descrição ou observação"
+        rows="5"
+        class="w-full"
+      ></textarea>
+      <small
+        *ngIf="observation.errors?.['maxlength'] && (observation.dirty || observation.touched)"
+        class="text-red-500"
+      >
+        A observação deve ter no máximo 500 caracteres.
+      </small>
+    </div>
+
+    <div class="flex justify-center md:justify-end gap-4 mt-2">
+      <p-button label="Cancelar" variant="outlined" severity="secondary" (click)="onCancel()" />
+      <p-button label="Salvar Pedido" icon="pi pi-check" [disabled]="orderForm.invalid" (click)="onSubmit()" />
+    </div>
+  </form>
 </div>
-
-<form
-  [formGroup]="orderForm"
-  (ngSubmit)="onSubmit()"
-  class="bg-white p-8 rounded-xl shadow-md mx-auto flex flex-col gap-6"
->
-  <!-- Linha 1: selects -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div>
-      <label class="font-medium text-gray-700 mb-2 block">Booster</label>
-      <p-select
-        styleClass="w-full"
-        [options]="boosters"
-        formControlName="booster"
-        placeholder="Selecione um booster"
-      ></p-select>
-      <small
-        *ngIf="
-          orderForm.get('booster')?.invalid && (orderForm.get('booster')?.dirty || orderForm.get('booster')?.touched)
-        "
-        class="text-red-500"
-      >
-        Selecione um booster.
-      </small>
-    </div>
-    <div>
-      <label class="font-medium text-gray-700 mb-2 block">Tipo de Serviço</label>
-      <p-select
-        styleClass="w-full"
-        [options]="serviceTypes"
-        formControlName="serviceType"
-        placeholder="Selecione um tipo de serviço"
-      ></p-select>
-      <small
-        *ngIf="
-          orderForm.get('serviceType')?.invalid &&
-          (orderForm.get('serviceType')?.dirty || orderForm.get('serviceType')?.touched)
-        "
-        class="text-red-500"
-      >
-        Selecione um tipo de serviço.
-      </small>
-    </div>
-    <div>
-      <label class="font-medium text-gray-700 mb-2 block">Fornecedor</label>
-      <p-select
-        styleClass="w-full"
-        [options]="suppliers"
-        formControlName="supplier"
-        placeholder="Selecione um fornecedor"
-      ></p-select>
-      <small
-        *ngIf="
-          orderForm.get('supplier')?.invalid && (orderForm.get('supplier')?.dirty || orderForm.get('supplier')?.touched)
-        "
-        class="text-red-500"
-      >
-        Selecione um fornecedor.
-      </small>
-    </div>
-  </div>
-
-  <!-- Linha 2: dados da conta -->
-  <div>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Dados da Conta</h3>
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="flex flex-col">
-        <label class="font-medium text-gray-700 mb-2 block">E-mail da Conta</label>
-        <input
-          styleClass="w-full"
-          pInputText
-          formControlName="accountEmail"
-          placeholder="Digite seu e-mail"
-          type="email"
-        />
-        <small
-          *ngIf="
-            orderForm.get('accountEmail')?.errors?.['required'] &&
-            (orderForm.get('accountEmail')?.dirty || orderForm.get('accountEmail')?.touched)
-          "
-          class="text-red-500"
-        >
-          O e-mail é obrigatório.
-        </small>
-        <small
-          *ngIf="
-            orderForm.get('accountEmail')?.errors?.['email'] &&
-            (orderForm.get('accountEmail')?.dirty || orderForm.get('accountEmail')?.touched)
-          "
-          class="text-red-500"
-        >
-          E-mail inválido.
-        </small>
-      </div>
-      <div class="flex flex-col">
-        <label class="font-medium text-gray-700 mb-2 block">Senha da Conta</label>
-        <input
-          styleClass="w-full"
-          pInputText
-          formControlName="accountPassword"
-          placeholder="Digite sua senha"
-          type="text"
-        />
-        <small
-          *ngIf="
-            orderForm.get('accountPassword')?.errors?.['required'] &&
-            (orderForm.get('accountPassword')?.dirty || orderForm.get('accountPassword')?.touched)
-          "
-          class="text-red-500"
-        >
-          A senha é obrigatória.
-        </small>
-      </div>
-      <div class="flex flex-col">
-        <label class="font-medium text-gray-700 mb-2 block">Código de Recuperação 1</label>
-        <input
-          styleClass="w-full"
-          pInputText
-          formControlName="recoveryCode1"
-          placeholder="Digite o código de recuperação 1"
-          type="text"
-        />
-        <small
-          *ngIf="
-            orderForm.get('recoveryCode1')?.errors?.['required'] &&
-            (orderForm.get('recoveryCode1')?.dirty || orderForm.get('recoveryCode1')?.touched)
-          "
-          class="text-red-500"
-        >
-          O código de recuperação 1 é obrigatório.
-        </small>
-      </div>
-      <div class="flex flex-col">
-        <label class="font-medium text-gray-700 mb-2 block">Código de Recuperação 2</label>
-        <input
-          styleClass="w-full"
-          pInputText
-          formControlName="recoveryCode2"
-          placeholder="Digite o código de recuperação 2"
-          type="text"
-        />
-        <small
-          *ngIf="
-            orderForm.get('recoveryCode2')?.errors?.['required'] &&
-            (orderForm.get('recoveryCode2')?.dirty || orderForm.get('recoveryCode2')?.touched)
-          "
-          class="text-red-500"
-        >
-          O código de recuperação 2 é obrigatório.
-        </small>
-      </div>
-    </div>
-  </div>
-
-  <!-- Linha 3: datas -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div>
-      <label class="font-medium text-gray-700 mb-2 block">Data de Início</label>
-      <p-datepicker
-        styleClass="w-full"
-        formControlName="startDate"
-        dateFormat="dd/mm/yy"
-        placeholder="Selecione a data de início"
-      ></p-datepicker>
-      <small
-        *ngIf="
-          orderForm.get('startDate')?.errors?.['required'] &&
-          (orderForm.get('startDate')?.dirty || orderForm.get('startDate')?.touched)
-        "
-        class="text-red-500"
-      >
-        A data de início é obrigatória.
-      </small>
-      <small
-        *ngIf="
-          orderForm.get('startDate')?.errors?.['minDate'] &&
-          (orderForm.get('startDate')?.dirty || orderForm.get('startDate')?.touched)
-        "
-        class="text-red-500"
-      >
-        A data de início deve ser maior ou igual à data atual.
-      </small>
-      <small
-        *ngIf="
-          orderForm.get('startDate')?.errors?.['maxDate'] &&
-          (orderForm.get('startDate')?.dirty || orderForm.get('startDate')?.touched)
-        "
-        class="text-red-500"
-      >
-        A data de início não pode ser maior que a data de fim.
-      </small>
-    </div>
-    <div>
-      <label class="font-medium text-gray-700 mb-2 block">Data de Fim</label>
-      <p-datepicker
-        styleClass="w-full"
-        formControlName="endDate"
-        dateFormat="dd/mm/yy"
-        placeholder="Selecione a data de fim"
-      ></p-datepicker>
-      <small
-        *ngIf="
-          orderForm.get('endDate')?.errors?.['required'] &&
-          (orderForm.get('endDate')?.dirty || orderForm.get('endDate')?.touched)
-        "
-        class="text-red-500"
-      >
-        A data de fim é obrigatória.
-      </small>
-      <small
-        *ngIf="
-          orderForm.get('endDate')?.errors?.['minDate'] &&
-          (orderForm.get('endDate')?.dirty || orderForm.get('endDate')?.touched)
-        "
-        class="text-red-500"
-      >
-        A data de fim deve ser maior ou igual à data de início.
-      </small>
-      <small *ngIf="orderForm.hasError('dateRange') && (endDate.dirty || endDate.touched)" class="text-red-500">
-        A data de fim não pode ser anterior à data de início.
-      </small>
-    </div>
-    <div>
-      <label class="font-medium text-gray-700 mb-2 block">Status</label>
-      <p-select
-        styleClass="w-full"
-        [options]="statusList"
-        formControlName="status"
-        placeholder="Selecione um status"
-      ></p-select>
-      <small
-        *ngIf="orderForm.get('status')?.invalid && (orderForm.get('status')?.dirty || orderForm.get('status')?.touched)"
-        class="text-red-500"
-      >
-        Selecione um status.
-      </small>
-    </div>
-  </div>
-
-  <!-- Linha 5: valores -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-      <label class="font-medium text-gray-700 mb-2 block" for="total-value">Valor Total do Serviço</label>
-      <p-inputnumber
-        styleClass="w-full"
-        formControlName="totalValue"
-        inputId="total-value"
-        placeholder="R$ 0,00"
-        mode="currency"
-        currency="BRL"
-        locale="pt-BR"
-        [min]="0"
-      />
-      <small *ngIf="totalValue.errors?.['required'] && (totalValue.dirty || totalValue.touched)" class="text-red-500">
-        Valor obrigatório.
-      </small>
-      <small *ngIf="totalValue.errors?.['min'] && (totalValue.dirty || totalValue.touched)" class="text-red-500">
-        Valor deve ser maior ou igual a 0.
-      </small>
-      <small *ngIf="totalValue.errors?.['max'] && (totalValue.dirty || totalValue.touched)" class="text-red-500">
-        Valor deve ser menor ou igual a 999999.99.
-      </small>
-    </div>
-    <div>
-      <label class="font-medium text-gray-700 mb-2 block" for="booster-value">Valor para o Booster</label>
-      <p-inputnumber
-        styleClass="w-full"
-        formControlName="boosterValue"
-        inputId="booster-value"
-        placeholder="R$ 0,00"
-        mode="currency"
-        currency="BRL"
-        locale="pt-BR"
-        [min]="0"
-      />
-      <small
-        *ngIf="boosterValue.errors?.['required'] && (boosterValue.dirty || boosterValue.touched)"
-        class="text-red-500"
-      >
-        Valor obrigatório.
-      </small>
-      <small *ngIf="boosterValue.errors?.['min'] && (boosterValue.dirty || boosterValue.touched)" class="text-red-500">
-        Valor deve ser maior ou igual a 0.
-      </small>
-      <small *ngIf="boosterValue.errors?.['max'] && (boosterValue.dirty || boosterValue.touched)" class="text-red-500">
-        Valor deve ser menor ou igual a 999999.99.
-      </small>
-    </div>
-  </div>
-
-  <!-- Observação -->
-  <div>
-    <label class="font-medium text-gray-700 mb-2 block">Descrição / Observação</label>
-    <textarea
-      pInputTextarea
-      formControlName="observation"
-      placeholder="Digite uma descrição ou observação"
-      rows="5"
-      class="w-full"
-    ></textarea>
-    <small *ngIf="observation.errors?.['maxlength'] && (observation.dirty || observation.touched)" class="text-red-500">
-      A observação deve ter no máximo 500 caracteres.
-    </small>
-  </div>
-
-  <div class="flex justify-center md:justify-end gap-4 mt-2">
-    <p-button label="Cancelar" icon="pi pi-times" variant="outlined" severity="secondary" (click)="onCancel()" />
-    <p-button label="Salvar Pedido" icon="pi pi-check" [disabled]="orderForm.invalid" (click)="onSubmit()" />
-  </div>
-</form>
