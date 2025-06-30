@@ -1,2 +1,86 @@
-<h2 class="!text-3xl font-bold text-black mb-2">Pedidos</h2>
-<p class="text-gray-500 mb-2">Aqui você pode visualizar todos os pedidos realizados.</p>
+<div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
+  <div>
+    <h2 class="!text-3xl font-bold text-black">Pedidos</h2>
+    <p class="text-gray-500">Aqui você pode visualizar todos os pedidos realizados.</p>
+  </div>
+  <div class="flex gap-2 w-full md:w-auto">
+    <input pInputText [(ngModel)]="search" type="text" placeholder="Buscar pedidos..." class="w-full md:w-64" />
+    <button
+      class="bg-lime-500 text-white px-6 py-2 rounded-lg font-bold shadow hover:bg-lime-600 transition cursor-pointer"
+      [routerLink]="['novo']"
+    >
+      Novo Pedido
+    </button>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-md p-8">
+  <p-table
+    [value]="filteredOrders"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    [responsiveLayout]="'scroll'"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} pedidos"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Booster</th>
+        <th>Serviço</th>
+        <th>Status</th>
+        <th>Valor</th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-order>
+      <tr>
+        <td>{{ order.booster }}</td>
+        <td>{{ order.serviceType }}</td>
+        <td>
+          <span
+            class="px-2 py-1 rounded-lg font-medium"
+            [ngClass]="{
+              'bg-yellow-100 text-yellow-800': order.status === 'Aguardando',
+              'bg-blue-100 text-blue-800': order.status === 'Em andamento',
+              'bg-green-100 text-green-800': order.status === 'Concluído',
+            }"
+          >
+            {{ order.status }}
+          </span>
+        </td>
+        <td>R$ {{ order.totalValue | number: '1.2-2' }}</td>
+        <td>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-pencil"
+            class="p-button-text p-button-sm text-blue-500"
+            (click)="editOrder(order)"
+            [style.marginRight.px]="8"
+            title="Editar"
+          ></button>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-trash"
+            class="p-button-text p-button-sm text-red-500"
+            (click)="confirmDelete(order)"
+            title="Excluir"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+    <!-- Use o nome correto do slot -->
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5" class="text-center text-gray-400 py-6">Nenhum pedido cadastrado.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+</div>
+
+<!-- FORMULÁRIO DE NOVO PEDIDO (modal ou inline) -->
+<app-order-form *ngIf="showOrderForm" (close)="closeOrderForm()" />

@@ -6,9 +6,9 @@ export const PRIVATE_ROUTES: Routes = [
     path: '',
     component: DashboardComponent,
     children: [
-      // { path: '', component: HomeComponent },
+      { path: '', redirectTo: 'orders', pathMatch: 'full' },
       {
-        path: '',
+        path: 'orders',
         loadChildren: () => import('./orders/orders.routes').then((r) => r.ordersRoutes),
       },
     ],
