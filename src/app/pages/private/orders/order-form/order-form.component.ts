@@ -62,19 +62,21 @@ export class OrderFormComponent {
   ];
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      // Edição: carregar o pedido do serviço
-      const order = this.orderService.getOrderById(id);
-      if (order) {
-        this.orderForm.patchValue(order);
-        // Opcional: guardar o id para salvar depois
-        this.editingId = id;
+    // Exemplo de como recuperar o id do pedido da rota
+    this.editingId = this.route.snapshot.paramMap.get('id') || undefined;
+    if (this.editingId) {
+      // Supondo que você tenha uma função para buscar um pedido pelo id
+      const orderParaEditar = this.orderService.getOrderById(this.editingId);
+      if (orderParaEditar) {
+        this.orderForm.patchValue({
+          ...orderParaEditar, // preenche todos os campos do pedido, incluindo orderNumber
+        });
       }
     }
   }
 
   orderForm = this.fb.group({
+    orderNumber: [''],
     booster: ['', Validators.required],
     serviceType: ['', Validators.required],
     supplier: ['', Validators.required],
@@ -152,8 +154,20 @@ export class OrderFormComponent {
     }
 
     const formValue = this.orderForm.value;
+    let orderNumber: string;
+
+    if (!this.editingId) {
+      // Gera novo número para pedidos novos
+      orderNumber = this.orderService.generateOrderNumber();
+    } else {
+      // Recupera o número do pedido existente
+      const existingOrder = this.orderService.getOrderById(this.editingId);
+      orderNumber = existingOrder?.orderNumber ?? this.orderService.generateOrderNumber(); // fallback de segurança!
+    }
+
     const order: Order = {
       id: this.editingId ? this.editingId : this.orderService.generateUUID(),
+      orderNumber,
       booster: formValue.booster ?? '',
       serviceType: formValue.serviceType ?? '',
       supplier: formValue.supplier ?? '',
@@ -187,6 +201,12 @@ export class OrderFormComponent {
 
     this.orderForm.reset();
     this.close.emit();
+    this.router.navigate(['/dashboard/orders']);
+  }
+
+  onCancel() {
+    this.orderForm.reset();
+    this.close.emit?.();
     this.router.navigate(['/dashboard/orders']);
   }
 }

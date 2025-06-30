@@ -53,7 +53,7 @@ export class OrderListComponent implements OnInit {
   }
 
   editOrder(order: Order) {
-    this.router.navigate(['../orders/editar', order.id]);
+    this.router.navigate(['dashboard/orders/editar', order.id]);
   }
 
   confirmDelete(order: Order) {

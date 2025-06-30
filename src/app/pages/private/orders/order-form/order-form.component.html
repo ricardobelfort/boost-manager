@@ -1,6 +1,11 @@
 <div class="flex items-center justify-between mb-4">
   <div>
-    <h2 class="!text-3xl font-bold text-black">Novo Pedido</h2>
+    <h2 class="!text-3xl font-bold text-black">
+      {{ editingId ? 'Editar Pedido' : 'Novo Pedido' }}
+      <span *ngIf="editingId && orderForm.value.orderNumber" class="text-gray-400 ml-2"
+        >#{{ orderForm.value.orderNumber }}</span
+      >
+    </h2>
     <p class="text-gray-500">Aqui você pode criar um novo pedido.</p>
   </div>
 </div>
@@ -19,7 +24,6 @@
         [options]="boosters"
         formControlName="booster"
         placeholder="Selecione um booster"
-        size="large"
       ></p-select>
       <small
         *ngIf="
@@ -37,7 +41,6 @@
         [options]="serviceTypes"
         formControlName="serviceType"
         placeholder="Selecione um tipo de serviço"
-        size="large"
       ></p-select>
       <small
         *ngIf="
@@ -56,7 +59,6 @@
         [options]="suppliers"
         formControlName="supplier"
         placeholder="Selecione um fornecedor"
-        size="large"
       ></p-select>
       <small
         *ngIf="
@@ -238,7 +240,6 @@
         [options]="statusList"
         formControlName="status"
         placeholder="Selecione um status"
-        size="large"
       ></p-select>
       <small
         *ngIf="orderForm.get('status')?.invalid && (orderForm.get('status')?.dirty || orderForm.get('status')?.touched)"
@@ -315,19 +316,20 @@
     </small>
   </div>
 
-  <div class="flex justify-center md:justify-end">
+  <div class="flex justify-center md:justify-end gap-4 mt-4">
+    <button
+      type="button"
+      class="w-full md:w-auto border border-gray-400 text-gray-600 bg-transparent px-8 py-3 rounded-lg font-bold hover:bg-gray-100 hover:border-gray-500 hover:text-gray-800 transition cursor-pointer"
+      (click)="onCancel()"
+    >
+      Cancelar
+    </button>
     <button
       type="submit"
       class="w-full md:w-auto bg-lime-500 text-white px-8 py-3 rounded-lg font-bold hover:bg-lime-600 transition cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
       [disabled]="orderForm.invalid"
     >
-      <ng-container *ngIf="loadingService.loading$ | async; else normalText">
-        <span class="inline-flex items-center gap-2">
-          <span class="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5"></span>
-          Salvando...
-        </span>
-      </ng-container>
-      <ng-template #normalText>Salvar Pedido</ng-template>
+      Salvar Pedido
     </button>
   </div>
 </form>
