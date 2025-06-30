@@ -24,7 +24,6 @@ export class OrderService {
   private STORAGE_KEY = 'orders';
   private ORDER_NUMBER_KEY = 'order_number_seq';
 
-  // 1. BehaviorSubject para pedidos
   private ordersSubject = new BehaviorSubject<Order[]>(this.getOrdersFromStorage());
   orders$ = this.ordersSubject.asObservable();
 
@@ -41,6 +40,11 @@ export class OrderService {
     return this.ordersSubject.value;
   }
 
+  /** Chame isto após qualquer alteração! */
+  private emitOrders() {
+    this.ordersSubject.next(this.getOrders());
+  }
+
   getOrdersStream() {
     return this.orders$;
   }
@@ -53,16 +57,19 @@ export class OrderService {
     if (!order.id) order.id = this.generateUUID();
     const orders = [...this.getOrders(), order];
     this.saveOrdersToStorage(orders);
+    this.emitOrders();
   }
 
   updateOrder(updated: Order) {
     const orders = this.getOrders().map((o) => (o.id === updated.id ? updated : o));
     this.saveOrdersToStorage(orders);
+    this.emitOrders();
   }
 
   deleteOrder(order: Order) {
     const orders = this.getOrders().filter((o) => o.id !== order.id);
     this.saveOrdersToStorage(orders);
+    this.emitOrders();
   }
 
   generateOrderNumber(): string {
