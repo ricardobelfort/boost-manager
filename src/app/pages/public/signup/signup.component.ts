@@ -6,12 +6,13 @@ import { AuthService } from '@shared/services/auth.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
+import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, ButtonModule, DividerModule, TooltipModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ButtonModule, DividerModule, TooltipModule, InputTextModule],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css',
 })

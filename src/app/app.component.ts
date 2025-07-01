@@ -11,21 +11,25 @@ import { APP_VERSION } from '../version';
   imports: [RouterOutlet, ToastModule, LoadingComponent],
   standalone: true,
   template: `
-    <p-toast [showTransitionOptions]="'500ms'" [hideTransitionOptions]="'500ms'" position="top-right" />
-    <app-loading />
-    <router-outlet />
-    <footer
-      class="w-full bg-gray-50 border-t border-gray-200 py-4 px-6 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500 gap-2"
-    >
-      <div>
-        <span class="font-semibold text-gray-700">BoostManager</span>
-        &copy; {{ currentYear }}. Todos os direitos reservados.
-      </div>
-      <div>
-        Versão <span class="font-mono bg-gray-100 rounded px-2 py-0.5">{{ APP_VERSION }}</span> | Desenvolvido por
-        <a href="https://belfortweb.com.br" target="_blank" class="underline hover:text-green-500">Ricardo Belfort</a>
-      </div>
-    </footer>
+    <div class="flex flex-col min-h-screen">
+      <p-toast [showTransitionOptions]="'500ms'" [hideTransitionOptions]="'500ms'" position="top-right" />
+      <app-loading />
+      <main class="flex-1 flex flex-col justify-center items-center">
+        <router-outlet />
+      </main>
+      <footer
+        class="w-full bg-gray-50 border-t border-gray-200 py-4 px-6 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500 gap-2"
+      >
+        <div>
+          <span class="font-semibold text-gray-700">BoostManager</span>
+          &copy; {{ currentYear }}. Todos os direitos reservados.
+        </div>
+        <div>
+          Versão <span class="font-mono bg-gray-100 rounded px-2 py-0.5">{{ APP_VERSION }}</span> | Desenvolvido por
+          <a href="https://belfortweb.com.br" target="_blank" class="underline hover:text-green-500">Ricardo Belfort</a>
+        </div>
+      </footer>
+    </div>
   `,
 })
 export class AppComponent {

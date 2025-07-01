@@ -17,6 +17,7 @@ import { MenubarModule } from 'primeng/menubar';
 export class MenubarComponent {
   items: MenuItem[] | undefined;
   profileItems: MenuItem[] = [];
+  userRole: string | null = null;
 
   constructor(
     private router: Router,
@@ -24,12 +25,15 @@ export class MenubarComponent {
     private messageService: MessageService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
+    this.userRole = await this.auth.getUserRole();
     this.items = [
       { label: 'Home', icon: 'pi pi-th-large' },
       { label: 'Pedidos', icon: 'pi pi-box' },
       { label: 'Fornecedores', icon: 'pi pi-inbox' },
       { label: 'Relatórios', icon: 'pi pi-chart-line' },
+      // Só admins veem esta opção
+      ...(this.userRole === 'admin' ? [{ label: 'Administração', icon: 'pi pi-lock', routerLink: '/admin' }] : []),
     ];
 
     this.profileItems = [

@@ -44,6 +44,7 @@
             <button
               type="button"
               (click)="togglePassword()"
+              tabindex="-1"
               class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-700 focus:outline-none mt-0.5"
             >
               <i class="pi pi-eye" *ngIf="!showPassword"></i>
@@ -68,7 +69,10 @@
             class="w-full mt-1 border border-gray-300 px-3 py-3 rounded-sm shadow-xs focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500"
           />
         </label>
-        <div *ngIf="confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)" class="text-sm text-red-500 mt-1 mb-2">
+        <div
+          *ngIf="confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)"
+          class="text-sm text-red-500 mt-1 mb-2"
+        >
           <div *ngIf="confirmPassword?.hasError('required')">A confirmação é obrigatória.</div>
           <div *ngIf="confirmPassword?.hasError('notMatching')">As senhas não coincidem.</div>
         </div>

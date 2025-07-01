@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import type { Session, User } from '@supabase/supabase-js';
-import { BehaviorSubject, from, Observable } from 'rxjs';
+import { BehaviorSubject, from, Observable, switchMap } from 'rxjs';
 import { supabase } from 'supabase.client';
 
 @Injectable({ providedIn: 'root' })
@@ -69,12 +69,40 @@ export class AuthService {
     });
   }
 
-  // Cadastro
-  signUp(email: string, password: string): Observable<any> {
-    return from(supabase.auth.signUp({ email, password }));
+  signUp(email: string, password: string) {
+    return from(supabase.auth.signUp({ email, password })).pipe(
+      switchMap(async (result: any) => {
+        if (result.error || !result.data?.user) {
+          throw result.error || new Error('Erro ao cadastrar usuário');
+        }
+        // Cria o profile no banco após sucesso no Auth
+        const { data, error } = await supabase.from('profiles').insert([
+          {
+            id: result.data.user.id,
+            email: email,
+            role: 'client', // padrão
+          },
+        ]);
+        if (error) {
+          throw error;
+        }
+        return result;
+      })
+    );
   }
 
-  // Recovery
+  async getUserProfile() {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user?.user?.id) return null;
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.user.id).single();
+    return data;
+  }
+
+  async getUserRole() {
+    const profile = await this.getUserProfile();
+    return profile?.role ?? null;
+  }
+
   recoverPassword(email: string): Observable<any> {
     return from(supabase.auth.resetPasswordForEmail(email));
   }
