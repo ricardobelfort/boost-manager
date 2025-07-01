@@ -86,10 +86,17 @@
         </td>
       </tr>
     </ng-template>
-    <!-- Use o nome correto do slot -->
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="9" class="text-center text-gray-400 py-6">Nenhum pedido cadastrado.</td>
+        <td [attr.colspan]="9" class="py-20">
+          <div class="flex flex-col items-center justify-center">
+            <div class="rounded-full bg-purple-100 w-20 h-20 flex items-center justify-center mb-4">
+              <i class="pi pi-box text-4xl text-yellow-500"></i>
+            </div>
+            <h3 class="font-bold text-xl text-gray-900 mb-1">Ainda não tem pedidos</h3>
+            <p class="text-gray-500 text-base">Aqui é onde você visualizará e gerenciará os pedidos.</p>
+          </div>
+        </td>
       </tr>
     </ng-template>
   </p-table>
@@ -113,15 +120,13 @@
       <div><b>Número do pedido:</b> #{{ orderToView.order_number }}</div>
       <div><b>Booster:</b> {{ orderToView.booster }}</div>
       <div><b>Tipo de serviço:</b> {{ orderToView.service_type }}</div>
-      <div *ngIf="orderToView.weapon_quantity">
-        <b>Qtd. Armas:</b> {{ orderToView.weapon_quantity }}
-      </div>
+      <div *ngIf="orderToView.weapon_quantity"><b>Qtd. Armas:</b> {{ orderToView.weapon_quantity }}</div>
       <div><b>Fornecedor:</b> {{ orderToView.supplier }}</div>
       <div><b>Status:</b> {{ orderToView.status }}</div>
-      <div><b>Data início:</b> {{ orderToView.start_date | date:'dd/MM/yyyy HH:mm' }}</div>
-      <div><b>Data fim:</b> {{ orderToView.end_date | date:'dd/MM/yyyy HH:mm' }}</div>
-      <div><b>Valor total:</b> R$ {{ orderToView.total_value | number:'1.2-2' }}</div>
-      <div><b>Valor do booster:</b> R$ {{ orderToView.booster_value | number:'1.2-2' }}</div>
+      <div><b>Data início:</b> {{ orderToView.start_date | date: 'dd/MM/yyyy HH:mm' }}</div>
+      <div><b>Data fim:</b> {{ orderToView.end_date | date: 'dd/MM/yyyy HH:mm' }}</div>
+      <div><b>Valor total:</b> R$ {{ orderToView.total_value | number: '1.2-2' }}</div>
+      <div><b>Valor do booster:</b> R$ {{ orderToView.booster_value | number: '1.2-2' }}</div>
       <div><b>Observação:</b> {{ orderToView.observation }}</div>
     </div>
   </ng-container>
