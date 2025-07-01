@@ -28,6 +28,7 @@
       <tr>
         <th>Booster</th>
         <th>Serviço</th>
+        <th>Nº Pedido</th>
         <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
         <th pSortableColumn="start_date">Início <p-sortIcon field="start_date" /></th>
         <th pSortableColumn="end_date">Término <p-sortIcon field="end_date" /></th>
@@ -40,6 +41,7 @@
       <tr>
         <td class="text-sm">{{ order.booster }}</td>
         <td class="text-sm">{{ order.service_type }}</td>
+        <td class="text-sm">#{{ order.order_number }}</td>
         <td class="text-sm">
           <span
             class="px-2 py-1 rounded-lg font-medium"
@@ -87,7 +89,7 @@
     <!-- Use o nome correto do slot -->
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="8" class="text-center text-gray-400 py-6">Nenhum pedido cadastrado.</td>
+        <td colspan="9" class="text-center text-gray-400 py-6">Nenhum pedido cadastrado.</td>
       </tr>
     </ng-template>
   </p-table>

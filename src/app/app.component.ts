@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { LoadingComponent } from '@shared/components/loading/loading.component';
 import { PrimeNG } from 'primeng/config';
 import { ToastModule } from 'primeng/toast';
+import { APP_VERSION } from '../version';
 
 @Component({
   selector: 'app-root',
@@ -12,9 +13,24 @@ import { ToastModule } from 'primeng/toast';
     <p-toast [showTransitionOptions]="'500ms'" [hideTransitionOptions]="'500ms'" position="top-right" />
     <app-loading />
     <router-outlet />
+    <footer
+      class="w-full bg-gray-50 border-t border-gray-200 py-4 px-6 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500 gap-2"
+    >
+      <div>
+        <span class="font-semibold text-gray-700">BoostManager</span>
+        &copy; {{ currentYear }}. Todos os direitos reservados.
+      </div>
+      <div>
+        Versão <span class="font-mono bg-gray-100 rounded px-2 py-0.5">{{ APP_VERSION }}</span> | Desenvolvido por
+        <a href="https://belfortweb.com.br" target="_blank" class="underline hover:text-green-500">Ricardo Belfort</a>
+      </div>
+    </footer>
   `,
 })
 export class AppComponent {
+  currentYear = new Date().getFullYear();
+  public APP_VERSION = APP_VERSION;
+
   constructor(private primeng: PrimeNG) {}
 
   ngOnInit() {
