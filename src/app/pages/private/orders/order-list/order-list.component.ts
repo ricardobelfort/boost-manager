@@ -2,16 +2,19 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Order, OrderService } from '@shared/services/order.service';
+import { Order } from '@shared/models/order.model';
+import { OrderService } from '@shared/services/order.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DialogModule } from 'primeng/dialog';
 import { DividerModule } from 'primeng/divider';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
+
 import { OrderFormComponent } from '../order-form/order-form.component';
 
 @Component({
@@ -29,6 +32,7 @@ import { OrderFormComponent } from '../order-form/order-form.component';
     DividerModule,
     InputIcon,
     IconField,
+    DialogModule,
   ],
   templateUrl: './order-list.component.html',
   styleUrl: './order-list.component.css',
@@ -39,6 +43,8 @@ export class OrderListComponent implements OnInit {
   search = '';
   showOrderForm = false;
   editingOrder: Order | null = null;
+  viewDialogVisible = false;
+  orderToView: Order | null = null;
 
   private orderService = inject(OrderService);
   private confirmationService = inject(ConfirmationService);
@@ -46,7 +52,9 @@ export class OrderListComponent implements OnInit {
   private router = inject(Router);
 
   ngOnInit() {
-    this.orders = this.orderService.getOrders();
+    this.orderService.orders$.subscribe((orders) => {
+      this.orders = orders;
+    });
   }
 
   get filteredOrders() {
@@ -88,5 +96,15 @@ export class OrderListComponent implements OnInit {
 
   closeOrderForm() {
     this.showOrderForm = false;
+  }
+
+  openViewDialog(order: Order) {
+    this.orderToView = order;
+    this.viewDialogVisible = true;
+  }
+
+  closeViewDialog() {
+    this.viewDialogVisible = false;
+    this.orderToView = null;
   }
 }

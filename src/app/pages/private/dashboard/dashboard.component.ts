@@ -4,7 +4,8 @@ import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { DashboardCardComponent } from '@shared/components/dashboard-card/dashboard-card.component';
 import { MenubarComponent } from '@shared/components/menubar/menubar.component';
-import { Order, OrderService } from '@shared/services/order.service';
+import { Order } from '@shared/models/order.model';
+import { OrderService } from '@shared/services/order.service';
 import { combineLatest, interval, map, Observable, startWith, switchMap } from 'rxjs';
 
 interface DashboardCard {
@@ -34,7 +35,7 @@ export class DashboardComponent {
 
   cards$: Observable<DashboardCard[]> = combineLatest([this.orders$, this.dollarRate$]).pipe(
     map(([orders, dollarRate]) => {
-      const salesValue = orders.reduce((acc, o) => acc + (o.totalValue || 0), 0);
+      const salesValue = orders.reduce((acc, o) => acc + (o.total_value || 0), 0);
       const salesValueUSD = salesValue / dollarRate;
       return [
         {

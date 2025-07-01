@@ -29,17 +29,17 @@
         <th>Booster</th>
         <th>Serviço</th>
         <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
-        <th pSortableColumn="startDate">Início <p-sortIcon field="startDate" /></th>
-        <th pSortableColumn="endDate">Término <p-sortIcon field="endDate" /></th>
-        <th pSortableColumn="totalValue">Valor Total <p-sortIcon field="totalValue" /></th>
-        <th pSortableColumn="boosterValue">Valor Booster <p-sortIcon field="boosterValue" /></th>
+        <th pSortableColumn="start_date">Início <p-sortIcon field="start_date" /></th>
+        <th pSortableColumn="end_date">Término <p-sortIcon field="end_date" /></th>
+        <th pSortableColumn="total_value">Valor Total <p-sortIcon field="total_value" /></th>
+        <th pSortableColumn="booster_value">Valor Booster <p-sortIcon field="booster_value" /></th>
         <th>Ações</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-order>
       <tr>
         <td class="text-sm">{{ order.booster }}</td>
-        <td class="text-sm">{{ order.serviceType }}</td>
+        <td class="text-sm">{{ order.service_type }}</td>
         <td class="text-sm">
           <span
             class="px-2 py-1 rounded-lg font-medium"
@@ -52,11 +52,19 @@
             {{ order.status }}
           </span>
         </td>
-        <td class="text-sm">{{ order.startDate ? (order.startDate | date: 'dd/MM/yy' : '' : 'pt-BR') : '-' }}</td>
-        <td class="text-sm">{{ order.endDate ? (order.endDate | date: 'dd/MM/yy' : '' : 'pt-BR') : '-' }}</td>
-        <td class="text-sm">R$ {{ order.totalValue | number: '1.2-2' }}</td>
-        <td class="text-sm">R$ {{ order.boosterValue | number: '1.2-2' }}</td>
+        <td class="text-sm">{{ order.start_date ? (order.start_date | date: 'dd/MM/yy' : '' : 'pt-BR') : '-' }}</td>
+        <td class="text-sm">{{ order.end_date ? (order.end_date | date: 'dd/MM/yy' : '' : 'pt-BR') : '-' }}</td>
+        <td class="text-sm">R$ {{ order.total_value | number: '1.2-2' }}</td>
+        <td class="text-sm">R$ {{ order.booster_value | number: '1.2-2' }}</td>
         <td>
+          <p-button
+            icon="pi pi-tag"
+            [rounded]="true"
+            [text]="true"
+            severity="secondary"
+            (click)="openViewDialog(order)"
+            title="Visualizar"
+          />
           <p-button
             icon="pi pi-pencil"
             [rounded]="true"
@@ -79,7 +87,7 @@
     <!-- Use o nome correto do slot -->
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="5" class="text-center text-gray-400 py-6">Nenhum pedido cadastrado.</td>
+        <td colspan="8" class="text-center text-gray-400 py-6">Nenhum pedido cadastrado.</td>
       </tr>
     </ng-template>
   </p-table>
@@ -89,3 +97,30 @@
 
 <!-- FORMULÁRIO DE NOVO PEDIDO (modal ou inline) -->
 <app-order-form *ngIf="showOrderForm" (close)="closeOrderForm()" />
+
+<p-dialog
+  header="Detalhes do Pedido"
+  [(visible)]="viewDialogVisible"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [closable]="true"
+  (onHide)="closeViewDialog()"
+>
+  <ng-container *ngIf="orderToView">
+    <div class="flex flex-col gap-3">
+      <div><b>Número do pedido:</b> #{{ orderToView.order_number }}</div>
+      <div><b>Booster:</b> {{ orderToView.booster }}</div>
+      <div><b>Tipo de serviço:</b> {{ orderToView.service_type }}</div>
+      <div *ngIf="orderToView.weapon_quantity">
+        <b>Qtd. Armas:</b> {{ orderToView.weapon_quantity }}
+      </div>
+      <div><b>Fornecedor:</b> {{ orderToView.supplier }}</div>
+      <div><b>Status:</b> {{ orderToView.status }}</div>
+      <div><b>Data início:</b> {{ orderToView.start_date | date:'dd/MM/yyyy HH:mm' }}</div>
+      <div><b>Data fim:</b> {{ orderToView.end_date | date:'dd/MM/yyyy HH:mm' }}</div>
+      <div><b>Valor total:</b> R$ {{ orderToView.total_value | number:'1.2-2' }}</div>
+      <div><b>Valor do booster:</b> R$ {{ orderToView.booster_value | number:'1.2-2' }}</div>
+      <div><b>Observação:</b> {{ orderToView.observation }}</div>
+    </div>
+  </ng-container>
+</p-dialog>

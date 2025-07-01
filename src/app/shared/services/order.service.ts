@@ -1,88 +1,97 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-
-export interface Order {
-  id: string;
-  orderNumber?: string;
-  booster: string;
-  serviceType: string;
-  weaponQuantity?: number;
-  supplier: string;
-  accountEmail: string;
-  accountPassword: string;
-  recoveryCode1: string;
-  recoveryEmail: string;
-  platform: string;
-  startDate: string;
-  endDate: string;
-  status: string;
-  totalValue: number;
-  boosterValue: number;
-  observation: string;
-}
+import { Order } from '@shared/models/order.model';
+import { BehaviorSubject, from, Observable } from 'rxjs';
+import { supabase } from 'supabase.client';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private STORAGE_KEY = 'orders';
-  private ORDER_NUMBER_KEY = 'order_number_seq';
-
-  private ordersSubject = new BehaviorSubject<Order[]>(this.getOrdersFromStorage());
+  private ordersSubject = new BehaviorSubject<Order[]>([]);
   orders$ = this.ordersSubject.asObservable();
 
-  private getOrdersFromStorage(): Order[] {
-    return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]');
+  constructor() {
+    this.refreshOrders();
   }
 
-  private saveOrdersToStorage(orders: Order[]) {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(orders));
-    this.ordersSubject.next(orders);
+  /** Recarrega os pedidos do Supabase */
+  refreshOrders() {
+    from(supabase.from('orders').select('*').order('created_at', { ascending: false })).subscribe(({ data }) => {
+      if (data) this.ordersSubject.next(data as Order[]);
+    });
   }
 
-  getOrders(): Order[] {
-    return this.ordersSubject.value;
+  addOrder(order: Order): Observable<Order> {
+    return from(
+      supabase
+        .from('orders')
+        .insert(order)
+        .select()
+        .single()
+        .then(({ data }) => {
+          this.refreshOrders();
+          return data as Order;
+        })
+    );
   }
 
-  /** Chame isto após qualquer alteração! */
-  private emitOrders() {
-    this.ordersSubject.next(this.getOrders());
+  getOrders(): Observable<Order[]> {
+    // Você pode usar orders$ ou chamar direto no banco se quiser sempre o mais fresco
+    return from(
+      supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .then(({ data }) => data as Order[])
+    );
   }
 
-  getOrdersStream() {
-    return this.orders$;
+  getOrderById(id: string): Observable<Order | undefined> {
+    return from(
+      supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id)
+        .single()
+        .then(({ data }) => data as Order)
+    );
   }
 
-  getOrderById(id: string): Order | undefined {
-    return this.getOrders().find((order) => order.id === id);
+  updateOrder(updated: Order): Observable<Order> {
+    return from(
+      supabase
+        .from('orders')
+        .update(updated)
+        .eq('id', updated.id)
+        .select()
+        .single()
+        .then(({ data }) => {
+          this.refreshOrders();
+          return data as Order;
+        })
+    );
   }
 
-  addOrder(order: Order) {
-    if (!order.id) order.id = this.generateUUID();
-    const orders = [...this.getOrders(), order];
-    this.saveOrdersToStorage(orders);
-    this.emitOrders();
-  }
-
-  updateOrder(updated: Order) {
-    const orders = this.getOrders().map((o) => (o.id === updated.id ? updated : o));
-    this.saveOrdersToStorage(orders);
-    this.emitOrders();
-  }
-
-  deleteOrder(order: Order) {
-    const orders = this.getOrders().filter((o) => o.id !== order.id);
-    this.saveOrdersToStorage(orders);
-    this.emitOrders();
+  deleteOrder(order: Order): Observable<any> {
+    return from(
+      supabase
+        .from('orders')
+        .delete()
+        .eq('id', order.id)
+        .then((res) => {
+          this.refreshOrders();
+          return res;
+        })
+    );
   }
 
   generateOrderNumber(): string {
-    let lastNumber = +(localStorage.getItem(this.ORDER_NUMBER_KEY) || '0');
+    // Pode manter localStorage, ou pegar max da tabela via supabase.
+    let lastNumber = +(localStorage.getItem('order_number_seq') || '0');
     lastNumber++;
-    localStorage.setItem(this.ORDER_NUMBER_KEY, lastNumber.toString());
-    return lastNumber.toString().padStart(4, '0'); // Exemplo: 0001, 0002...
+    localStorage.setItem('order_number_seq', lastNumber.toString());
+    return lastNumber.toString().padStart(4, '0');
   }
 
   generateUUID() {
-    // (Mantive sua implementação)
     return crypto.randomUUID
       ? crypto.randomUUID()
       : String(1e7 + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>

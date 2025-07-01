@@ -2,8 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Order } from '@shared/models/order.model';
 import { LoadingService } from '@shared/services/loading.service';
-import { Order, OrderService } from '@shared/services/order.service';
+import { OrderService } from '@shared/services/order.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -12,6 +13,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
+import { of, switchMap, take, tap } from 'rxjs';
 
 @Component({
   selector: 'app-order-form',
@@ -39,6 +41,11 @@ export class OrderFormComponent {
   private route = inject(ActivatedRoute);
 
   editingId?: string;
+  hoje = (() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  })();
 
   loadingService = inject(LoadingService);
 
@@ -73,20 +80,25 @@ export class OrderFormComponent {
   ngOnInit() {
     this.editingId = this.route.snapshot.paramMap.get('id') || undefined;
     if (this.editingId) {
-      const orderParaEditar = this.orderService.getOrderById(this.editingId);
-      if (orderParaEditar) {
-        this.orderForm.patchValue({
-          ...orderParaEditar,
-          weaponQuantity: typeof orderParaEditar.weaponQuantity === 'number' ? null : orderParaEditar.weaponQuantity,
-          startDate: orderParaEditar.startDate ? orderParaEditar.startDate : null,
-          endDate: orderParaEditar.endDate ? orderParaEditar.endDate : null,
+      this.orderService
+        .getOrderById(this.editingId)
+        .pipe(take(1))
+        .subscribe((orderParaEditar) => {
+          if (orderParaEditar) {
+            this.orderForm.patchValue({
+              ...orderParaEditar,
+              weapon_quantity:
+                typeof orderParaEditar.weapon_quantity === 'number' ? orderParaEditar.weapon_quantity : null,
+              start_date: orderParaEditar.start_date ? new Date(orderParaEditar.start_date) : undefined,
+              end_date: orderParaEditar.end_date ? new Date(orderParaEditar.end_date) : undefined,
+            } as Order);
+          }
         });
-      }
     }
 
-    this.orderForm.get('serviceType')!.valueChanges.subscribe((value) => {
-      const isCamuflagem = value && value.toLowerCase().includes('camuflagem');
-      const weaponCtrl = this.orderForm.get('weaponQuantity');
+    this.orderForm.get('service_type')!.valueChanges.subscribe((value) => {
+      const isCamuflagem = typeof value === 'string' && (value as string).toLowerCase().includes('camuflagem');
+      const weaponCtrl = this.orderForm.get('weapon_quantity');
       if (isCamuflagem) {
         weaponCtrl?.enable();
         weaponCtrl?.setValidators([Validators.required, Validators.min(1), Validators.max(33)]);
@@ -99,30 +111,36 @@ export class OrderFormComponent {
     });
   }
 
-  orderForm = this.fb.group({
-    orderNumber: [''],
-    booster: ['', Validators.required],
-    serviceType: ['', Validators.required],
-    weaponQuantity: [{ value: null, disabled: true }],
-    supplier: ['', Validators.required],
-    accountEmail: ['', [Validators.required, Validators.email]],
-    accountPassword: ['', Validators.required],
-    recoveryCode1: ['', Validators.required],
-    recoveryEmail: ['', Validators.required, Validators.email],
-    platform: ['', Validators.required],
-    startDate: ['', Validators.required],
-    endDate: ['', Validators.required],
-    status: ['', Validators.required],
-    totalValue: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
-    boosterValue: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
-    observation: ['', [Validators.maxLength(500)]],
-  });
+  orderForm = this.fb.nonNullable.group(
+    {
+      order_number: [''],
+      booster: ['', Validators.required],
+      service_type: ['', Validators.required],
+      weapon_quantity: this.fb.control<number | null>({ value: null, disabled: true }),
+      supplier: ['', Validators.required],
+      account_email: ['', [Validators.required, Validators.email]],
+      account_password: ['', Validators.required],
+      recovery_code: ['', Validators.required],
+      recovery_email: ['', [Validators.required, Validators.email]],
+      platform: ['', Validators.required],
+      start_date: ['', Validators.required],
+      end_date: ['', Validators.required],
+      status: ['', Validators.required],
+      total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
+      booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
+      observation: ['', [Validators.maxLength(500)]],
+    },
+    {
+      validators: this.dateRangeValidator.bind(this),
+    }
+  );
 
-  dateRangeValidator(group: FormGroup) {
-    const start = group.get('startDate')?.value;
-    const end = group.get('endDate')?.value;
+  dateRangeValidator(control: import('@angular/forms').AbstractControl) {
+    if (!(control instanceof FormGroup)) return null;
+    const start = control.get('start_date')?.value;
+    const end = control.get('end_date')?.value;
     if (start && end && end < start) {
-      group.get('endDate')?.setErrors({ dateRange: true });
+      control.get('end_date')?.setErrors({ dateRange: true });
       return { dateRange: true };
     }
     return null;
@@ -131,44 +149,44 @@ export class OrderFormComponent {
   get booster() {
     return this.orderForm.get('booster')!;
   }
-  get serviceType() {
-    return this.orderForm.get('serviceType')!;
+  get service_type() {
+    return this.orderForm.get('service_type')!;
   }
-  get weaponQuantity() {
-    return this.orderForm.get('weaponQuantity')!;
+  get weapon_quantity() {
+    return this.orderForm.get('weapon_quantity')!;
   }
   get supplier() {
     return this.orderForm.get('supplier')!;
   }
-  get accountEmail() {
-    return this.orderForm.get('accountEmail')!;
+  get account_email() {
+    return this.orderForm.get('account_email')!;
   }
-  get accountPassword() {
-    return this.orderForm.get('accountPassword')!;
+  get account_password() {
+    return this.orderForm.get('account_password')!;
   }
-  get recoveryCode1() {
-    return this.orderForm.get('recoveryCode1')!;
+  get recovery_code() {
+    return this.orderForm.get('recovery_code')!;
   }
-  get recoveryEmail() {
-    return this.orderForm.get('recoveryEmail')!;
+  get recovery_email() {
+    return this.orderForm.get('recovery_email')!;
   }
   get platform() {
     return this.orderForm.get('platform')!;
   }
-  get startDate() {
-    return this.orderForm.get('startDate')!;
+  get start_date() {
+    return this.orderForm.get('start_date')!;
   }
-  get endDate() {
-    return this.orderForm.get('endDate')!;
+  get end_date() {
+    return this.orderForm.get('end_date')!;
   }
   get status() {
     return this.orderForm.get('status')!;
   }
-  get totalValue() {
-    return this.orderForm.get('totalValue')!;
+  get total_value() {
+    return this.orderForm.get('total_value')!;
   }
-  get boosterValue() {
-    return this.orderForm.get('boosterValue')!;
+  get booster_value() {
+    return this.orderForm.get('booster_value')!;
   }
   get observation() {
     return this.orderForm.get('observation')!;
@@ -186,62 +204,79 @@ export class OrderFormComponent {
     }
 
     const formValue = this.orderForm.value;
-    let orderNumber: string;
-
-    if (!this.editingId) {
-      // Gera novo número para pedidos novos
-      orderNumber = this.orderService.generateOrderNumber();
-    } else {
-      // Recupera o número do pedido existente
-      const existingOrder = this.orderService.getOrderById(this.editingId);
-      orderNumber = existingOrder?.orderNumber ?? this.orderService.generateOrderNumber();
-    }
 
     const toIsoString = (d: any) => {
       if (!d) return '';
-      // Se já for Date, converte; se for string, tenta criar Date e converter
       return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
     };
 
-    const order: Order = {
-      id: this.editingId ? this.editingId : this.orderService.generateUUID(),
-      orderNumber,
-      booster: formValue.booster ?? '',
-      serviceType: formValue.serviceType ?? '',
-      weaponQuantity: formValue.weaponQuantity ?? undefined,
-      supplier: formValue.supplier ?? '',
-      accountEmail: formValue.accountEmail ?? '',
-      accountPassword: formValue.accountPassword ?? '',
-      recoveryCode1: formValue.recoveryCode1 ?? '',
-      recoveryEmail: formValue.recoveryEmail ?? '',
-      platform: formValue.platform ?? '',
-      startDate: toIsoString(formValue.startDate),
-      endDate: toIsoString(formValue.endDate),
-      status: formValue.status ?? '',
-      totalValue: formValue.totalValue ?? 0,
-      boosterValue: formValue.boosterValue ?? 0,
-      observation: formValue.observation ?? '',
+    const createOrder = (orderNumber: string) => {
+      const order: Order = {
+        id: this.editingId ? this.editingId : this.orderService.generateUUID(),
+        order_number: orderNumber,
+        booster: formValue.booster ?? '',
+        service_type: formValue.service_type ?? '',
+        weapon_quantity: formValue.weapon_quantity ?? undefined,
+        supplier: formValue.supplier ?? '',
+        account_email: formValue.account_email ?? '',
+        account_password: formValue.account_password ?? '',
+        recovery_code: formValue.recovery_code ?? '',
+        recovery_email: formValue.recovery_email ?? '',
+        platform: formValue.platform ?? '',
+        start_date: toIsoString(formValue.start_date),
+        end_date: toIsoString(formValue.end_date),
+        status: formValue.status ?? '',
+        total_value: formValue.total_value ?? 0,
+        booster_value: formValue.booster_value ?? 0,
+        observation: formValue.observation ?? '',
+      };
+      return order;
     };
 
-    if (this.editingId) {
-      this.orderService.updateOrder(order);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Sucesso',
-        detail: 'Pedido atualizado com sucesso!',
-      });
+    // Lógica RxJS:
+    let flow$: any = of(null);
+
+    if (!this.editingId) {
+      // Cadastro novo: já gera número e segue fluxo
+      const orderNumber = this.orderService.generateOrderNumber();
+      const order = createOrder(orderNumber);
+      flow$ = this.orderService.addOrder(order).pipe(
+        tap(() => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Pedido cadastrado com sucesso!',
+          });
+          this.orderForm.reset();
+          this.close.emit();
+          this.router.navigate(['/dashboard/orders']);
+        })
+      );
     } else {
-      this.orderService.addOrder(order);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Sucesso',
-        detail: 'Pedido cadastrado com sucesso!',
-      });
+      // Edição: busca primeiro o pedido, pega o número, depois atualiza
+      flow$ = this.orderService.getOrderById(this.editingId).pipe(
+        take(1),
+        switchMap((existingOrder) => {
+          const orderNumber = existingOrder?.order_number ?? this.orderService.generateOrderNumber();
+          const order = createOrder(orderNumber);
+          return this.orderService.updateOrder(order).pipe(
+            tap(() => {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: 'Pedido atualizado com sucesso!',
+              });
+              this.orderForm.reset();
+              this.close.emit();
+              this.router.navigate(['/dashboard/orders']);
+            })
+          );
+        })
+      );
     }
 
-    this.orderForm.reset();
-    this.close.emit();
-    this.router.navigate(['/dashboard/orders']);
+    // Sempre subscribe ao fluxo
+    flow$.subscribe();
   }
 
   onCancel() {
