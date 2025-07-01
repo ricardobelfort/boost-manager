@@ -42,7 +42,7 @@ export class AuthService {
         options: {
           // O persistSession funciona para web. 'local' para localStorage, 'session' para sessionStorage.
           persistSession: rememberMe ? 'local' : 'session',
-        } as any // "as any" pois typescript v2 ainda não aceita string, mas funciona
+        } as any, // "as any" pois typescript v2 ainda não aceita string, mas funciona
       })
     );
   }
@@ -67,5 +67,15 @@ export class AuthService {
       this.sessionSubject.next(data.session);
       return data.session;
     });
+  }
+
+  // Cadastro
+  signUp(email: string, password: string): Observable<any> {
+    return from(supabase.auth.signUp({ email, password }));
+  }
+
+  // Recovery
+  recoverPassword(email: string): Observable<any> {
+    return from(supabase.auth.resetPasswordForEmail(email));
   }
 }

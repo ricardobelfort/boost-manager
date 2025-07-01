@@ -1,0 +1,89 @@
+<div class="w-full h-full flex justify-center items-center">
+  <div class="w-[400px] p-8 flex flex-col items-center bg-white rounded-2xl shadow-xs relative">
+    <div class="flex flex-col items-center mb-1">
+      <img src="assets/images/boost.png" width="64" class="mb-4" alt="" />
+      <h1 class="text-2xl font-bold">Boost Manager</h1>
+      <p class="text-xl font-normal text-gray-700 text-center mb-8">Crie sua conta</p>
+    </div>
+    <form [formGroup]="signupForm" class="w-full min-w-full flex flex-col gap-4">
+      <div>
+        <label class="block text-base text-gray-700">
+          <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">E-mail</span>
+          <input
+            class="w-full mt-1 border border-gray-300 px-3 py-3 rounded-sm shadow-xs focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500"
+            type="email"
+            formControlName="email"
+            placeholder="Seu e-mail"
+            autocomplete="off"
+            required
+          />
+        </label>
+        <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="text-sm text-red-500 mt-1">
+          <div *ngIf="email?.hasError('required')">O e-mail é obrigatório.</div>
+          <div *ngIf="email?.hasError('email')">Formato de e-mail inválido.</div>
+          <div *ngIf="email?.hasError('minlength')">O e-mail deve ter pelo menos 5 caracteres.</div>
+        </div>
+      </div>
+      <div>
+        <label class="block text-base text-gray-700">
+          <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">Senha</span>
+          <div class="relative">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Sua senha"
+              autocomplete="off"
+              required
+              class="w-full mt-1 border border-gray-300 px-3 py-3 rounded-sm shadow-xs focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500 pr-10"
+            />
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-700 focus:outline-none mt-0.5"
+            >
+              <i class="pi pi-eye" *ngIf="!showPassword"></i>
+              <i class="pi pi-eye-slash" *ngIf="showPassword"></i>
+            </button>
+          </div>
+        </label>
+        <div *ngIf="password?.invalid && (password?.dirty || password?.touched)" class="text-sm text-red-500 mt-1 mb-2">
+          <div *ngIf="password?.hasError('required')">A senha é obrigatória.</div>
+          <div *ngIf="password?.hasError('minlength')">A senha deve ter pelo menos 8 caracteres.</div>
+        </div>
+      </div>
+      <div>
+        <label class="block text-base text-gray-700">
+          <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">Confirmar Senha</span>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            placeholder="Confirme sua senha"
+            autocomplete="off"
+            required
+            class="w-full mt-1 border border-gray-300 px-3 py-3 rounded-sm shadow-xs focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500"
+          />
+        </label>
+        <div *ngIf="confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)" class="text-sm text-red-500 mt-1 mb-2">
+          <div *ngIf="confirmPassword?.hasError('required')">A confirmação é obrigatória.</div>
+          <div *ngIf="confirmPassword?.hasError('notMatching')">As senhas não coincidem.</div>
+        </div>
+      </div>
+      <div class="w-full flex flex-col">
+        <p-button
+          (onClick)="onSubmit()"
+          label="CRIAR CONTA"
+          [disabled]="signupForm.invalid"
+          size="large"
+          [style]="{ width: '100%', fontSize: '14px' }"
+        />
+        <p-divider align="center">
+          <b class="font-normal text-sm text-gray-400">Ou</b>
+        </p-divider>
+        <p class="text-base font-normal text-gray-700 text-center">
+          Já tem conta?
+          <a routerLink="/auth/login" class="font-bold text-lime-500 hover:text-lime-600">Entrar</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>
