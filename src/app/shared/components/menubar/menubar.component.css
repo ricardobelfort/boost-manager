@@ -1,4 +1,7 @@
-.p-menu {
-  right: 8px; /* Ajuste se necessário */
-  left: unset !important;
+.animate-fadeIn {
+  animation: fadeIn 0.18s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+}
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(-8px);}
+  100% { opacity: 1; transform: translateY(0);}
 }

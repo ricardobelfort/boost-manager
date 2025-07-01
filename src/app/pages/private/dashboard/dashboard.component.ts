@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { DashboardCardComponent } from '@shared/components/dashboard-card/dashboard-card.component';
-import { MenubarComponent } from '@shared/components/menubar/menubar.component';
 import { Order } from '@shared/models/order.model';
 import { OrderService } from '@shared/services/order.service';
 import { combineLatest, interval, map, Observable, startWith, switchMap } from 'rxjs';
@@ -18,7 +17,7 @@ interface DashboardCard {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [MenubarComponent, RouterOutlet, DashboardCardComponent, CommonModule],
+  imports: [RouterOutlet, DashboardCardComponent, CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import type { Session, User } from '@supabase/supabase-js';
 import { BehaviorSubject, from, Observable, switchMap } from 'rxjs';
 import { supabase } from 'supabase.client';
+import { Md5 } from 'ts-md5';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -101,6 +102,11 @@ export class AuthService {
   async getUserRole() {
     const profile = await this.getUserProfile();
     return profile?.role ?? null;
+  }
+
+  getGravatarUrl(email: string, size: number = 80) {
+    const hash = Md5.hashStr(email.trim().toLowerCase());
+    return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=identicon`;
   }
 
   recoverPassword(email: string): Observable<any> {

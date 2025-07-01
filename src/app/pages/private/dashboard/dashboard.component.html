@@ -1,27 +1,19 @@
-<div class="bg-gray-50 min-h-screen w-full overflow-x-hidden py-8">
-  <div class="max-w-[1140px] mx-auto px-4">
-    <app-menubar></app-menubar>
-
-    <div class="bg-gray-50 min-h-screen py-8">
-      <div class="max-w-[1140px] mx-auto">
-        <h2 class="!text-3xl font-bold text-black mb-4">Resumo</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <ng-container *ngIf="cards$ | async as cards">
-            <ng-container *ngFor="let card of cards">
-              <app-dashboard-card
-                [title]="card.title"
-                [value]="card.value"
-                [subtitle]="card.subtitle"
-                [iconClass]="card.iconClass"
-                [valueColor]="card.valueColor"
-              />
-            </ng-container>
-          </ng-container>
-        </div>
-      </div>
-      <div class="max-w-[1140px] mx-auto">
-        <router-outlet />
-      </div>
-    </div>
+<div class="mt-8">
+  <h2 class="!text-3xl font-bold text-black mb-4">Resumo</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <ng-container *ngIf="cards$ | async as cards">
+      <ng-container *ngFor="let card of cards">
+        <app-dashboard-card
+          [title]="card.title"
+          [value]="card.value"
+          [subtitle]="card.subtitle"
+          [iconClass]="card.iconClass"
+          [valueColor]="card.valueColor"
+        />
+      </ng-container>
+    </ng-container>
+  </div>
+  <div class="mt-10 mb-6">
+    <router-outlet />
   </div>
 </div>

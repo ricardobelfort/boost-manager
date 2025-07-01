@@ -1,23 +1,64 @@
-<p-menubar [model]="items" class="shadow-sm border-b bg-white" styleClass="border-0 bg-white">
-  <ng-template pTemplate="start">
-    <div class="flex items-center gap-2">
-      <img src="assets/images/boost.png" width="30" alt="" />
-    </div>
-  </ng-template>
+<header class="w-full bg-white flex items-center px-8 py-6 shadow-none sticky top-0 z-30">
+  <!-- Logo -->
+  <div class="flex items-center">
+    <img src="assets/images/boost.png" alt="Logo" class="w-10 h-10 rounded-full" />
+    <span class="ml-2 text-2xl font-bold text-lime-600">Boost Manager</span>
+  </div>
 
-  <ng-template #item let-item>
-    <ng-container>
-      <a class="p-menubar-item-link">
-        <span [class]="item.icon"></span>
-        <span>{{ item.label }}</span>
-      </a>
-    </ng-container>
-  </ng-template>
+  <!-- Navegação -->
+  <nav class="flex items-center gap-7 ml-12">
+    <a
+      *ngFor="let item of items"
+      [routerLink]="item.routerLink"
+      routerLinkActive="text-lime-600 font-semibold"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="flex items-center gap-2 text-base font-medium text-gray-700 hover:text-lime-600 transition"
+      [ngClass]="{ 'text-lime-600 font-semibold': isActive(item.routerLink) }"
+    >
+      <i [class]="item.icon"></i>
+      <span>{{ item.label }}</span>
+    </a>
+  </nav>
 
-  <ng-template pTemplate="end">
-    <div class="card flex justify-center">
-      <p-menu #menu [model]="profileItems" [popup]="true" [appendTo]="'body'" />
-      <p-button (click)="menu.toggle($event)" icon="pi pi-cog"/>
+  <!-- Spacer -->
+  <div class="flex-1"></div>
+
+  <!-- Usuário e Avatar -->
+  <div class="relative group">
+    <div class="flex items-center cursor-pointer" (click)="toggleDropdown()" tabindex="0">
+      <p-button *ngIf="showUpgrade" label="Upgrade to PRO" [rounded]="true" severity="contrast" />
+      <img [src]="userAvatarUrl" class="w-10 h-10 ml-10 mr-2 rounded-full border border-gray-300 object-cover" alt="Avatar" />
+      <i class="pi pi-chevron-down text-gray-500 text-xs"></i>
     </div>
-  </ng-template>
-</p-menubar>
+    <!-- Dropdown de perfil -->
+    <div
+      *ngIf="dropdownOpen"
+      class="absolute right-0 mt-3 bg-white shadow-lg rounded-lg py-1 w-64 flex flex-col border border-gray-100 animate-fadeIn"
+      (mouseleave)="closeDropdown()"
+    >
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+        <div>
+          <div class="text-sm font-bold text-gray-900 leading-tight">{{ userName }}</div>
+          <div class="text-xs text-gray-500">{{ userRole | titlecase }}</div>
+        </div>
+      </div>
+      <div class="flex flex-col py-2">
+        <button
+          class="flex items-center text-left px-4 py-2 hover:bg-gray-50 text-gray-700 text-sm cursor-pointer"
+          (click)="goToProfile()"
+        >
+          <i class="pi pi-user mr-2"></i> Minha Conta
+        </button>
+        <button
+          class="flex items-center text-left px-4 py-2 hover:bg-gray-50 text-gray-700 text-sm cursor-pointer"
+          (click)="goToSettings()"
+        >
+          <i class="pi pi-cog mr-2"></i> Configurações
+        </button>
+        <button class="flex items-center text-left px-4 py-2 hover:bg-gray-50 text-red-600 text-sm cursor-pointer" (click)="logout()">
+          <i class="pi pi-sign-out mr-2"></i> Sair
+        </button>
+      </div>
+    </div>
+  </div>
+</header>

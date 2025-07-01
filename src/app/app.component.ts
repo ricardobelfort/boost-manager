@@ -5,16 +5,18 @@ import { PrimeNG } from 'primeng/config';
 import { ToastModule } from 'primeng/toast';
 import { supabase } from 'supabase.client';
 import { APP_VERSION } from '../version';
+import { MenubarComponent } from './shared/components/menubar/menubar.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ToastModule, LoadingComponent],
+  imports: [RouterOutlet, ToastModule, LoadingComponent, MenubarComponent],
   standalone: true,
   template: `
-    <div class="flex flex-col min-h-screen">
+    <div class="w-full flex flex-col min-h-screen">
+      <app-menubar></app-menubar>
       <p-toast [showTransitionOptions]="'500ms'" [hideTransitionOptions]="'500ms'" position="top-right" />
       <app-loading />
-      <main class="flex-1 flex flex-col justify-center items-center">
+      <main class="flex-1 max-w-[1280px] mx-auto px-4 w-full">
         <router-outlet />
       </main>
       <footer

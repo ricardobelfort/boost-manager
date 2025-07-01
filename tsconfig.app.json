@@ -11,7 +11,8 @@
       "@shared/*": ["src/app/shared/*"],
       "@pages/*": ["src/app/pages/*"],
       "@assets/*": ["src/app/assets/*"]
-    }
+    },
+    "typeRoots": ["node_modules/@types", "src/types"]
   },
   "files": [
     "src/main.ts"
