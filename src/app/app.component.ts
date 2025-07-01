@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { LoadingComponent } from '@shared/components/loading/loading.component';
 import { PrimeNG } from 'primeng/config';
 import { ToastModule } from 'primeng/toast';
+import { supabase } from 'supabase.client';
 import { APP_VERSION } from '../version';
 
 @Component({
@@ -31,9 +32,25 @@ export class AppComponent {
   currentYear = new Date().getFullYear();
   public APP_VERSION = APP_VERSION;
 
-  constructor(private primeng: PrimeNG) {}
+  constructor(
+    private primeng: PrimeNG,
+    private router: Router
+  ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.primeng.ripple.set(true);
+
+    const { data, error } = await supabase.auth.getSession();
+
+    if (!data.session && !this.router.url.startsWith('/auth')) {
+      // Só redireciona se NÃO estiver já numa rota pública
+      this.router.navigate(['/auth/login']);
+    }
+    // Opcional: escute mudanças na sessão para logout automático!
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        this.router.navigate(['/auth/login']);
+      }
+    });
   }
 }

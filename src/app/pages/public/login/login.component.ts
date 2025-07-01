@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '@shared/services/auth.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -22,36 +23,44 @@ import { TooltipModule } from 'primeng/tooltip';
     RouterLink,
     DialogModule,
     IftaLabelModule,
-    TooltipModule
+    TooltipModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
+  private readonly auth = inject(AuthService);
 
   passwordStrengthClass = '';
   passwordStrengthWidth = '0%';
   rememberMe = false;
 
-  loginForm = this.fb.group({
-    email: ['', [Validators.email, Validators.required, Validators.minLength(5)]],
-    password: [
-      '',
-      [Validators.required, Validators.minLength(8), Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$')],
-    ],
-    rememberMe: [false],
+  loginForm = this.fb.nonNullable.group({
+    email: this.fb.nonNullable.control('', [Validators.email, Validators.required, Validators.minLength(5)]),
+    password: this.fb.nonNullable.control('', [
+      Validators.required,
+      Validators.minLength(8),
+      Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$'),
+    ]),
+    rememberMe: this.fb.nonNullable.control(false),
   });
 
   showPassword = false;
   visible = false;
   passwordTouched = false;
 
-  onSubmit() {
-    const { email, password } = this.loginForm.value;
+  ngOnInit() {
+    this.auth.session$.subscribe((session) => {
+      if (session) {
+        this.router.navigate(['/dashboard']);
+      }
+    });
+  }
 
+  onSubmit() {
     if (this.loginForm.invalid) {
       this.messageService.add({
         severity: 'error',
@@ -61,11 +70,42 @@ export class LoginComponent {
       return;
     }
 
-    this.router.navigate(['/dashboard']);
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Sucesso',
-      detail: `Bem-vindo(a), ${email}! Você está logado.`,
+    const { email, password, rememberMe } = this.loginForm.value;
+
+    this.auth.signIn(email!, password!, rememberMe ?? false).subscribe({
+      next: (response) => {
+        if (response.error) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: response.error.message || 'E-mail ou senha inválidos.',
+          });
+          return;
+        }
+
+        if (!response.data?.session) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Sessão não iniciada. Tente novamente.',
+          });
+          return;
+        }
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: `Bem-vindo(a), ${email}!`,
+        });
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: err?.message || 'Erro de comunicação com o servidor.',
+        });
+      },
     });
   }
 
