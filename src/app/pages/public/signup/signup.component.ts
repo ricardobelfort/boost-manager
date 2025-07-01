@@ -6,17 +6,12 @@ import { AuthService } from '@shared/services/auth.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink,
-    ButtonModule,
-    DividerModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ButtonModule, DividerModule, TooltipModule],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css',
 })
@@ -30,7 +25,10 @@ export class SignupComponent {
 
   signupForm = this.fb.nonNullable.group({
     email: ['', [Validators.email, Validators.required, Validators.minLength(5)]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: [
+      '',
+      [Validators.required, Validators.minLength(8), Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$')],
+    ],
     confirmPassword: ['', [Validators.required]],
   });
 
@@ -75,7 +73,7 @@ export class SignupComponent {
           summary: 'Erro',
           detail: err?.message || 'Erro ao cadastrar. Tente novamente.',
         });
-      }
+      },
     });
   }
 

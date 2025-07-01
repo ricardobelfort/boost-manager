@@ -27,6 +27,11 @@
       <div>
         <label class="block text-base text-gray-700">
           <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">Senha</span>
+          <i
+            class="pi pi-info-circle ml-2 text-gray-400 hover:text-lime-500 cursor-pointer"
+            pTooltip="A senha deve conter:&#10;Pelo menos 8 caracteres sendo letras maiúsculas, minúsculas e números."
+            tooltipPosition="right"
+          ></i>
           <div class="relative">
             <input
               [type]="showPassword ? 'text' : 'password'"
