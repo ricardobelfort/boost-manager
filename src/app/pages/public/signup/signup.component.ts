@@ -23,6 +23,9 @@ export class SignupComponent {
   private readonly auth = inject(AuthService);
 
   showPassword = false;
+  passwordTouched = false;
+  passwordStrengthClass = '';
+  passwordStrengthWidth = '0%';
 
   signupForm = this.fb.nonNullable.group({
     email: ['', [Validators.email, Validators.required, Validators.minLength(5)]],
@@ -86,5 +89,55 @@ export class SignupComponent {
   }
   get confirmPassword() {
     return this.signupForm.get('confirmPassword');
+  }
+
+  onPasswordInput(): void {
+    const passwordValue = this.password?.value || '';
+
+    if (passwordValue.length > 0) {
+      this.passwordTouched = true;
+    } else {
+      this.passwordTouched = false;
+    }
+
+    // Calcule a força
+    let strength = 0;
+    if (passwordValue.length >= 8) strength++;
+    if (/[a-z]/.test(passwordValue)) strength++;
+    if (/[A-Z]/.test(passwordValue)) strength++;
+    if (/\d/.test(passwordValue)) strength++;
+
+    if (strength <= 1) {
+      this.passwordStrengthClass = 'bg-red-400';
+      this.passwordStrengthWidth = '25%';
+    } else if (strength === 2) {
+      this.passwordStrengthClass = 'bg-yellow-400';
+      this.passwordStrengthWidth = '50%';
+    } else if (strength === 3) {
+      this.passwordStrengthClass = 'bg-blue-400';
+      this.passwordStrengthWidth = '75%';
+    } else if (strength === 4) {
+      this.passwordStrengthClass = 'bg-lime-500';
+      this.passwordStrengthWidth = '100%';
+    } else {
+      this.passwordStrengthClass = 'bg-gray-200';
+      this.passwordStrengthWidth = '0%';
+    }
+  }
+
+  passwordHasLowerCase(): boolean {
+    return /[a-z]/.test(this.password?.value || '');
+  }
+
+  passwordHasUpperCase(): boolean {
+    return /[A-Z]/.test(this.password?.value || '');
+  }
+
+  passwordHasNumber(): boolean {
+    return /\d/.test(this.password?.value || '');
+  }
+
+  passwordHasMinLength(): boolean {
+    return (this.password?.value || '').length >= 8;
   }
 }

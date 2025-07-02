@@ -151,6 +151,22 @@ export class LoginComponent implements OnInit {
     return this.loginForm.get('password');
   }
 
+  passwordHasLowerCase(): boolean {
+    return /[a-z]/.test(this.password?.value || '');
+  }
+
+  passwordHasUpperCase(): boolean {
+    return /[A-Z]/.test(this.password?.value || '');
+  }
+
+  passwordHasNumber(): boolean {
+    return /\d/.test(this.password?.value || '');
+  }
+
+  passwordHasMinLength(): boolean {
+    return (this.password?.value || '').length >= 8;
+  }
+
   togglePassword() {
     this.showPassword = !this.showPassword;
   }
