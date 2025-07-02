@@ -7,18 +7,18 @@
 
   <!-- Navegação -->
   <nav class="flex items-center gap-7 ml-12">
-    <a
-      *ngFor="let item of items"
-      [routerLink]="item.routerLink"
-      routerLinkActive="text-lime-600 font-semibold"
-      [routerLinkActiveOptions]="{ exact: true }"
-      class="flex items-center gap-2 text-base font-medium text-gray-700 hover:text-lime-600 transition"
-      [ngClass]="{ 'text-lime-600 font-semibold': isActive(item.routerLink) }"
-    >
-      <i [class]="item.icon"></i>
-      <span>{{ item.label }}</span>
-    </a>
-  </nav>
+  <a
+    *ngFor="let item of items"
+    [routerLink]="item.routerLink"
+    routerLinkActive="text-lime-600 font-semibold"
+    [routerLinkActiveOptions]="{ exact: item.routerLink === '/dashboard' }"
+    class="flex items-center gap-2 text-base font-medium text-gray-700 hover:text-lime-600 transition"
+  >
+    <i [class]="item.icon"></i>
+    <span>{{ item.label }}</span>
+  </a>
+</nav>
+
 
   <!-- Spacer -->
   <div class="flex-1"></div>

@@ -1,14 +1,15 @@
+<app-breadcrumb [items]="breadcrumb" />
 <div class="bg-white rounded-xl shadow-sm p-8">
   <div class="flex items-center justify-between mb-4">
     <div>
       <h2 class="!text-3xl font-bold text-black">
-        {{ editingId ? 'Editar Pedido' : 'Novo Pedido' }}
+        {{ editingId ? 'Edit Order' : 'New Order' }}
         <span *ngIf="editingId && orderForm.value.order_number" class="text-gray-400 ml-2"
           >#{{ orderForm.value.order_number }}</span
         >
       </h2>
       <p class="text-gray-500">
-        {{ editingId ? 'Editando um pedido existente.' : 'Aqui você pode criar um novo pedido.' }}
+        {{ editingId ? 'Editing an existing order.' : 'Here you can create a New Order.' }}
       </p>
     </div>
   </div>
@@ -16,114 +17,19 @@
   <p-divider />
 
   <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
-    <!-- Linha 1: selects -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div>
-        <label class="font-medium text-gray-700 mb-2 block">Booster</label>
-        <p-select
-          styleClass="w-full"
-          [options]="boosters"
-          formControlName="booster"
-          placeholder="Selecione um booster"
-        ></p-select>
-        <small
-          *ngIf="
-            orderForm.get('booster')?.invalid && (orderForm.get('booster')?.dirty || orderForm.get('booster')?.touched)
-          "
-          class="text-red-500"
-        >
-          Selecione um booster.
-        </small>
-      </div>
-      <div>
-        <label class="font-medium text-gray-700 mb-2 block">Fornecedor</label>
-        <p-select
-          styleClass="w-full"
-          [options]="suppliers"
-          formControlName="supplier"
-          placeholder="Selecione um fornecedor"
-        ></p-select>
-        <small
-          *ngIf="
-            orderForm.get('supplier')?.invalid &&
-            (orderForm.get('supplier')?.dirty || orderForm.get('supplier')?.touched)
-          "
-          class="text-red-500"
-        >
-          Selecione um fornecedor.
-        </small>
-      </div>
-      <div>
-        <label class="font-medium text-gray-700 mb-2 block">Tipo de Serviço</label>
-        <p-select
-          styleClass="w-full"
-          [options]="serviceTypes"
-          formControlName="service_type"
-          placeholder="Selecione um tipo de serviço"
-        ></p-select>
-        <small
-          *ngIf="
-            orderForm.get('service_type')?.invalid &&
-            (orderForm.get('service_type')?.dirty || orderForm.get('service_type')?.touched)
-          "
-          class="text-red-500"
-        >
-          Selecione um tipo de serviço.
-        </small>
-      </div>
-      <div>
-        <div *ngIf="typeof (orderForm.get('service_type')?.value ?? '') === 'string' && (orderForm.get('service_type')?.value ?? '').toLowerCase().includes('camuflagem')">
-          <label class="font-medium text-gray-700 mb-2 block">Qtd. Armas</label>
-          <p-inputnumber
-            formControlName="weapon_quantity"
-            [min]="1"
-            [max]="33"
-            [showButtons]="true"
-            styleClass="w-full"
-            placeholder="Ex: 1"
-          ></p-inputnumber>
-          <small
-            *ngIf="
-              orderForm.get('weapon_quantity')?.errors?.['required'] &&
-              (orderForm.get('weapon_quantity')?.dirty || orderForm.get('weapon_quantity')?.touched)
-            "
-            class="text-red-500"
-          >
-            Informe a quantidade de armas.
-          </small>
-          <small
-            *ngIf="
-              orderForm.get('weapon_quantity')?.errors?.['min'] &&
-              (orderForm.get('weapon_quantity')?.dirty || orderForm.get('weapon_quantity')?.touched)
-            "
-            class="text-red-500"
-          >
-            Mínimo 1 arma.
-          </small>
-          <small
-            *ngIf="
-              orderForm.get('weapon_quantity')?.errors?.['max'] &&
-              (orderForm.get('weapon_quantity')?.dirty || orderForm.get('weapon_quantity')?.touched)
-            "
-            class="text-red-500"
-          >
-            Máximo 33 armas.
-          </small>
-        </div>
-      </div>
-    </div>
-
-    <!-- Linha 2: dados da conta -->
+    <!-- Row 2: account data -->
     <div>
-      <h3 class="text-lg font-semibold text-gray-800 mb-2">Dados da Conta</h3>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">Account Data</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="flex flex-col">
-          <label class="font-medium text-gray-700 mb-2 block">E-mail da Conta</label>
+          <label class="font-medium text-gray-700 mb-2 block">
+            Account Email <span class="text-red-500">*</span>
+          </label>
           <input
             styleClass="w-full"
             pInputText
             formControlName="account_email"
-            placeholder="Digite seu e-mail"
+            placeholder="Enter your email"
             type="email"
           />
           <small
@@ -133,7 +39,7 @@
             "
             class="text-red-500"
           >
-            O e-mail é obrigatório.
+            Email is required.
           </small>
           <small
             *ngIf="
@@ -142,16 +48,18 @@
             "
             class="text-red-500"
           >
-            E-mail inválido.
+            Invalid email.
           </small>
         </div>
         <div class="flex flex-col">
-          <label class="font-medium text-gray-700 mb-2 block">Senha da Conta</label>
+          <label class="font-medium text-gray-700 mb-2 block">
+            Account Password <span class="text-red-500">*</span>
+          </label>
           <input
             styleClass="w-full"
             pInputText
             formControlName="account_password"
-            placeholder="Digite sua senha"
+            placeholder="Enter your password"
             type="text"
           />
           <small
@@ -161,35 +69,26 @@
             "
             class="text-red-500"
           >
-            A senha é obrigatória.
+            Password is required.
           </small>
         </div>
         <div class="flex flex-col">
-          <label class="font-medium text-gray-700 mb-2 block">Códigos de Backup</label>
+          <label class="font-medium text-gray-700 mb-2 block"> Backup Codes </label>
           <input
             styleClass="w-full"
             pInputText
             formControlName="recovery_code"
-            placeholder="Digite o código de backup"
+            placeholder="Enter the backup code"
             type="text"
           />
-          <small
-            *ngIf="
-              orderForm.get('recovery_code')?.errors?.['required'] &&
-              (orderForm.get('recovery_code')?.dirty || orderForm.get('recovery_code')?.touched)
-            "
-            class="text-red-500"
-          >
-            O código de recuperação é obrigatório.
-          </small>
         </div>
         <div class="flex flex-col">
-          <label class="font-medium text-gray-700 mb-2 block">E-mail de recuperação</label>
+          <label class="font-medium text-gray-700 mb-2 block"> Recovery Email </label>
           <input
             styleClass="w-full"
             pInputText
             formControlName="recovery_email"
-            placeholder="Digite o e-mail de recuperação"
+            placeholder="Enter the recovery email"
             type="text"
           />
           <small
@@ -199,16 +98,16 @@
             "
             class="text-red-500"
           >
-            O e-mail de recuperação é obrigatório.
+            Recovery email is required.
           </small>
         </div>
         <div class="flex flex-col">
-          <label class="font-medium text-gray-700 mb-2 block">Plataforma</label>
+          <label class="font-medium text-gray-700 mb-2 block"> Platform <span class="text-red-500">*</span> </label>
           <p-select
             styleClass="w-full"
             [options]="platforms"
             formControlName="platform"
-            placeholder="Selecione uma plataforma"
+            placeholder="Select a platform"
           ></p-select>
           <small
             *ngIf="
@@ -217,21 +116,104 @@
             "
             class="text-red-500"
           >
-            Selecione uma plataforma.
+            Please select a platform.
           </small>
         </div>
       </div>
     </div>
 
-    <!-- Linha 3: datas -->
+    <!-- Row 1: selects -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block"> Booster <span class="text-red-500">*</span> </label>
+        <p-select
+          styleClass="w-full"
+          [options]="boosters"
+          formControlName="booster"
+          placeholder="Select a booster"
+        ></p-select>
+        <small
+          *ngIf="
+            orderForm.get('booster')?.invalid && (orderForm.get('booster')?.dirty || orderForm.get('booster')?.touched)
+          "
+          class="text-red-500"
+        >
+          Please select a booster.
+        </small>
+      </div>
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block"> Supplier <span class="text-red-500">*</span> </label>
+        <p-select
+          styleClass="w-full"
+          [options]="suppliers"
+          formControlName="supplier"
+          placeholder="Select a supplier"
+        ></p-select>
+        <small
+          *ngIf="
+            orderForm.get('supplier')?.invalid &&
+            (orderForm.get('supplier')?.dirty || orderForm.get('supplier')?.touched)
+          "
+          class="text-red-500"
+        >
+          Please select a supplier.
+        </small>
+      </div>
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block"> Service Type <span class="text-red-500">*</span> </label>
+        <p-select
+          styleClass="w-full"
+          [options]="serviceTypes"
+          formControlName="service_type"
+          placeholder="Select a service type"
+        ></p-select>
+        <small
+          *ngIf="
+            orderForm.get('service_type')?.invalid &&
+            (orderForm.get('service_type')?.dirty || orderForm.get('service_type')?.touched)
+          "
+          class="text-red-500"
+        >
+          Please select a service type.
+        </small>
+      </div>
+      <div>
+        <div
+          *ngIf="
+            typeof (orderForm.get('service_type')?.value ?? '') === 'string' &&
+            (orderForm.get('service_type')?.value ?? '').toLowerCase().includes('camuflagem')
+          "
+        >
+          <label class="font-medium text-gray-700 mb-2 block"> Weapon Quantity </label>
+          <p-inputnumber
+            formControlName="weapon_quantity"
+            [max]="58"
+            [showButtons]="true"
+            styleClass="w-full"
+            placeholder="Ex: 1"
+          ></p-inputnumber>
+          <small
+            *ngIf="
+              orderForm.get('weapon_quantity')?.errors?.['max'] &&
+              (orderForm.get('weapon_quantity')?.dirty || orderForm.get('weapon_quantity')?.touched)
+            "
+            class="text-red-500"
+          >
+            Maximum 58 weapons.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: dates -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <label class="font-medium text-gray-700 mb-2 block">Data de Início</label>
+        <label class="font-medium text-gray-700 mb-2 block"> Start Date <span class="text-red-500">*</span> </label>
         <p-datepicker
           styleClass="w-full"
           formControlName="start_date"
           dateFormat="dd/mm/yy"
-          placeholder="Selecione a data de início"
+          placeholder="Select start date"
           [showIcon]="true"
           [showButtonBar]="true"
           [selectOtherMonths]="true"
@@ -244,7 +226,7 @@
           "
           class="text-red-500"
         >
-          A data de início é obrigatória.
+          Start date is required.
         </small>
         <small
           *ngIf="
@@ -253,7 +235,7 @@
           "
           class="text-red-500"
         >
-          A data de início deve ser maior ou igual à data atual.
+          Start date must be greater than or equal to today.
         </small>
         <small
           *ngIf="
@@ -262,16 +244,16 @@
           "
           class="text-red-500"
         >
-          A data de início não pode ser maior que a data de fim.
+          Start date cannot be after end date.
         </small>
       </div>
       <div>
-        <label class="font-medium text-gray-700 mb-2 block">Data de Fim</label>
+        <label class="font-medium text-gray-700 mb-2 block"> End Date </label>
         <p-datepicker
           styleClass="w-full"
           formControlName="end_date"
           dateFormat="dd/mm/yy"
-          placeholder="Selecione a data de fim"
+          placeholder="Select end date"
           [showIcon]="true"
           [showButtonBar]="true"
           [selectOtherMonths]="true"
@@ -279,30 +261,21 @@
         ></p-datepicker>
         <small
           *ngIf="
-            orderForm.get('end_date')?.errors?.['required'] &&
-            (orderForm.get('end_date')?.dirty || orderForm.get('end_date')?.touched)
-          "
-          class="text-red-500"
-        >
-          A data de fim é obrigatória.
-        </small>
-        <small
-          *ngIf="
             orderForm.get('end_date')?.errors?.['minDate'] &&
             (orderForm.get('end_date')?.dirty || orderForm.get('end_date')?.touched)
           "
           class="text-red-500"
         >
-          A data de fim deve ser maior ou igual à data de início.
+          End date must be greater than or equal to start date.
         </small>
       </div>
       <div>
-        <label class="font-medium text-gray-700 mb-2 block">Status</label>
+        <label class="font-medium text-gray-700 mb-2 block"> Status <span class="text-red-500">*</span> </label>
         <p-select
           styleClass="w-full"
           [options]="statusList"
           formControlName="status"
-          placeholder="Selecione um status"
+          placeholder="Select a status"
         ></p-select>
         <small
           *ngIf="
@@ -310,89 +283,98 @@
           "
           class="text-red-500"
         >
-          Selecione um status.
+          Please select a status.
         </small>
       </div>
     </div>
 
-    <!-- Linha 5: valores -->
+    <!-- Row 5: values -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label class="font-medium text-gray-700 mb-2 block" for="total-value">Valor Total</label>
+        <label class="font-medium text-gray-700 mb-2 block" for="total-value">
+          Total Value <span class="text-red-500">*</span>
+        </label>
         <p-inputnumber
           styleClass="w-full"
           formControlName="total_value"
           inputId="total-value"
-          placeholder="R$ 0,00"
+          placeholder="US$ 0.00"
           mode="currency"
-          currency="BRL"
-          locale="pt-BR"
+          currency="USD"
+          locale="en-US"
           [min]="0"
         />
-        <small *ngIf="total_value.errors?.['required'] && (total_value.dirty || total_value.touched)" class="text-red-500">
-          Valor obrigatório.
+        <small
+          *ngIf="total_value.errors?.['required'] && (total_value.dirty || total_value.touched)"
+          class="text-red-500"
+        >
+          Value is required.
         </small>
         <small *ngIf="total_value.errors?.['min'] && (total_value.dirty || total_value.touched)" class="text-red-500">
-          Valor deve ser maior ou igual a 0.
+          Value must be greater than or equal to 0.
         </small>
         <small *ngIf="total_value.errors?.['max'] && (total_value.dirty || total_value.touched)" class="text-red-500">
-          Valor deve ser menor ou igual a 999999.99.
+          Value must be less than or equal to 999999.99.
         </small>
       </div>
+      <!-- Booster Value -->
       <div>
-        <label class="font-medium text-gray-700 mb-2 block" for="booster-value">Valor do Booster</label>
+        <label class="font-medium text-gray-700 mb-2 block" for="booster-value">
+          Booster Value <span class="text-red-500">*</span>
+        </label>
         <p-inputnumber
           styleClass="w-full"
           formControlName="booster_value"
           inputId="booster-value"
-          placeholder="R$ 0,00"
+          placeholder="US$ 0.00"
           mode="currency"
-          currency="BRL"
-          locale="pt-BR"
+          currency="USD"
+          locale="en-US"
           [min]="0"
         />
         <small
           *ngIf="booster_value.errors?.['required'] && (booster_value.dirty || booster_value.touched)"
           class="text-red-500"
         >
-          Valor obrigatório.
+          Value is required.
         </small>
         <small
           *ngIf="booster_value.errors?.['min'] && (booster_value.dirty || booster_value.touched)"
           class="text-red-500"
         >
-          Valor deve ser maior ou igual a 0.
+          Value must be greater than or equal to 0.
         </small>
         <small
           *ngIf="booster_value.errors?.['max'] && (booster_value.dirty || booster_value.touched)"
           class="text-red-500"
         >
-          Valor deve ser menor ou igual a 999999.99.
+          Value must be less than or equal to 999999.99.
         </small>
       </div>
     </div>
 
-    <!-- Observação -->
+    <!-- Observation -->
     <div>
-      <label class="font-medium text-gray-700 mb-2 block">Descrição / Observação</label>
+      <label class="font-medium text-gray-700 mb-2 block">Description / Notes</label>
       <textarea
         rows="5"
         cols="30"
         pTextarea
         formControlName="observation"
+        placeholder="Fill in the service details, platform, order number, etc."
         class="w-full resize-y max-w-full"
       ></textarea>
       <small
         *ngIf="observation.errors?.['maxlength'] && (observation.dirty || observation.touched)"
         class="text-red-500"
       >
-        A observação deve ter no máximo 500 caracteres.
+        Notes must be at most 500 characters.
       </small>
     </div>
 
     <div class="flex justify-center md:justify-end gap-4 mt-2">
-      <p-button label="Cancelar" variant="outlined" severity="secondary" (click)="onCancel()" />
-      <p-button label="Salvar Pedido" icon="pi pi-check" [disabled]="orderForm.invalid" (click)="onSubmit()" />
+      <p-button label="Cancel" variant="outlined" severity="secondary" (click)="onCancel()" />
+      <p-button label="Save Order" icon="pi pi-check" [disabled]="orderForm.invalid" (click)="onSubmit()" />
     </div>
   </form>
 </div>

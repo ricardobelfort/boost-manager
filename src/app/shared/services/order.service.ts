@@ -12,7 +12,7 @@ export class OrderService {
     this.refreshOrders();
   }
 
-  /** Recarrega os pedidos do Supabase */
+  /** Recarrega os Orders do Supabase */
   refreshOrders() {
     from(supabase.from('orders').select('*').order('created_at', { ascending: false })).subscribe(({ data }) => {
       if (data) this.ordersSubject.next(data as Order[]);

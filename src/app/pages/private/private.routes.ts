@@ -5,6 +5,7 @@ export const PRIVATE_ROUTES: Routes = [
   {
     path: '',
     component: DashboardComponent,
+    data: { breadcrumb: 'Dashboard' },
     children: [
       {
         path: 'orders',

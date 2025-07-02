@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { DashboardCardComponent } from '@shared/components/dashboard-card/dashboard-card.component';
 import { Order } from '@shared/models/order.model';
 import { OrderService } from '@shared/services/order.service';
+import { MenuItem } from 'primeng/api';
 import { combineLatest, interval, map, Observable, startWith, switchMap } from 'rxjs';
 
 interface DashboardCard {
@@ -23,14 +23,16 @@ interface DashboardCard {
 })
 export class DashboardComponent {
   private orderService = inject(OrderService);
-  private http = inject(HttpClient);
+  private router = inject(Router);
+
+  items: MenuItem[] | undefined;
+  home: MenuItem | undefined;
 
   orders$: Observable<Order[]> = this.orderService.orders$;
-  dollarRate$: Observable<number> = interval(10 * 60 * 1000) // 10 minutos em ms
-    .pipe(
-      startWith(0),
-      switchMap(() => this.fetchDollarRate())
-    );
+  dollarRate$: Observable<number> = interval(10 * 60 * 1000).pipe(
+    startWith(0),
+    switchMap(() => this.fetchDollarRate())
+  );
 
   cards$: Observable<DashboardCard[]> = combineLatest([this.orders$, this.dollarRate$]).pipe(
     map(([orders, dollarRate]) => {
@@ -38,28 +40,29 @@ export class DashboardComponent {
       const salesValueUSD = salesValue / dollarRate;
       return [
         {
-          title: 'Vendas',
-          value: 'R$ ' + salesValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
-          subtitle: new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }).format(salesValueUSD),
+          title: 'Sales',
+          value: 'U$ ' + salesValue.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+          // subtitle: new Intl.NumberFormat('en-US', {
+          //   style: 'currency',
+          //   currency: 'USD',
+          //   minimumFractionDigits: 2,
+          //   maximumFractionDigits: 2,
+          // }).format(salesValueUSD),
+          subtitle: 'Last 7 days',
           iconClass: 'pi pi-money-bill text-lime-500 !text-3xl',
           valueColor: 'text-lime-500',
         },
         {
-          title: 'Pedidos',
+          title: 'Orders',
           value: orders.length,
-          subtitle: 'Últimos 7 dias',
+          subtitle: 'Last 7 days',
           iconClass: 'pi pi-box text-lime-500 !text-3xl',
           valueColor: 'text-lime-500',
         },
         {
-          title: 'Clientes',
+          title: 'Clients',
           value: 0,
-          subtitle: 'Últimos 7 dias',
+          subtitle: 'Last 7 days',
           iconClass: 'pi pi-users text-lime-500 !text-3xl',
           valueColor: 'text-lime-500',
         },
@@ -67,7 +70,6 @@ export class DashboardComponent {
     })
   );
 
-  // Para buscar a cotação em tempo real:
   ngOnInit() {
     this.dollarRate$ = this.fetchDollarRate();
   }
@@ -92,5 +94,10 @@ export class DashboardComponent {
           observer.complete();
         });
     });
+  }
+
+  get isRoot() {
+    // ajusta conforme seu path
+    return this.router.url === '/dashboard' || this.router.url === '/dashboard/';
   }
 }

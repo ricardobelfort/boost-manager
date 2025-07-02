@@ -1,19 +1,23 @@
-<div class="mt-8">
-  <h2 class="!text-3xl font-bold text-black mb-4">Resumo</h2>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <ng-container *ngIf="cards$ | async as cards">
-      <ng-container *ngFor="let card of cards">
-        <app-dashboard-card
-          [title]="card.title"
-          [value]="card.value"
-          [subtitle]="card.subtitle"
-          [iconClass]="card.iconClass"
-          [valueColor]="card.valueColor"
-        />
+<div class="mt-4">
+  <ng-container *ngIf="isRoot; else childView">
+    <h2 class="!text-3xl font-bold text-black mb-4">Summary</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <ng-container *ngIf="cards$ | async as cards">
+        <ng-container *ngFor="let card of cards">
+          <app-dashboard-card
+            [title]="card.title"
+            [value]="card.value"
+            [subtitle]="card.subtitle"
+            [iconClass]="card.iconClass"
+            [valueColor]="card.valueColor"
+          />
+        </ng-container>
       </ng-container>
-    </ng-container>
-  </div>
-  <div class="mt-10 mb-6">
-    <router-outlet />
-  </div>
+    </div>
+  </ng-container>
+  <ng-template #childView>
+    <div class="mt-6">
+      <router-outlet />
+    </div>
+  </ng-template>
 </div>

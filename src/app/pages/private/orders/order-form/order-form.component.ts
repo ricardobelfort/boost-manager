@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { BreadcrumbComponent, ManualBreadcrumbItem } from '@shared/components/breadcrumb/breadcrumb.component';
 import { Order } from '@shared/models/order.model';
 import { LoadingService } from '@shared/services/loading.service';
 import { OrderService } from '@shared/services/order.service';
@@ -27,6 +28,7 @@ import { of, switchMap, take, tap } from 'rxjs';
     TextareaModule,
     ReactiveFormsModule,
     DividerModule,
+    BreadcrumbComponent,
   ],
   templateUrl: './order-form.component.html',
   styleUrl: './order-form.component.css',
@@ -76,6 +78,11 @@ export class OrderFormComponent {
     { label: 'Battle Net', value: 'Battle Net' },
     { label: 'Xbox', value: 'Xbox' },
   ];
+  breadcrumb: ManualBreadcrumbItem[] = [
+    { label: 'Dashboard', route: '/dashboard' },
+    { label: 'Orders', route: '/dashboard/orders' },
+    { label: 'New Order' }, // ou 'Editar Pedido'
+  ];
 
   ngOnInit() {
     this.editingId = this.route.snapshot.paramMap.get('id') || undefined;
@@ -120,11 +127,11 @@ export class OrderFormComponent {
       supplier: ['', Validators.required],
       account_email: ['', [Validators.required, Validators.email]],
       account_password: ['', Validators.required],
-      recovery_code: ['', Validators.required],
-      recovery_email: ['', [Validators.required, Validators.email]],
+      recovery_code: [''],
+      recovery_email: ['', [Validators.email]],
       platform: ['', Validators.required],
       start_date: ['', Validators.required],
-      end_date: ['', Validators.required],
+      end_date: [''],
       status: ['', Validators.required],
       total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
       booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],

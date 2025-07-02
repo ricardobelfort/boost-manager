@@ -1,15 +1,16 @@
-<div class="bg-white rounded-xl shadow-md p-8">
+<app-breadcrumb [items]="breadcrumb" />
+<div class="bg-white rounded-xl shadow-sm p-8">
   <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
     <div>
-      <h2 class="!text-3xl font-bold text-black">Pedidos</h2>
-      <p class="text-gray-500">Aqui você pode visualizar todos os pedidos realizados.</p>
+      <h2 class="!text-3xl font-bold text-black">Orders</h2>
+      <p class="text-gray-500">Here you can view all orders placed.</p>
     </div>
     <div class="flex gap-2 w-full md:w-auto">
       <p-iconfield>
         <p-inputicon styleClass="pi pi-search" />
-        <input type="text" pInputText [(ngModel)]="search" placeholder="Buscar pedidos..." />
+        <input type="text" pInputText [(ngModel)]="search" placeholder="Search..." />
       </p-iconfield>
-      <p-button label="Novo Pedido" icon="pi pi-plus" [routerLink]="['novo']" />
+      <p-button label="New Order" icon="pi pi-plus" [routerLink]="['new']" />
     </div>
   </div>
 
@@ -22,19 +23,19 @@
     [rowsPerPageOptions]="[10, 20, 50]"
     [responsiveLayout]="'scroll'"
     [showCurrentPageReport]="true"
-    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} pedidos"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Orders"
   >
     <ng-template pTemplate="header">
       <tr>
-        <th>Booster</th>
-        <th>Serviço</th>
-        <th># Pedido</th>
-        <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
-        <th pSortableColumn="start_date">Início <p-sortIcon field="start_date" /></th>
-        <th pSortableColumn="end_date">Término <p-sortIcon field="end_date" /></th>
-        <th pSortableColumn="total_value">Valor Total <p-sortIcon field="total_value" /></th>
-        <th pSortableColumn="booster_value">Valor Booster <p-sortIcon field="booster_value" /></th>
-        <th>Ações</th>
+        <th class="!text-gray-400">Booster</th>
+        <th class="!text-gray-400">Service</th>
+        <th class="!text-gray-400">#Order</th>
+        <th class="!text-gray-400" pSortableColumn="status">Status <p-sortIcon field="status" /></th>
+        <th class="!text-gray-400" pSortableColumn="start_date">Start <p-sortIcon field="start_date" /></th>
+        <th class="!text-gray-400" pSortableColumn="end_date">End <p-sortIcon field="end_date" /></th>
+        <th class="!text-gray-400" pSortableColumn="total_value">Total <p-sortIcon field="total_value" /></th>
+        <th class="!text-gray-400" pSortableColumn="booster_value">Booster Price <p-sortIcon field="booster_value" /></th>
+        <th class="!text-gray-400">Actions</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-order>
@@ -90,11 +91,11 @@
       <tr>
         <td [attr.colspan]="9" class="py-20">
           <div class="flex flex-col items-center justify-center">
-            <div class="rounded-full bg-purple-100 w-20 h-20 flex items-center justify-center mb-4">
-              <i class="pi pi-box text-4xl text-yellow-500"></i>
+            <div class="w-20 h-20 flex items-center justify-center mt-8">
+              <i class="pi pi-box text-yellow-500" style="font-size: 2.5rem"></i>
             </div>
-            <h3 class="font-bold text-xl text-gray-900 mb-1">Ainda não tem pedidos</h3>
-            <p class="text-gray-500 text-base">Aqui é onde você visualizará e gerenciará os pedidos.</p>
+            <h3 class="font-bold text-xl text-gray-900 mb-1">No orders yet</h3>
+            <p class="text-gray-500 text-base mb-8">This is where you will view and manage Orders.</p>
           </div>
         </td>
       </tr>
@@ -104,7 +105,7 @@
   <p-confirmDialog></p-confirmDialog>
 </div>
 
-<!-- FORMULÁRIO DE NOVO PEDIDO (modal ou inline) -->
+<!-- FORMULÁRIO DE New Order (modal ou inline) -->
 <app-order-form *ngIf="showOrderForm" (close)="closeOrderForm()" />
 
 <p-dialog

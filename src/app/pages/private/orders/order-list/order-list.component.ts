@@ -15,6 +15,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 
+import { BreadcrumbComponent, ManualBreadcrumbItem } from '@shared/components/breadcrumb/breadcrumb.component';
 import { OrderFormComponent } from '../order-form/order-form.component';
 
 @Component({
@@ -33,6 +34,7 @@ import { OrderFormComponent } from '../order-form/order-form.component';
     InputIcon,
     IconField,
     DialogModule,
+    BreadcrumbComponent,
   ],
   templateUrl: './order-list.component.html',
   styleUrl: './order-list.component.css',
@@ -45,6 +47,8 @@ export class OrderListComponent implements OnInit {
   editingOrder: Order | null = null;
   viewDialogVisible = false;
   orderToView: Order | null = null;
+
+  breadcrumb: ManualBreadcrumbItem[] = [{ label: 'Dashboard', route: '/dashboard' }, { label: 'Orders' }];
 
   private orderService = inject(OrderService);
   private confirmationService = inject(ConfirmationService);

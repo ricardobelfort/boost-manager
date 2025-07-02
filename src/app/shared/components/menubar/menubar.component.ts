@@ -16,12 +16,12 @@ import { OverlayBadgeModule } from 'primeng/overlaybadge';
 })
 export class MenubarComponent {
   items = [
-    { label: 'Home', icon: 'pi pi-th-large', routerLink: '/dashboard' },
-    { label: 'Pedidos', icon: 'pi pi-box', routerLink: '/dashboard/orders' },
-    { label: 'Fornecedores', icon: 'pi pi-inbox', routerLink: '/dashboard/suppliers' },
-    { label: 'Relatórios', icon: 'pi pi-chart-line', routerLink: '/dashboard/reports' },
+    { label: 'Dashboard', icon: 'pi pi-th-large', routerLink: '/dashboard' },
+    { label: 'Orders', icon: 'pi pi-box', routerLink: '/dashboard/orders' },
+    { label: 'Suppliers', icon: 'pi pi-inbox', routerLink: '/dashboard/suppliers' },
+    { label: 'Reports', icon: 'pi pi-chart-line', routerLink: '/dashboard/reports' },
     // Administração visível só para admin
-    { label: 'Administração', icon: 'pi pi-lock', routerLink: '/admin', adminOnly: true },
+    { label: 'Settings', icon: 'pi pi-lock', routerLink: '/admin', adminOnly: true },
   ];
   userName = '';
   userRole = '';

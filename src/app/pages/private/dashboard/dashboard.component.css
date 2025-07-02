@@ -1,0 +1,4 @@
+:host ::ng-deep .p-breadcrumb {
+  background: transparent;
+  margin-bottom: 2rem;
+}
