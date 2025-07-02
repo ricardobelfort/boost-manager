@@ -35,7 +35,7 @@ export class RecoveryComponent {
       this.messageService.add({
         severity: 'error',
         summary: 'Erro',
-        detail: 'Informe um e-mail válido.',
+        detail: 'Informe um Email válido.',
       });
       return;
     }
@@ -47,7 +47,7 @@ export class RecoveryComponent {
         this.messageService.add({
           severity: 'success',
           summary: 'Sucesso',
-          detail: 'Verifique seu e-mail para redefinir sua senha.',
+          detail: 'Verifique Your email para redefinir Your password.',
         });
         this.router.navigate(['/auth/login']);
       },
@@ -57,7 +57,7 @@ export class RecoveryComponent {
           summary: 'Erro',
           detail: err?.message || 'Erro ao solicitar recuperação. Tente novamente.',
         });
-      }
+      },
     });
   }
 

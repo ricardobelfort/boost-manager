@@ -64,7 +64,7 @@ export class SignupComponent {
         this.messageService.add({
           severity: 'success',
           summary: 'Sucesso',
-          detail: 'Cadastro realizado! Verifique seu e-mail para confirmar sua conta.',
+          detail: 'Cadastro realizado! Verifique Your email para confirmar sua conta.',
         });
         this.router.navigate(['/auth/login']);
       },

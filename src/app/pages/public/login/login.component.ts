@@ -78,7 +78,7 @@ export class LoginComponent implements OnInit {
           this.messageService.add({
             severity: 'error',
             summary: 'Erro',
-            detail: response.error.message || 'E-mail ou senha inválidos.',
+            detail: response.error.message || 'Email ou senha inválidos.',
           });
           return;
         }
