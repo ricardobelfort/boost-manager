@@ -1,14 +1,12 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '@shared/services/auth.service';
 import { MessageService } from 'primeng/api';
 import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const messageService = inject(MessageService);
-  const authService = inject(AuthService);
   const router = inject(Router);
 
   return next(req).pipe(

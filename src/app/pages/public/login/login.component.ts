@@ -10,6 +10,7 @@ import { DividerModule } from 'primeng/divider';
 import { IftaLabelModule } from 'primeng/iftalabel';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { supabase } from 'supabase.client';
 
 @Component({
   selector: 'app-login',
@@ -60,12 +61,12 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.loginForm.invalid) {
       this.messageService.add({
         severity: 'error',
-        summary: 'Erro',
-        detail: 'Por favor, preencha todos os campos corretamente.',
+        summary: 'Error',
+        detail: 'Please fill in all fields correctly.',
       });
       return;
     }
@@ -73,12 +74,12 @@ export class LoginComponent implements OnInit {
     const { email, password, rememberMe } = this.loginForm.value;
 
     this.auth.signIn(email!, password!, rememberMe ?? false).subscribe({
-      next: (response) => {
+      next: async (response) => {
         if (response.error) {
           this.messageService.add({
             severity: 'error',
-            summary: 'Erro',
-            detail: response.error.message || 'Email ou senha inválidos.',
+            summary: 'Error',
+            detail: response.error.message || 'Invalid email or password.',
           });
           return;
         }
@@ -86,24 +87,69 @@ export class LoginComponent implements OnInit {
         if (!response.data?.session) {
           this.messageService.add({
             severity: 'error',
-            summary: 'Erro',
-            detail: 'Sessão não iniciada. Tente novamente.',
+            summary: 'Error',
+            detail: 'Session not started. Please try again.',
           });
           return;
         }
 
+        // Here's the important change!
+        const user = response.data.session.user;
+
+        // Fetch the profile of the logged in user
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id, name, email, role, tenant_id')
+          .eq('id', user.id)
+          .single();
+
+        // If the profile does not exist, create the tenant and the profile!
+        if (!profile) {
+          // Retrieve the name saved in localStorage during signup (can be null/undefined, handle it!)
+          const companyName = localStorage.getItem('pendingCompanyName') || 'My Company';
+
+          try {
+            await this.auth.createTenantAndProfile(companyName, email ?? '', user.id);
+
+            // Clear localStorage after creating!
+            localStorage.removeItem('pendingCompanyName');
+
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Welcome!',
+              detail: `Company created and account linked successfully!`,
+            });
+          } catch (err) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Error creating profile/tenant. Contact support.',
+            });
+            return;
+          }
+        }
+
+        // If profile already exists OR just created, follow normal flow
+        // (Optional: reload profile/tenant info here if you want!)
+        await this.auth.loadUserProfileAndTenant();
+
+        // Save tenant_id if needed
+        if (profile?.tenant_id) {
+          localStorage.setItem('tenant_id', profile.tenant_id);
+        }
+
         this.messageService.add({
           severity: 'success',
-          summary: 'Sucesso',
-          detail: `Bem-vindo(a), ${email}!`,
+          summary: 'Success',
+          detail: `Welcome, ${email}!`,
         });
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.messageService.add({
           severity: 'error',
-          summary: 'Erro',
-          detail: err?.message || 'Erro de comunicação com o servidor.',
+          summary: 'Error',
+          detail: err?.message || 'Error communicating with the server.',
         });
       },
     });

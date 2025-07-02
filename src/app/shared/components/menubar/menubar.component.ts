@@ -27,7 +27,6 @@ export class MenubarComponent {
   userRole = '';
   userAvatarUrl = 'assets/images/avatar-placeholder.png';
   dropdownOpen = false;
-  showUpgrade = true;
 
   constructor(
     private auth: AuthService,

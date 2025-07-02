@@ -28,6 +28,7 @@ export class SignupComponent {
   passwordStrengthWidth = '0%';
 
   signupForm = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.email, Validators.required, Validators.minLength(5)]],
     password: [
       '',
@@ -42,43 +43,46 @@ export class SignupComponent {
 
   onSubmit() {
     if (this.signupForm.invalid) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail: 'Por favor, preencha todos os campos corretamente.',
-      });
+      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Please fill in all fields correctly.' });
       return;
     }
 
-    const { email, password, confirmPassword } = this.signupForm.value;
+    const { name, email, password, confirmPassword } = this.signupForm.value;
 
     if (password !== confirmPassword) {
       this.signupForm.get('confirmPassword')?.setErrors({ notMatching: true });
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail: 'As senhas não coincidem.',
-      });
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Passwords do not match.' });
       return;
     }
 
+    // AuthService para Multi-Tenant:
+    // 1. signUp apenas cria usuário no Auth (e-mail/senha)
+    // 2. Após o primeiro login (com e-mail confirmado), cria tenant/profile
+    // 3. Cada usuário está sempre associado a um tenant
+
+    localStorage.setItem('pendingCompanyName', name ?? '');
+
     this.auth.signUp(email!, password!).subscribe({
-      next: (res) => {
+      next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Sucesso',
-          detail: 'Cadastro realizado! Verifique Your email para confirmar sua conta.',
+          summary: 'Success',
+          detail: 'Registration completed! Check your email to confirm your account.',
         });
         this.router.navigate(['/auth/login']);
       },
       error: (err) => {
         this.messageService.add({
           severity: 'error',
-          summary: 'Erro',
-          detail: err?.message || 'Erro ao cadastrar. Tente novamente.',
+          summary: 'Error',
+          detail: err?.message || 'Error registering. Please try again.',
         });
       },
     });
+  }
+
+  get name() {
+    return this.signupForm.get('name');
   }
 
   get email() {

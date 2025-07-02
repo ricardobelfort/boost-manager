@@ -3,9 +3,29 @@
     <div class="flex flex-col items-center mb-1">
       <img src="assets/images/boost.png" width="64" class="mb-4" alt="" />
       <h1 class="text-2xl font-bold">Boost Manager</h1>
-      <p class="text-xl font-normal text-gray-700 text-center mb-8">Crie sua conta</p>
+      <p class="text-xl font-normal text-gray-700 text-center mb-8">Create Account</p>
     </div>
     <form [formGroup]="signupForm" class="w-full min-w-full flex flex-col gap-4">
+      <div>
+        <label class="block text-base text-gray-700">
+          <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">Company name</span>
+          <input
+            class="w-full mt-1 border border-gray-300 px-3 py-3 rounded-sm shadow-xs focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500"
+            type="text"
+            formControlName="name"
+            placeholder="Your company or project name"
+            autocomplete="off"
+            required
+          />
+        </label>
+        <div
+          *ngIf="name?.invalid && (name?.dirty || name?.touched)"
+          class="text-sm text-red-500 mt-1"
+        >
+          <div *ngIf="name?.hasError('required')">Company name is required.</div>
+          <div *ngIf="name?.hasError('minlength')">Minimum 2 characters.</div>
+        </div>
+      </div>
       <div>
         <label class="block text-base text-gray-700">
           <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">Email</span>
@@ -123,7 +143,7 @@
           <b class="font-normal text-sm text-gray-400">Or</b>
         </p-divider>
         <p class="text-base font-normal text-gray-700 text-center">
-          Já tem conta?
+          Already have an account?
           <a routerLink="/auth/login" class="font-bold text-lime-500 hover:text-lime-600">Sign In</a>
         </p>
       </div>

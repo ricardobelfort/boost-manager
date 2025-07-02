@@ -1,24 +1,22 @@
-<header class="w-full bg-white flex items-center px-8 py-6 shadow-none sticky top-0 z-30">
+<header class="w-full bg-white flex items-center px-4 py-2 shadow-none sticky top-0 z-30">
   <!-- Logo -->
   <div class="flex items-center">
-    <img src="assets/images/boost.png" alt="Logo" class="w-10 h-10 rounded-full" />
-    <span class="ml-2 text-2xl font-bold text-lime-600">Boost Manager</span>
+    <img src="assets/images/boost.png" width="30" alt="Logo" />
   </div>
 
   <!-- Navegação -->
-  <nav class="flex items-center gap-7 ml-12">
-  <a
-    *ngFor="let item of items"
-    [routerLink]="item.routerLink"
-    routerLinkActive="text-lime-600 font-semibold"
-    [routerLinkActiveOptions]="{ exact: item.routerLink === '/dashboard' }"
-    class="flex items-center gap-2 text-base font-medium text-gray-700 hover:text-lime-600 transition"
-  >
-    <i [class]="item.icon"></i>
-    <span>{{ item.label }}</span>
-  </a>
-</nav>
-
+  <nav class="flex items-center gap-7 ml-5">
+    <a
+      *ngFor="let item of items"
+      [routerLink]="item.routerLink"
+      routerLinkActive="text-lime-600 font-semibold"
+      [routerLinkActiveOptions]="{ exact: item.routerLink === '/dashboard' }"
+      class="flex items-center gap-2 text-base font-medium text-gray-700 hover:text-lime-600 transition"
+    >
+      <i [class]="item.icon"></i>
+      <span>{{ item.label }}</span>
+    </a>
+  </nav>
 
   <!-- Spacer -->
   <div class="flex-1"></div>
@@ -26,8 +24,11 @@
   <!-- Usuário e Avatar -->
   <div class="relative group">
     <div class="flex items-center cursor-pointer" (click)="toggleDropdown()" tabindex="0">
-      <p-button *ngIf="showUpgrade" label="Upgrade to PRO" [rounded]="true" severity="contrast" />
-      <img [src]="userAvatarUrl" class="w-10 h-10 ml-10 mr-2 rounded-full border border-gray-300 object-cover" alt="Avatar" />
+      <img
+        [src]="userAvatarUrl"
+        class="w-10 h-10 ml-10 mr-2 rounded-full border border-gray-300 object-cover"
+        alt="Avatar"
+      />
       <i class="pi pi-chevron-down text-gray-500 text-xs"></i>
     </div>
     <!-- Dropdown de perfil -->
@@ -55,7 +56,10 @@
         >
           <i class="pi pi-cog mr-2"></i> Settings
         </button>
-        <button class="flex items-center text-left px-4 py-2 hover:bg-gray-50 text-red-600 text-sm cursor-pointer" (click)="logout()">
+        <button
+          class="flex items-center text-left px-4 py-2 hover:bg-gray-50 text-red-600 text-sm cursor-pointer"
+          (click)="logout()"
+        >
           <i class="pi pi-sign-out mr-2"></i> Sign out
         </button>
       </div>

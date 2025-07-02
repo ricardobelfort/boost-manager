@@ -1,12 +1,15 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import type { Session, User } from '@supabase/supabase-js';
-import { BehaviorSubject, from, Observable, switchMap } from 'rxjs';
+import { MessageService } from 'primeng/api';
+import { BehaviorSubject, from, Observable } from 'rxjs';
 import { supabase } from 'supabase.client';
 import { Md5 } from 'ts-md5';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private sessionSubject = new BehaviorSubject<Session | null>(null);
+  private tenantId: string | null = null;
+  private readonly messageService = inject(MessageService);
 
   constructor() {
     // Restaura a sessão ao iniciar o app
@@ -33,6 +36,16 @@ export class AuthService {
     return this.sessionSubject.value;
   }
 
+  /** Getter para o tenantId */
+  get currentTenantId(): string | null {
+    return this.tenantId;
+  }
+
+  /** Setter público se quiser atualizar manualmente (opcional) */
+  set currentTenantId(value: string | null) {
+    this.tenantId = value;
+  }
+
   /** Efetua login com persistência de sessão */
   signIn(email: string, password: string, rememberMe: boolean): Observable<any> {
     // Opção nativa do Supabase
@@ -46,6 +59,15 @@ export class AuthService {
         } as any, // "as any" pois typescript v2 ainda não aceita string, mas funciona
       })
     );
+  }
+
+  async loadUserProfileAndTenant() {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user?.user?.id) return null;
+    const { data: profile } = await supabase.from('profiles').select('*, tenant_id').eq('id', user.user.id).single();
+    this.tenantId = profile?.tenant_id ?? null;
+    console.log('[DEBUG] tenantId carregado:', this.tenantId);
+    return profile;
   }
 
   /** Desloga o usuário */
@@ -70,26 +92,49 @@ export class AuthService {
     });
   }
 
+  // auth.service.ts
+  // ...
   signUp(email: string, password: string) {
-    return from(supabase.auth.signUp({ email, password })).pipe(
-      switchMap(async (result: any) => {
-        if (result.error || !result.data?.user) {
-          throw result.error || new Error('Erro ao cadastrar usuário');
-        }
-        // Cria o profile no banco após sucesso no Auth
-        const { data, error } = await supabase.from('profiles').insert([
-          {
-            id: result.data.user.id,
-            email: email,
-            role: 'client', // padrão
-          },
-        ]);
-        if (error) {
-          throw error;
-        }
-        return result;
-      })
-    );
+    // Só registra o usuário no Auth
+    return from(supabase.auth.signUp({ email, password }));
+  }
+
+  // Cria tenant e profile DEPOIS do login (quando session ativa)
+  async createTenantAndProfile(name: string, email: string, userId: string) {
+    // Cria o tenant
+    const { data: tenantData, error: tenantError } = await supabase
+      .from('tenants')
+      .insert([{ name }])
+      .select()
+      .single();
+
+    if (tenantError) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: tenantError.message || 'Tenant creation error.',
+      });
+      throw tenantError;
+    }
+
+    // Cria o profile vinculado ao tenant
+    const { data, error: profileError } = await supabase.from('profiles').insert([
+      {
+        id: userId,
+        email,
+        role: 'owner',
+        tenant_id: tenantData.id,
+      },
+    ]);
+    if (profileError) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: profileError.message || 'Tenant creation error.',
+      });
+      throw profileError;
+    }
+    return { tenant: tenantData, profile: data };
   }
 
   async getUserProfile() {

@@ -7,11 +7,26 @@ export class AuthGuard implements CanActivate {
   constructor(private router: Router) {}
 
   async canActivate(): Promise<boolean> {
-    const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      return true;
+    // Checa se há session no localStorage
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      this.router.navigate(['/auth/login']);
+      return false;
     }
-    this.router.navigate(['/auth/login']);
-    return false;
+
+    // Faz uma chamada para garantir que o token é válido e usuário existe
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error || !data?.user) {
+      // Remove local session, força logout!
+      await supabase.auth.signOut();
+      this.router.navigate(['/auth/login']);
+      return false;
+    }
+
+    return true;
   }
 }
