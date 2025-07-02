@@ -34,7 +34,9 @@
         <th class="!text-gray-400" pSortableColumn="start_date">Start <p-sortIcon field="start_date" /></th>
         <th class="!text-gray-400" pSortableColumn="end_date">End <p-sortIcon field="end_date" /></th>
         <th class="!text-gray-400" pSortableColumn="total_value">Total <p-sortIcon field="total_value" /></th>
-        <th class="!text-gray-400" pSortableColumn="booster_value">Booster Price <p-sortIcon field="booster_value" /></th>
+        <th class="!text-gray-400" pSortableColumn="booster_value">
+          Booster Price <p-sortIcon field="booster_value" />
+        </th>
         <th class="!text-gray-400">Actions</th>
       </tr>
     </ng-template>
@@ -65,6 +67,8 @@
             [rounded]="true"
             [text]="true"
             severity="secondary"
+            pTooltip="Details"
+            tooltipPosition="top"
             (click)="openViewDialog(order)"
             title="Visualizar"
           />
@@ -73,6 +77,8 @@
             [rounded]="true"
             [text]="true"
             severity="success"
+            pTooltip="Edit"
+            tooltipPosition="top"
             (click)="editOrder(order)"
             title="Editar"
           />
@@ -81,6 +87,8 @@
             [rounded]="true"
             [text]="true"
             severity="danger"
+            pTooltip="Remove"
+            tooltipPosition="top"
             (click)="confirmDelete(order)"
             title="Excluir"
           />
@@ -118,17 +126,17 @@
 >
   <ng-container *ngIf="orderToView">
     <div class="flex flex-col gap-3">
-      <div><b>Número do pedido:</b> #{{ orderToView.order_number }}</div>
+      <div><b>Order number:</b> #{{ orderToView.order_number }}</div>
       <div><b>Booster:</b> {{ orderToView.booster }}</div>
-      <div><b>Tipo de serviço:</b> {{ orderToView.service_type }}</div>
-      <div *ngIf="orderToView.weapon_quantity"><b>Qtd. Armas:</b> {{ orderToView.weapon_quantity }}</div>
-      <div><b>Fornecedor:</b> {{ orderToView.supplier }}</div>
+      <div><b>Service type:</b> {{ orderToView.service_type }}</div>
+      <div *ngIf="orderToView.weapon_quantity"><b>Qty. Weapons:</b> {{ orderToView.weapon_quantity }}</div>
+      <div><b>Supplier:</b> {{ orderToView.supplier }}</div>
       <div><b>Status:</b> {{ orderToView.status }}</div>
-      <div><b>Data início:</b> {{ orderToView.start_date | date: 'dd/MM/yyyy HH:mm' }}</div>
-      <div><b>Data fim:</b> {{ orderToView.end_date | date: 'dd/MM/yyyy HH:mm' }}</div>
-      <div><b>Valor total:</b> R$ {{ orderToView.total_value | number: '1.2-2' }}</div>
-      <div><b>Valor do booster:</b> R$ {{ orderToView.booster_value | number: '1.2-2' }}</div>
-      <div><b>Observação:</b> {{ orderToView.observation }}</div>
+      <div><b>Start date:</b> {{ orderToView.start_date | date: 'dd/MM/yyyy HH:mm' }}</div>
+      <div><b>End date:</b> {{ orderToView.end_date | date: 'dd/MM/yyyy HH:mm' }}</div>
+      <div><b>Total value:</b> R$ {{ orderToView.total_value | number: '1.2-2' }}</div>
+      <div><b>Booster value:</b> R$ {{ orderToView.booster_value | number: '1.2-2' }}</div>
+      <div><b>Notes:</b> {{ orderToView.observation }}</div>
     </div>
   </ng-container>
 </p-dialog>

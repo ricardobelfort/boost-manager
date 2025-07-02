@@ -14,6 +14,7 @@ import { InputIcon } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 
 import { BreadcrumbComponent, ManualBreadcrumbItem } from '@shared/components/breadcrumb/breadcrumb.component';
 import { OrderFormComponent } from '../order-form/order-form.component';
@@ -35,6 +36,7 @@ import { OrderFormComponent } from '../order-form/order-form.component';
     IconField,
     DialogModule,
     BreadcrumbComponent,
+    TooltipModule,
   ],
   templateUrl: './order-list.component.html',
   styleUrl: './order-list.component.css',
