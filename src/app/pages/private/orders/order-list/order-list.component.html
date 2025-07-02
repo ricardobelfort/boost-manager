@@ -49,18 +49,18 @@
           <span
             class="px-2 py-1 rounded-lg font-medium"
             [ngClass]="{
-              'bg-yellow-100 text-yellow-800': order.status === 'Aguardando',
+              'bg-yellow-100 text-yellow-800': order.status === 'Awaiting',
               'bg-blue-100 text-blue-800': order.status === 'In progress',
-              'bg-green-100 text-green-800': order.status === 'Concluído',
+              'bg-blue-100 text-red-800': order.status === 'Suspected ban',
+              'bg-green-100 text-green-800': order.status === 'Finished',
             }"
           >
             {{ order.status }}
           </span>
         </td>
-        <td class="text-sm">{{ order.start_date ? (order.start_date | date: 'dd/MM/yy' : '' : 'pt-BR') : '-' }}</td>
-        <td class="text-sm">{{ order.end_date ? (order.end_date | date: 'dd/MM/yy' : '' : 'pt-BR') : '-' }}</td>
-        <td class="text-sm">R$ {{ order.total_value | number: '1.2-2' }}</td>
-        <td class="text-sm">R$ {{ order.booster_value | number: '1.2-2' }}</td>
+        <td class="text-sm">{{ order.total_value | currency: 'USD' : 'symbol' : '1.2-2' : 'en-US' }}</td>
+        <td class="text-sm">{{ order.booster_value | currency: 'USD' : 'symbol' : '1.2-2' : 'en-US' }}</td>
+
         <td>
           <p-button
             icon="pi pi-tag"
