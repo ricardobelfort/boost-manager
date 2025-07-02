@@ -63,14 +63,15 @@ export class OrderFormComponent {
     { label: 'Bot Lobby', value: 'bot lobby' },
   ];
   suppliers = [
-    { label: 'Fornecedor 1', value: 'fornecedor 1' },
-    { label: 'Fornecedor 2', value: 'fornecedor 2' },
-    { label: 'Fornecedor 3', value: 'fornecedor 3' },
+    { label: 'Supplier 1', value: 'Supplier 1' },
+    { label: 'Supplier 2', value: 'Supplier 2' },
+    { label: 'Supplier 3', value: 'Supplier 3' },
   ];
   statusList = [
-    { label: 'Aguardando', value: 'Aguardando' },
-    { label: 'Em andamento', value: 'Em andamento' },
-    { label: 'Concluído', value: 'Concluído' },
+    { label: 'Awaiting', value: 'Awaiting' },
+    { label: 'In progress', value: 'In progress' },
+    { label: 'Suspected ban', value: 'Suspected ban' },
+    { label: 'Finished', value: 'Finished' },
   ];
   platforms = [
     { label: 'PlayStation', value: 'PlayStation' },
