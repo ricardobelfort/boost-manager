@@ -18,6 +18,7 @@ import { of, switchMap, take, tap } from 'rxjs';
 
 @Component({
   selector: 'app-order-form',
+  standalone: true,
   imports: [
     CommonModule,
     InputTextModule,

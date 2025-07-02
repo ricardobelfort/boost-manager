@@ -49,7 +49,7 @@ export class DashboardComponent {
           //   maximumFractionDigits: 2,
           // }).format(salesValueUSD),
           subtitle: 'Last 7 days',
-          iconClass: 'pi pi-money-bill text-lime-500 !text-3xl',
+          iconClass: 'pi pi-dollar text-lime-500 !text-3xl',
           valueColor: 'text-lime-500',
         },
         {
@@ -66,12 +66,23 @@ export class DashboardComponent {
           iconClass: 'pi pi-users text-lime-500 !text-3xl',
           valueColor: 'text-lime-500',
         },
+        {
+          title: 'Payroll Boosters',
+          value: 0,
+          subtitle: 'Last 7 days',
+          iconClass: 'pi pi-tags text-lime-500 !text-3xl',
+          valueColor: 'text-lime-500',
+        },
       ];
     })
   );
 
   ngOnInit() {
     this.dollarRate$ = this.fetchDollarRate();
+  }
+
+  goToPayrollBoosters() {
+    this.router.navigate(['/dashboard/payroll-boosters']);
   }
 
   fetchDollarRate(): Observable<number> {

@@ -1,0 +1,118 @@
+<app-breadcrumb [items]="breadcrumb" />
+<div class="bg-white rounded-xl shadow-sm p-8">
+  <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
+    <div>
+      <h2 class="!text-3xl font-bold text-black">Payroll Boosters</h2>
+      <p class="text-gray-500">Here you can view all payments to service providers.</p>
+    </div>
+    <div class="flex gap-2 w-full md:w-auto">
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input type="text" pInputText [(ngModel)]="search" (ngModelChange)="applyFilter()" placeholder="Search..." />
+      </p-iconfield>
+      <p-select
+        [options]="statusOptions"
+        [(ngModel)]="statusFilter"
+        (ngModelChange)="applyFilter()"
+        placeholder="Status"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="min-w-[130px]"
+        [showClear]="true"
+      />
+    </div>
+  </div>
+
+  <p-divider />
+
+  <p-table
+    [value]="filteredPayrolls"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    [responsiveLayout]="'scroll'"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} payments"
+    sortMode="multiple"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="name" class="!text-gray-400">Name <p-sortIcon field="name" /></th>
+        <th pSortableColumn="email" class="!text-gray-400">E-mail <p-sortIcon field="email" /></th>
+        <th pSortableColumn="value" class="!text-gray-400 text-right">Value (USD) <p-sortIcon field="value" /></th>
+        <th pSortableColumn="status" class="!text-gray-400 text-center">Status <p-sortIcon field="status" /></th>
+        <th pSortableColumn="date" class="!text-gray-400 text-center">Date <p-sortIcon field="date" /></th>
+        <!-- <th class="!text-gray-400 text-center">Actions</th> -->
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td class="text-sm">{{ row.name }}</td>
+        <td class="text-sm">{{ row.email }}</td>
+        <td class="text-sm">U$ {{ row.value | number: '1.2-2' }}</td>
+        <td class="text-sm">
+          <span
+            class="px-2 py-1 rounded-lg font-medium"
+            [ngClass]="{
+              'bg-green-100 text-green-800': row.status === 'Paid',
+              'bg-yellow-100 text-yellow-800': row.status === 'Pending',
+              'bg-red-100 text-red-800': row.status === 'Late',
+            }"
+          >
+            {{ row.status }}
+          </span>
+        </td>
+        <td class="text-sm text-center">{{ row.date | date: 'dd/MM/yyyy' }}</td>
+        <!-- <td class="text-center">
+          <p-button
+            icon="pi pi-eye"
+            [rounded]="true"
+            [text]="true"
+            severity="secondary"
+            pTooltip="Details"
+            tooltipPosition="top"
+            (click)="onView(row)"
+            title="Details"
+          />
+          <p-button
+            icon="pi pi-pencil"
+            [rounded]="true"
+            [text]="true"
+            severity="success"
+            pTooltip="Edit"
+            tooltipPosition="top"
+            (click)="onEdit(row)"
+            title="Edit"
+          />
+          <p-button
+            icon="pi pi-trash"
+            [rounded]="true"
+            [text]="true"
+            severity="danger"
+            pTooltip="Remove"
+            tooltipPosition="top"
+            (click)="onDelete(row)"
+            title="Remove"
+          />
+        </td>
+      </tr> -->
+      </tr></ng-template
+    >
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="5" class="py-20">
+          <div class="flex flex-col items-center justify-center">
+            <div class="w-20 h-20 flex items-center justify-center mt-8">
+              <i class="pi pi-money-bill text-lime-500" style="font-size: 2.5rem"></i>
+            </div>
+            <h3 class="font-bold text-xl text-gray-900 mb-1">No payments yet</h3>
+            <p class="text-gray-500 text-base mb-8">This is where you will view and manage payments.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+</div>
