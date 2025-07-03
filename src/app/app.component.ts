@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { LoadingComponent } from '@shared/components/loading/loading.component';
 import { PrimeNG } from 'primeng/config';
@@ -13,6 +13,7 @@ import { MenubarComponent } from './shared/components/menubar/menubar.component'
   selector: 'app-root',
   imports: [CommonModule, RouterOutlet, ToastModule, LoadingComponent, MenubarComponent, FooterComponent],
   standalone: true,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <div class="w-full flex flex-col min-h-screen">
       <app-menubar *ngIf="!isPublicPage && !isAdminPage"></app-menubar>
@@ -33,6 +34,7 @@ import { MenubarComponent } from './shared/components/menubar/menubar.component'
         </div>
       </main>
 
+      <cc-banner></cc-banner>
       <app-footer *ngIf="!isPublicPage && !isAdminPage" />
     </div>
   `,

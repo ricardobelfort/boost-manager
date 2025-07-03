@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { APP_VERSION } from 'src/version';
 
 @Component({
   selector: 'app-footer',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   standalone: true,
   template: `
     <footer
@@ -15,9 +15,9 @@ import { APP_VERSION } from 'src/version';
       <div>
         <span class="font-semibold text-gray-700">BoostManager</span>
         &copy; {{ currentYear }}. All rights reserved. |
-        <a routerLink="/privacy" class="underline hover:text-lime-500">Privacy Policies</a> |
-        <a routerLink="/terms" class="underline hover:text-lime-500">Terms</a> |
-        <a routerLink="/cookies" class="underline hover:text-lime-500">Cookie Policies</a>
+        <a routerLink="/privacy" class="underline hover:text-lime-500 cursor-pointer">Privacy Policies</a> |
+        <a routerLink="/terms" class="underline hover:text-lime-500 cursor-pointer">Terms of Use</a> |
+        <a routerLink="/cookies" class="underline hover:text-lime-500 cursor-pointer">Cookie Policies</a>
       </div>
       <div>
         Version <span class="font-mono bg-gray-100 rounded px-2 py-0.5">{{ APP_VERSION }}</span> | Designed by

@@ -16,9 +16,7 @@
             "outputPath": "dist/boost-manager",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -26,10 +24,8 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ],
-            "scripts": []
+            "styles": ["src/styles.css", "node_modules/cookieconsent/build/cookieconsent.min.css"],
+            "scripts": ["node_modules/cookieconsent/build/cookieconsent.min.js"]
           },
           "configurations": {
             "production": {

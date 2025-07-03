@@ -7,6 +7,7 @@ import { LOCALE_ID } from '@angular/core';
 import { authInterceptor } from '@core/interceptors/auth.interceptor';
 import { errorInterceptor } from '@core/interceptors/error.interceptor';
 import { loadingInterceptor } from '@core/interceptors/loading.interceptor';
+import { provideNgcCookieConsent } from 'ngx-cookieconsent';
 import { FilterMatchMode, MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import { ToastModule } from 'primeng/toast';
@@ -21,6 +22,33 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     importProvidersFrom(ToastModule),
     { provide: LOCALE_ID, useValue: 'pt' },
+    provideNgcCookieConsent({
+      cookie: {
+        domain: 'https://boost-manager.vercel.app',
+      },
+      palette: {
+        popup: {
+          background: '#232328',
+          text: '#fff',
+        },
+        button: {
+          background: '#A3E634',
+          text: '#fff',
+        },
+      },
+      position: 'bottom-right',
+      theme: 'classic', // ou 'edgeless'
+      type: 'info',
+      content: {
+        message: 'This website uses cookies to ensure you get the best experience on our website.',
+        dismiss: 'Got it!',
+        allow: 'Allow cookies',
+        deny: 'Refuse cookies',
+        link: 'Learn more',
+        href: 'https://boost-manager.vercel.app/cookies',
+        policy: 'Cookie Policy',
+      },
+    }),
     MessageService,
     providePrimeNG({
       ripple: true,
