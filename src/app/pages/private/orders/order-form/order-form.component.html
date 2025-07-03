@@ -322,6 +322,10 @@
           [locale]="getLocale(orderForm.value.currency || 'USD')"
           [min]="0"
         />
+        <!-- Loading enquanto cotações não carregam -->
+        <div *ngIf="!ratesLoaded" class="flex items-center gap-2 text-gray-400 mt-1">
+          <i class="pi pi-spin pi-spinner"></i> Carregando cotações...
+        </div>
         <div *ngIf="orderForm.value.total_value && ratesLoaded">
           <div *ngFor="let c of getConvertedValues()" class="text-xs mt-1 text-gray-500">
             ≈ {{ c.value }} ({{ c.label }})
@@ -344,18 +348,28 @@
       <!-- Booster Value -->
       <div>
         <label class="font-medium text-gray-700 mb-2 block" for="booster-value">
-          Booster Value <span class="text-red-500">*</span>
+          Booster Value (R$) <span class="text-red-500">*</span>
         </label>
         <p-inputnumber
           styleClass="w-full"
           formControlName="booster_value"
           inputId="booster-value"
-          placeholder="US$ 0.00"
-          mode="currency"
-          currency="USD"
-          locale="en-US"
+          placeholder="R$ 0,00"
+          [mode]="'currency'"
+          [currency]="'BRL'"
+          [locale]="'pt-BR'"
           [min]="0"
         />
+        <!-- Loading -->
+        <div *ngIf="!ratesLoaded" class="flex items-center gap-2 text-gray-400 mt-1">
+          <i class="pi pi-spin pi-spinner"></i> Carregando cotações...
+        </div>
+        <!-- Conversão do booster_value para moeda escolhida -->
+        <div *ngIf="ratesLoaded && orderForm.value.currency && orderForm.value.currency !== 'BRL'">
+          <span class="text-xs mt-1 text-gray-500">
+            ≈ {{ boosterConvertedValue }} ({{ getCurrencyLabel(orderForm.value.currency) }})
+          </span>
+        </div>
         <small
           *ngIf="booster_value.errors?.['required'] && (booster_value.dirty || booster_value.touched)"
           class="text-red-500"

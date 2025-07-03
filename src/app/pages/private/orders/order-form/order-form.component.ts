@@ -44,6 +44,7 @@ export class OrderFormComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private currencyService = inject(CurrencyService);
+  loadingService = inject(LoadingService);
 
   editingId?: string;
   convertedValue: number | null = null;
@@ -55,8 +56,7 @@ export class OrderFormComponent {
 
   exchangeRates: Record<string, number> = {};
   ratesLoaded = false;
-
-  loadingService = inject(LoadingService);
+  boosterConvertedValue: string | null = null;
 
   boosters = [
     { label: 'Booster 1', value: 'booster 1' },
@@ -183,10 +183,31 @@ export class OrderFormComponent {
 
     this.orderForm.get('currency')?.valueChanges.subscribe(() => this.updateConvertedValue());
     this.orderForm.get('total_value')?.valueChanges.subscribe(() => this.updateConvertedValue());
+    this.orderForm.get('booster_value')?.valueChanges.subscribe(() => this.updateBoosterConvertedValue());
   }
 
   onCurrencyChange() {
     this.updateConvertedValue();
+  }
+
+  updateBoosterConvertedValue() {
+    const boosterValue = this.orderForm.value.booster_value;
+    const currency = this.orderForm.value.currency;
+    if (!boosterValue || !currency || currency === 'BRL' || !this.exchangeRates[currency]) {
+      this.boosterConvertedValue = null;
+      return;
+    }
+    // Converte de BRL para a moeda escolhida
+    const rate = this.exchangeRates[currency];
+    const converted = boosterValue / rate;
+    this.boosterConvertedValue = converted.toLocaleString(this.getLocale(currency), {
+      style: 'currency',
+      currency,
+    });
+  }
+
+  getCurrencyLabel(currency: string) {
+    return this.currencies.find((c) => c.value === currency)?.label || currency;
   }
 
   async updateConvertedValue() {
@@ -231,10 +252,9 @@ export class OrderFormComponent {
     const fromCurrency = this.orderForm.value.currency || 'USD';
     const amount = +(this.orderForm.value?.total_value ?? 0) || 0;
 
-    if (!fromCurrency || !amount || !this.exchangeRates[fromCurrency]) return [];
+    // Verifique se rates já carregaram e tem o currency correto
+    if (!fromCurrency || !amount || !this.exchangeRates || !this.exchangeRates[fromCurrency]) return [];
 
-    // USD é base (mude se precisar)
-    // Calcula valor em USD, depois para cada moeda do select
     let amountInBase = fromCurrency === 'USD' ? amount : amount / this.exchangeRates[fromCurrency];
 
     return this.currencies
