@@ -21,15 +21,15 @@
   <!-- Spacer -->
   <div class="flex-1"></div>
 
-  <!-- Usuário e Avatar -->
   <div class="relative group">
     <div class="flex items-center cursor-pointer" (click)="toggleDropdown()" tabindex="0">
-      <img
-        [src]="userAvatarUrl"
-        class="w-10 h-10 ml-10 mr-2 rounded-full border border-gray-300 object-cover"
-        alt="Avatar"
-      />
-      <i class="pi pi-chevron-down text-gray-500 text-xs"></i>
+      <div
+        class="w-[36px] h-[36px] ml-10 mr-2 rounded-full border border-gray-300 flex items-center justify-center font-semibold text-gray-700 select-none bg-slate-200"
+      >
+        {{ userInitials }}
+      </div>
+
+      <i class="pi pi-sort-down-fill text-gray-400 !text-xs"></i>
     </div>
     <!-- Dropdown de perfil -->
     <div

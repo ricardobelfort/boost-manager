@@ -27,6 +27,7 @@ export class MenubarComponent {
   userRole = '';
   userAvatarUrl = 'assets/images/avatar-placeholder.png';
   dropdownOpen = false;
+  userInitials = '';
 
   constructor(
     private auth: AuthService,
@@ -39,6 +40,9 @@ export class MenubarComponent {
     this.userName = profile?.full_name || profile?.email || 'Usuário';
     this.userRole = profile?.role || 'Cliente';
     this.userAvatarUrl = this.getGravatar(profile?.email);
+
+    this.userInitials = this.getInitials(this.userName);
+
     // Filtra itens para admin
     if (this.userRole !== 'admin') {
       this.items = this.items.filter((i) => !i.adminOnly);
@@ -49,6 +53,14 @@ export class MenubarComponent {
     if (!email) return 'assets/images/avatar-placeholder.png';
     const hash = md5(email.trim().toLowerCase());
     return `https://www.gravatar.com/avatar/${hash}?d=mp&s=120`;
+  }
+
+  // Pega até 2 iniciais
+  getInitials(name: string) {
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase();
   }
 
   isActive(route: string) {

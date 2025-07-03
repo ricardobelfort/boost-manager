@@ -8,40 +8,49 @@ import { LoadingService } from '@shared/services/loading.service';
   imports: [CommonModule],
   template: `
     <div *ngIf="loadingService.loading$ | async" class="loading-overlay">
-      <div class="spinner"></div>
+      <svg width="64" height="64" viewBox="0 0 24 24">
+        <style>
+          .spinner_hzlK {
+            animation: spinner_vc4H 0.8s linear infinite;
+            animation-delay: -0.8s;
+          }
+          .spinner_koGT {
+            animation-delay: -0.65s;
+          }
+          .spinner_YF1u {
+            animation-delay: -0.5s;
+          }
+          @keyframes spinner_vc4H {
+            0% {
+              y: 1px;
+              height: 22px;
+            }
+            93.75% {
+              y: 5px;
+              height: 14px;
+              opacity: 0.2;
+            }
+          }
+        </style>
+        <rect class="spinner_hzlK" x="1" y="1" width="6" height="22" fill="#7cce00" />
+        <rect class="spinner_hzlK spinner_koGT" x="9" y="1" width="6" height="22" fill="#7cce00" />
+        <rect class="spinner_hzlK spinner_YF1u" x="17" y="1" width="6" height="22" fill="#7cce00" />
+      </svg>
     </div>
   `,
   styles: [
     `
       .loading-overlay {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 9999;
-      }
-
-      .spinner {
-        width: 50px;
-        height: 50px;
-        border: 5px solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes spin {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
+        transition: background 0.3s;
       }
     `,
   ],

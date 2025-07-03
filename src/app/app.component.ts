@@ -17,8 +17,14 @@ import { MenubarComponent } from './shared/components/menubar/menubar.component'
   template: `
     <div class="w-full flex flex-col min-h-screen">
       <app-menubar *ngIf="!isPublicPage && !isAdminPage"></app-menubar>
-      <p-toast [showTransitionOptions]="'500ms'" [hideTransitionOptions]="'500ms'" position="top-center" />
-      <app-loading *ngIf="!isPublicPage && !isAdminPage" />
+      <p-toast
+        [showTransitionOptions]="'500ms'"
+        [hideTransitionOptions]="'500ms'"
+        position="top-right"
+        [life]="3000"
+        [baseZIndex]="10000"
+      />
+      <app-loading />
 
       <main class="flex-1 w-full bg-[#f7f9fc]">
         <div

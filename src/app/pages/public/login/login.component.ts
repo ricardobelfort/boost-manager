@@ -109,7 +109,6 @@ export class LoginComponent implements OnInit {
             const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
 
             try {
-              // Atualiza o profile (cria tenant e preenche role, name, tenant_id)
               await this.auth.createTenantAndProfile(companyName, email ?? '', user.id);
 
               localStorage.removeItem('pendingCompanyName');
