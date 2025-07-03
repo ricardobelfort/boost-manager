@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { SuperAdminGuard } from '@core/guards/super-admin.guard';
+import { TenantGuard } from '@core/guards/tenant.guard';
 import { LoginComponent } from '@pages/public/login/login.component';
 import { RecoveryComponent } from '@pages/public/recovery/recovery.component';
 import { SignupComponent } from '@pages/public/signup/signup.component';
@@ -25,7 +26,7 @@ export const routes: Routes = [
     data: {
       breadcrumb: 'Dashboard',
     },
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, TenantGuard],
   },
   { path: '**', component: PageNotFoundComponent },
 ];
