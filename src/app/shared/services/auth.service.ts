@@ -101,7 +101,7 @@ export class AuthService {
 
   // Cria tenant e profile DEPOIS do login (quando session ativa)
   async createTenantAndProfile(name: string, email: string, userId: string) {
-    // Cria o tenant
+    // 1. Cria o tenant
     const { data: tenantData, error: tenantError } = await supabase
       .from('tenants')
       .insert([{ name }])
@@ -117,27 +117,58 @@ export class AuthService {
       throw tenantError;
     }
 
-    // ATUALIZA o profile vinculado ao tenant!
-    const { error: profileError } = await supabase
+    // 2. Busca se já existe o profile
+    const { data: existingProfile, error: profileSelectError } = await supabase
       .from('profiles')
-      .update({
-        email, // Opcional, mas pode atualizar para garantir
-        role: 'owner', // ou 'superadmin' se for o primeiro usuário!
-        name,
-        tenant_id: tenantData.id,
-      })
-      .eq('id', userId);
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-    if (profileError) {
+    if (profileSelectError && profileSelectError.code !== 'PGRST116') {
+      // PGRST116 = no rows found (ok se não existe ainda)
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: profileError.message || 'Profile update error.',
+        detail: profileSelectError.message || 'Profile select error.',
       });
-      throw profileError;
+      throw profileSelectError;
     }
 
-    return { tenant: tenantData };
+    let profileResp;
+    if (existingProfile) {
+      // UPDATE profile existente
+      profileResp = await supabase
+        .from('profiles')
+        .update({
+          name,
+          email,
+          role: 'owner', // aqui pode ser 'superadmin' para você!
+          tenant_id: tenantData.id,
+        })
+        .eq('id', userId);
+    } else {
+      // INSERT profile se não existir
+      profileResp = await supabase.from('profiles').insert([
+        {
+          id: userId,
+          name,
+          email,
+          role: 'owner',
+          tenant_id: tenantData.id,
+        },
+      ]);
+    }
+
+    if (profileResp.error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: profileResp.error.message || 'Profile upsert error.',
+      });
+      throw profileResp.error;
+    }
+
+    return { tenant: tenantData, profile: profileResp.data };
   }
 
   async getUserProfile() {

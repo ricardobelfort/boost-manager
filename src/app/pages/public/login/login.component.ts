@@ -3,6 +3,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@shared/services/auth.service';
+import { LoadingService } from '@shared/services/loading.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -34,6 +35,7 @@ export class LoginComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
   private readonly auth = inject(AuthService);
+  private readonly loading = inject(LoadingService);
 
   passwordStrengthClass = '';
   passwordStrengthWidth = '0%';
@@ -72,93 +74,87 @@ export class LoginComponent implements OnInit {
     }
 
     const { email, password, rememberMe } = this.loginForm.value;
+    this.loading.show();
 
     this.auth.signIn(email!, password!, rememberMe ?? false).subscribe({
       next: async (response) => {
-        if (response.error) {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: response.error.message || 'Invalid email or password.',
-          });
-          return;
-        }
-
-        if (!response.data?.session) {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Session not started. Please try again.',
-          });
-          return;
-        }
-
-        // Here's the important change!
-        const user = response.data.session.user;
-
-        // Fetch the profile of the logged in user
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id, name, email, role, tenant_id')
-          .eq('id', user.id)
-          .single();
-
-        // If the profile does not exist, create the tenant and the profile!
-        if (!profile) {
-          // Retrieve the name saved in localStorage during signup (can be null/undefined, handle it!)
-          const companyName = localStorage.getItem('pendingCompanyName') || 'My Company';
-
-          try {
-            await this.auth.createTenantAndProfile(companyName, email ?? '', user.id);
-
-            // Clear localStorage after creating!
-            localStorage.removeItem('pendingCompanyName');
-
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Welcome!',
-              detail: `Company created and account linked successfully!`,
-            });
-          } catch (err) {
+        try {
+          if (response.error) {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'Error creating profile/tenant. Contact support.',
+              detail: response.error.message || 'Invalid email or password.',
             });
             return;
           }
-        }
 
-        // If profile already exists OR just created, follow normal flow
-        // (Optional: reload profile/tenant info here if you want!)
-        await this.auth.loadUserProfileAndTenant();
+          if (!response.data?.session) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Session not started. Please try again.',
+            });
+            return;
+          }
 
-        // Save tenant_id if needed
-        if (profile?.tenant_id) {
-          localStorage.setItem('tenant_id', profile.tenant_id);
-        }
+          // ... (demais lógicas do login, tenant/profile...)
 
-        // Verifica novamente o perfil após login/criação
-        const { data: loadedProfile } = await supabase
-          .from('profiles')
-          .select('id, name, email, role, tenant_id')
-          .eq('id', user.id)
-          .single();
+          const user = response.data.session.user;
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, name, email, role, tenant_id')
+            .eq('id', user.id)
+            .single();
 
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: `Welcome, ${email}!`,
-        });
+          if (!profile) {
+            const companyName = localStorage.getItem('pendingCompanyName') || 'My Company';
+            try {
+              await this.auth.createTenantAndProfile(companyName, email ?? '', user.id);
+              localStorage.removeItem('pendingCompanyName');
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Welcome!',
+                detail: `Company created and account linked successfully!`,
+              });
+            } catch (err) {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error creating profile/tenant. Contact support.',
+              });
+              return;
+            }
+          }
 
-        // Redireciona para o painel correto:
-        if (loadedProfile?.role === 'superadmin') {
-          this.router.navigate(['/superadmin']);
-        } else {
-          this.router.navigate(['/dashboard']);
+          await this.auth.loadUserProfileAndTenant();
+
+          if (profile?.tenant_id) {
+            localStorage.setItem('tenant_id', profile.tenant_id);
+          }
+
+          const { data: loadedProfile } = await supabase
+            .from('profiles')
+            .select('id, name, email, role, tenant_id')
+            .eq('id', user.id)
+            .single();
+
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: `Welcome, ${email}!`,
+          });
+
+          if (loadedProfile?.role === 'superadmin') {
+            this.router.navigate(['/superadmin']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
+        } finally {
+          this.loading.hide();
         }
       },
       error: (err) => {
+        this.loading.hide();
         this.messageService.add({
           severity: 'error',
           summary: 'Error',

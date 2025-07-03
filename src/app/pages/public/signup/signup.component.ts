@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@shared/services/auth.service';
+import { LoadingService } from '@shared/services/loading.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
@@ -21,6 +22,7 @@ export class SignupComponent {
   private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
   private readonly auth = inject(AuthService);
+  private readonly loading = inject(LoadingService);
 
   showPassword = false;
   passwordTouched = false;
@@ -47,6 +49,8 @@ export class SignupComponent {
       return;
     }
 
+    this.loading.show();
+
     const { name, email, password, confirmPassword } = this.signupForm.value;
 
     if (password !== confirmPassword) {
@@ -64,6 +68,7 @@ export class SignupComponent {
 
     this.auth.signUp(email!, password!).subscribe({
       next: (response) => {
+        this.loading.hide();
         if (response.error) {
           this.messageService.add({
             severity: 'error',
@@ -80,6 +85,7 @@ export class SignupComponent {
         this.router.navigate(['/auth/login']);
       },
       error: (err) => {
+        this.loading.hide();
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
