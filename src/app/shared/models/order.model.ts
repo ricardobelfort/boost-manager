@@ -17,4 +17,6 @@ export interface Order {
   observation?: string;
   weapon_quantity?: number;
   created_at?: string;
+  currency?: string;
+  booster_currency?: string;
 }

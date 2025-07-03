@@ -289,7 +289,24 @@
     </div>
 
     <!-- Row 5: values -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="font-medium text-gray-700 mb-2 block" for="currency">Currency</label>
+        <p-select
+          styleClass="w-full"
+          [options]="currencies"
+          formControlName="currency"
+          placeholder="Select currency"
+          (onChange)="onCurrencyChange()"
+        >
+          <ng-template let-option pTemplate="item">
+            <div class="flex items-center gap-2">
+              <i *ngIf="option.icon" [class]="option.icon + ' text-lg mr-2 text-lime-600'"></i>
+              <span>{{ option.label }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
       <div>
         <label class="font-medium text-gray-700 mb-2 block" for="total-value">
           Total Value <span class="text-red-500">*</span>
@@ -298,12 +315,17 @@
           styleClass="w-full"
           formControlName="total_value"
           inputId="total-value"
-          placeholder="US$ 0.00"
-          mode="currency"
-          currency="USD"
-          locale="en-US"
+          [mode]="'currency'"
+          [currency]="orderForm.value.currency || 'USD'"
+          [locale]="getLocale(orderForm.value.currency || 'USD')"
           [min]="0"
         />
+        <div *ngIf="orderForm.value.total_value && ratesLoaded">
+          <div *ngFor="let c of getConvertedValues()" class="text-xs mt-1 text-gray-500">
+            ≈ {{ c.value }} ({{ c.label }})
+          </div>
+        </div>
+
         <small
           *ngIf="total_value.errors?.['required'] && (total_value.dirty || total_value.touched)"
           class="text-red-500"

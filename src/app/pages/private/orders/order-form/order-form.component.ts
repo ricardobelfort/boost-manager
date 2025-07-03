@@ -15,6 +15,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { of, switchMap, take, tap } from 'rxjs';
+import { CurrencyService } from './../../../../shared/services/currency.service';
 
 @Component({
   selector: 'app-order-form',
@@ -42,13 +43,18 @@ export class OrderFormComponent {
   private messageService = inject(MessageService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private currencyService = inject(CurrencyService);
 
   editingId?: string;
+  convertedValue: number | null = null;
   hoje = (() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
     return d;
   })();
+
+  exchangeRates: Record<string, number> = {};
+  ratesLoaded = false;
 
   loadingService = inject(LoadingService);
 
@@ -85,40 +91,32 @@ export class OrderFormComponent {
     { label: 'Orders', route: '/dashboard/orders' },
     { label: 'New Order' }, // ou 'Editar Pedido'
   ];
-
-  ngOnInit() {
-    this.editingId = this.route.snapshot.paramMap.get('id') || undefined;
-    if (this.editingId) {
-      this.orderService
-        .getOrderById(this.editingId)
-        .pipe(take(1))
-        .subscribe((orderParaEditar) => {
-          if (orderParaEditar) {
-            this.orderForm.patchValue({
-              ...orderParaEditar,
-              weapon_quantity:
-                typeof orderParaEditar.weapon_quantity === 'number' ? orderParaEditar.weapon_quantity : null,
-              start_date: orderParaEditar.start_date ? new Date(orderParaEditar.start_date) : undefined,
-              end_date: orderParaEditar.end_date ? new Date(orderParaEditar.end_date) : undefined,
-            } as Order);
-          }
-        });
-    }
-
-    this.orderForm.get('service_type')!.valueChanges.subscribe((value) => {
-      const isCamuflagem = typeof value === 'string' && (value as string).toLowerCase().includes('camuflagem');
-      const weaponCtrl = this.orderForm.get('weapon_quantity');
-      if (isCamuflagem) {
-        weaponCtrl?.enable();
-        weaponCtrl?.setValidators([Validators.required, Validators.min(1), Validators.max(33)]);
-      } else {
-        weaponCtrl?.reset();
-        weaponCtrl?.disable();
-        weaponCtrl?.clearValidators();
-      }
-      weaponCtrl?.updateValueAndValidity();
-    });
-  }
+  currencies = [
+    {
+      label: 'US Dollar (USD)',
+      value: 'USD',
+      icon: 'pi pi-dollar', // PrimeIcons
+      image: 'assets/currencies/usd.png', // ou
+    },
+    {
+      label: 'Real (BRL)',
+      value: 'BRL',
+      icon: 'pi pi-money-bill',
+      image: 'assets/currencies/brl.png',
+    },
+    {
+      label: 'Euro (EUR)',
+      value: 'EUR',
+      icon: 'pi pi-euro',
+      image: 'assets/currencies/eur.png',
+    },
+    {
+      label: 'Bitcoin (BTC)',
+      value: 'BTC',
+      icon: 'pi pi-bitcoin',
+      image: 'assets/currencies/btc.png',
+    },
+  ];
 
   orderForm = this.fb.nonNullable.group(
     {
@@ -135,6 +133,7 @@ export class OrderFormComponent {
       start_date: ['', Validators.required],
       end_date: [''],
       status: ['', Validators.required],
+      currency: ['', Validators.required],
       total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
       booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
       observation: ['', [Validators.maxLength(500)]],
@@ -143,6 +142,124 @@ export class OrderFormComponent {
       validators: this.dateRangeValidator.bind(this),
     }
   );
+
+  ngOnInit() {
+    this.fetchRates();
+    this.editingId = this.route.snapshot.paramMap.get('id') || undefined;
+    if (this.editingId) {
+      this.orderService
+        .getOrderById(this.editingId)
+        .pipe(take(1))
+        .subscribe((orderParaEditar) => {
+          if (orderParaEditar) {
+            this.orderForm.patchValue({
+              ...orderParaEditar,
+              weapon_quantity:
+                typeof orderParaEditar.weapon_quantity === 'number' ? orderParaEditar.weapon_quantity : null,
+              start_date: orderParaEditar.start_date ? new Date(orderParaEditar.start_date) : undefined,
+              end_date: orderParaEditar.end_date ? new Date(orderParaEditar.end_date) : undefined,
+            } as Order);
+          }
+        });
+
+      this.orderForm.get('currency')?.valueChanges.subscribe((base) => {
+        this.fetchRates(base);
+      });
+    }
+
+    this.orderForm.get('service_type')!.valueChanges.subscribe((value) => {
+      const isCamuflagem = typeof value === 'string' && (value as string).toLowerCase().includes('camuflagem');
+      const weaponCtrl = this.orderForm.get('weapon_quantity');
+      if (isCamuflagem) {
+        weaponCtrl?.enable();
+        weaponCtrl?.setValidators([Validators.required, Validators.min(1), Validators.max(33)]);
+      } else {
+        weaponCtrl?.reset();
+        weaponCtrl?.disable();
+        weaponCtrl?.clearValidators();
+      }
+      weaponCtrl?.updateValueAndValidity();
+    });
+
+    this.orderForm.get('currency')?.valueChanges.subscribe(() => this.updateConvertedValue());
+    this.orderForm.get('total_value')?.valueChanges.subscribe(() => this.updateConvertedValue());
+  }
+
+  onCurrencyChange() {
+    this.updateConvertedValue();
+  }
+
+  async updateConvertedValue() {
+    const value = this.orderForm.value.total_value;
+    const currency = this.orderForm.value.currency;
+    if (!value || !currency || currency === 'BRL') {
+      this.convertedValue = null;
+      return;
+    }
+    // Chama uma função para buscar a cotação atual
+    this.convertedValue = await this.convertToBRL(value, currency);
+  }
+
+  async convertToBRL(value: number, currency: string): Promise<number> {
+    // Exemplo básico com fetch de uma API de câmbio gratuita
+    if (currency === 'BRL') return value;
+    try {
+      const res = await fetch(`https://api.exchangerate.host/convert?from=${currency}&to=BRL&amount=${value}`);
+      const data = await res.json();
+      return data.result ?? value;
+    } catch (e) {
+      return value;
+    }
+  }
+
+  fetchRates(base = 'USD') {
+    this.ratesLoaded = false;
+    this.currencyService.getExchangeRates(base).subscribe({
+      next: (rates) => {
+        this.exchangeRates = rates;
+        this.ratesLoaded = true;
+      },
+      error: () => {
+        // fallback para evitar crash
+        this.exchangeRates = { USD: 1, BRL: 5, EUR: 0.92, BTC: 0.000015 };
+        this.ratesLoaded = true;
+      },
+    });
+  }
+
+  getConvertedValues() {
+    const fromCurrency = this.orderForm.value.currency || 'USD';
+    const amount = +(this.orderForm.value?.total_value ?? 0) || 0;
+
+    if (!fromCurrency || !amount || !this.exchangeRates[fromCurrency]) return [];
+
+    // USD é base (mude se precisar)
+    // Calcula valor em USD, depois para cada moeda do select
+    let amountInBase = fromCurrency === 'USD' ? amount : amount / this.exchangeRates[fromCurrency];
+
+    return this.currencies
+      .filter((c) => c.value !== fromCurrency)
+      .map((curr) => {
+        const converted = amountInBase * (this.exchangeRates[curr.value] || 1);
+        return {
+          label: curr.label,
+          value: converted.toLocaleString(this.getLocale(curr.value), { style: 'currency', currency: curr.value }),
+        };
+      });
+  }
+
+  getLocale(currency: string) {
+    switch (currency) {
+      case 'BRL':
+        return 'pt-BR';
+      case 'EUR':
+        return 'de-DE';
+      case 'BTC':
+        return 'en-US'; // bitcoin não tem locale, trate especial
+      default:
+        return 'en-US';
+    }
+  }
 
   dateRangeValidator(control: import('@angular/forms').AbstractControl) {
     if (!(control instanceof FormGroup)) return null;
@@ -200,6 +317,9 @@ export class OrderFormComponent {
   get observation() {
     return this.orderForm.get('observation')!;
   }
+  get currency() {
+    return this.orderForm.get('currency')!;
+  }
 
   onSubmit() {
     if (this.orderForm.invalid) {
@@ -235,6 +355,7 @@ export class OrderFormComponent {
         start_date: toIsoString(formValue.start_date),
         end_date: toIsoString(formValue.end_date),
         status: formValue.status ?? '',
+        currency: formValue.currency ?? '',
         total_value: formValue.total_value ?? 0,
         booster_value: formValue.booster_value ?? 0,
         observation: formValue.observation ?? '',
