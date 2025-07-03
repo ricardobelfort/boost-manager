@@ -117,24 +117,27 @@ export class AuthService {
       throw tenantError;
     }
 
-    // Cria o profile vinculado ao tenant
-    const { data, error: profileError } = await supabase.from('profiles').insert([
-      {
-        id: userId,
-        email,
-        role: 'owner',
+    // ATUALIZA o profile vinculado ao tenant!
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        email, // Opcional, mas pode atualizar para garantir
+        role: 'owner', // ou 'superadmin' se for o primeiro usuário!
+        name,
         tenant_id: tenantData.id,
-      },
-    ]);
+      })
+      .eq('id', userId);
+
     if (profileError) {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: profileError.message || 'Tenant creation error.',
+        detail: profileError.message || 'Profile update error.',
       });
       throw profileError;
     }
-    return { tenant: tenantData, profile: data };
+
+    return { tenant: tenantData };
   }
 
   async getUserProfile() {
