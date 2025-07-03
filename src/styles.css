@@ -1,17 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
 @import "primeicons/primeicons.css";
 @layer primeng, tailwind, noir;
 @layer tailwind {
-  @import 'tailwindcss';
+  @import "tailwindcss";
 }
 
 :root {
   --font-nunito: "Nunito";
   --rem: 14px;
-  --bg-body: #F7F9FC;
+  --bg-body: #f7f9fc;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   min-height: 100vh;
   font-size: 14px;
@@ -28,4 +29,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg-body);
   overflow-x: hidden !important;
+}
+
+.material-symbols-rounded {
+  font-family: "Material Symbols Rounded";
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 600,
+    "GRAD" 0,
+    "opsz" 48;
+  font-size: 22px;
+  line-height: 1;
+  vertical-align: middle;
 }

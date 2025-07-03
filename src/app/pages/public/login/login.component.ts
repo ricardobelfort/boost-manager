@@ -97,30 +97,27 @@ export class LoginComponent implements OnInit {
             return;
           }
 
-          // ... (demais lógicas do login, tenant/profile...)
-
           const user = response.data.session.user;
+
           const { data: profile } = await supabase
             .from('profiles')
             .select('id, name, email, role, tenant_id')
             .eq('id', user.id)
             .single();
 
-          if (!profile) {
-            const companyName = localStorage.getItem('pendingCompanyName') || 'My Company';
+          if (!profile || !profile.tenant_id || !profile.role || !profile.name) {
+            const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
+
             try {
+              // Atualiza o profile (cria tenant e preenche role, name, tenant_id)
               await this.auth.createTenantAndProfile(companyName, email ?? '', user.id);
+
               localStorage.removeItem('pendingCompanyName');
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Welcome!',
-                detail: `Company created and account linked successfully!`,
-              });
             } catch (err) {
               this.messageService.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Error creating profile/tenant. Contact support.',
+                detail: 'Erro ao criar tenant/profile. Contate o suporte.',
               });
               return;
             }

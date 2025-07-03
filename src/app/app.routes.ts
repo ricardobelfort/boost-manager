@@ -15,17 +15,17 @@ export const routes: Routes = [
   { path: 'auth/signup', component: SignupComponent },
   { path: 'auth/recovery', component: RecoveryComponent },
   {
+    path: 'superadmin',
+    loadChildren: () => import('./pages/private/superadmin/superadmin.routes').then((r) => r.SUPERADMIN_ROUTES),
+    canActivate: [AuthGuard, SuperAdminGuard],
+  },
+  {
     path: 'dashboard',
     loadChildren: () => import('./pages/private/private.routes').then((r) => r.PRIVATE_ROUTES),
     data: {
       breadcrumb: 'Dashboard',
     },
     canActivate: [AuthGuard],
-  },
-  {
-    path: 'superadmin',
-    loadChildren: () => import('./pages/private/superadmin/superadmin.routes').then((r) => r.SUPERADMIN_ROUTES),
-    canActivate: [AuthGuard, SuperAdminGuard],
   },
   { path: '**', component: PageNotFoundComponent },
 ];

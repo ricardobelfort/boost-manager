@@ -15,28 +15,34 @@ import { MenubarComponent } from './shared/components/menubar/menubar.component'
   standalone: true,
   template: `
     <div class="w-full flex flex-col min-h-screen">
-      <app-menubar *ngIf="!isPublicPage"></app-menubar>
+      <app-menubar *ngIf="!isPublicPage && !isAdminPage"></app-menubar>
       <p-toast [showTransitionOptions]="'500ms'" [hideTransitionOptions]="'500ms'" position="top-center" />
-      <app-loading *ngIf="!isPublicPage" />
+      <app-loading *ngIf="!isPublicPage && !isAdminPage" />
 
       <main class="flex-1 w-full bg-[#f7f9fc]">
         <div
           [class]="
-            isPublicPage ? 'flex flex-col justify-center items-center h-full' : 'max-w-[1280px] mx-auto px-4 py-8'
+            isPublicPage
+              ? 'flex flex-col justify-center items-center h-full'
+              : isAdminPage
+                ? 'w-full min-h-screen'
+                : 'max-w-[1280px] mx-auto px-4 py-8'
           "
         >
           <router-outlet />
         </div>
       </main>
 
-      <app-footer *ngIf="!isPublicPage" />
+      <app-footer *ngIf="!isPublicPage && !isAdminPage" />
     </div>
   `,
 })
 export class AppComponent {
   isPublicPage = false;
+  isAdminPage = false;
 
   publicPages = ['/auth/login', '/auth/signup', '/auth/recovery'];
+  adminPages = ['/superadmin'];
 
   constructor(
     private primeng: PrimeNG,
@@ -48,6 +54,7 @@ export class AppComponent {
 
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
       this.isPublicPage = this.publicPages.some((path) => this.router.url.startsWith(path));
+      this.isAdminPage = this.adminPages.some((path) => this.router.url.startsWith(path));
     });
 
     const { data } = await supabase.auth.getSession();
