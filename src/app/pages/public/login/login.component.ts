@@ -138,12 +138,25 @@ export class LoginComponent implements OnInit {
           localStorage.setItem('tenant_id', profile.tenant_id);
         }
 
+        // Verifica novamente o perfil após login/criação
+        const { data: loadedProfile } = await supabase
+          .from('profiles')
+          .select('id, name, email, role, tenant_id')
+          .eq('id', user.id)
+          .single();
+
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
           detail: `Welcome, ${email}!`,
         });
-        this.router.navigate(['/dashboard']);
+
+        // Redireciona para o painel correto:
+        if (loadedProfile?.role === 'superadmin') {
+          this.router.navigate(['/superadmin']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       },
       error: (err) => {
         this.messageService.add({

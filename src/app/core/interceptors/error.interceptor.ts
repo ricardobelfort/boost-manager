@@ -17,30 +17,30 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Trate casos especiais
       if (status === 401) {
-        // Já será tratado pelo AuthInterceptor, mas pode exibir algo
+        // This will already be handled by AuthInterceptor, but it may display something
         messageService.add({
           severity: 'warn',
-          summary: 'Sessão Expirada',
-          detail: 'Sua sessão expirou. Faça login novamente.',
+          summary: 'Session Expired',
+          detail: 'Your session has expired. Please log in again.',
         });
       } else if (status === 403) {
         messageService.add({
           severity: 'error',
-          summary: 'Acesso negado',
-          detail: 'Você não tem permissão para essa ação.',
+          summary: 'Access Denied',
+          detail: 'You do not have permission for this action.',
         });
         router.navigate(['/unauthorized']);
       } else if (status === 0) {
         messageService.add({
           severity: 'error',
-          summary: 'Sem conexão',
-          detail: 'Não foi possível se conectar ao servidor.',
+          summary: 'No connection',
+          detail: 'Unable to connect to the server.',
         });
       } else {
-        // Para qualquer outro erro, mostre uma mensagem amigável
+        // For any other error, display a friendly message
         messageService.add({
           severity: 'error',
-          summary: `Erro ${status}`,
+          summary: `Error ${status}`,
           detail: apiMessage,
         });
       }

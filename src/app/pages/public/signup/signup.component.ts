@@ -63,7 +63,15 @@ export class SignupComponent {
     localStorage.setItem('pendingCompanyName', name ?? '');
 
     this.auth.signUp(email!, password!).subscribe({
-      next: () => {
+      next: (response) => {
+        if (response.error) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: response.error.message || 'Error registering. Please try again.',
+          });
+          return;
+        }
         this.messageService.add({
           severity: 'success',
           summary: 'Success',

@@ -1,0 +1,67 @@
+<div class="min-h-screen bg-[#18181B] flex">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-[#232328] text-white flex flex-col border-r border-[#222] min-h-screen">
+    <div class="flex items-center gap-3 p-6">
+      <img src="/assets/boost.png" alt="Logo" class="w-9 h-9" />
+      <span class="font-bold text-xl text-[#7BF2A7] tracking-wide">Boost Manager</span>
+    </div>
+    <nav class="flex-1">
+      <ul class="space-y-1 px-3">
+        <li>
+          <a routerLink="" class="flex items-center px-3 py-2 rounded-lg bg-[#18181B] hover:bg-[#222] text-[#7BF2A7] font-semibold transition-colors">
+            <span class="material-symbols-rounded mr-2">dashboard</span>
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/users" class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors">
+            <span class="material-symbols-rounded mr-2">people</span>
+            Usuários
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/tenants" class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors">
+            <span class="material-symbols-rounded mr-2">business</span>
+            Tenants
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/roles" class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors">
+            <span class="material-symbols-rounded mr-2">admin_panel_settings</span>
+            Roles & Permissões
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/auditoria" class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors">
+            <span class="material-symbols-rounded mr-2">history</span>
+            Auditoria
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 p-8 bg-[#18181B] text-white">
+    <header class="flex justify-between items-center mb-8">
+      <h1 class="text-2xl font-bold text-[#7BF2A7]">Painel Super Admin</h1>
+      <button class="bg-[#7BF2A7] hover:bg-[#5dbf82] text-[#18181B] font-bold px-5 py-2 rounded-xl shadow-md transition">
+        Nova ação
+      </button>
+    </header>
+
+    <!-- Dashboard cards -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="bg-[#232328] rounded-xl p-6 shadow-lg border border-[#222]">
+        <h2 class="text-lg font-semibold mb-2 text-[#7BF2A7]">Usuários</h2>
+        <p class="text-gray-300">Visualize, edite ou promova usuários na plataforma.</p>
+        <!-- Aqui vai a tabela/lista de usuários -->
+      </div>
+      <div class="bg-[#232328] rounded-xl p-6 shadow-lg border border-[#222]">
+        <h2 class="text-lg font-semibold mb-2 text-[#7BF2A7]">Tenants</h2>
+        <p class="text-gray-300">Gerencie tenants cadastrados e permissões.</p>
+      </div>
+      <!-- Adicione mais cards conforme quiser -->
+    </section>
+  </main>
+</div>
