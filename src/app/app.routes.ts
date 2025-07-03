@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { SuperAdminGuard } from '@core/guards/super-admin.guard';
 import { TenantGuard } from '@core/guards/tenant.guard';
-import { CookiesComponent } from '@pages/public/cookies/cookies.component';
 import { LoginComponent } from '@pages/public/login/login.component';
 import { PrivacyComponent } from '@pages/public/privacy/privacy.component';
 import { RecoveryComponent } from '@pages/public/recovery/recovery.component';
@@ -20,7 +19,6 @@ export const routes: Routes = [
   { path: 'auth/recovery', component: RecoveryComponent },
   { path: 'privacy', component: PrivacyComponent },
   { path: 'terms', component: TermsComponent },
-  { path: 'cookies', component: CookiesComponent },
   {
     path: 'superadmin',
     loadChildren: () => import('./pages/private/superadmin/superadmin.routes').then((r) => r.SUPERADMIN_ROUTES),
