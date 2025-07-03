@@ -34,8 +34,8 @@ import { MenubarComponent } from './shared/components/menubar/menubar.component'
         </div>
       </main>
 
-      <cc-banner></cc-banner>
       <app-footer *ngIf="!isPublicPage && !isAdminPage" />
+      <cc-banner></cc-banner>
     </div>
   `,
 })
