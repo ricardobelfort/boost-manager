@@ -291,7 +291,9 @@
     <!-- Row 5: values -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <label class="font-medium text-gray-700 mb-2 block" for="currency">Currency</label>
+        <label class="font-medium text-gray-700 mb-2 block" for="currency"
+          >Currency <span class="text-red-500">*</span></label
+        >
         <p-select
           styleClass="w-full"
           [options]="currencies"
