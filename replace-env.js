@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const prodEnvPath = path.resolve(__dirname, 'src/environments/environment.prod.ts');
+const prodEnvPath = path.resolve(__dirname, 'src/environments/environment.development.ts');
 let fileContent = fs.readFileSync(prodEnvPath, 'utf8');
 
 fileContent = fileContent
