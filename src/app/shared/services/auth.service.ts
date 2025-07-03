@@ -70,7 +70,6 @@ export class AuthService {
     return profile;
   }
 
-  /** Desloga o usuário */
   signOut(): Observable<void> {
     return from(
       supabase.auth.signOut().then(() => {
@@ -79,7 +78,6 @@ export class AuthService {
     );
   }
 
-  /** Verifica se está logado (atual e reativo) */
   isLoggedIn(): boolean {
     return !!this.sessionSubject.value;
   }
@@ -92,44 +90,63 @@ export class AuthService {
     });
   }
 
-  // auth.service.ts
-  // ...
+  // Só registra o usuário no Auth
   signUp(email: string, password: string) {
-    // Só registra o usuário no Auth
     return from(supabase.auth.signUp({ email, password }));
   }
 
-  // Cria tenant e profile DEPOIS do login (quando session ativa)
-  // AuthService.ts
-
   async createTenantAndProfile(name: string, email: string, userId: string) {
     // 1. Verifica se já existe um tenant com o mesmo nome
-    const { data: existingTenant, error: lookupError } = await supabase
+    const { data: existingTenant, error: lookupTenantError } = await supabase
       .from('tenants')
       .select('id')
       .eq('name', name)
       .maybeSingle();
 
-    if (lookupError) {
+    if (lookupTenantError) {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
         detail: 'Error verifying name.',
       });
-      throw lookupError;
+      throw lookupTenantError;
     }
 
     if (existingTenant) {
-      // Se já existe, lança erro e mostra toast
       this.messageService.add({
         severity: 'warn',
         summary: 'Name already exists',
-        detail: 'There is already a tenant registered with that name. Please choose another one.',
+        detail: 'A company with that name is already registered. Please choose another one.',
       });
       throw new Error('Tenant name already exists');
     }
 
-    // 2. Cria tenant normalmente se não existe
+    // 2. Verifica se já existe e-mail na tabela de profiles (além do auth)
+    const { data: existingProfile, error: lookupEmailError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (lookupEmailError) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error verifying email.',
+      });
+      throw lookupEmailError;
+    }
+
+    if (existingProfile) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Email already exists',
+        detail: 'A registration with this email already exists. Try to recover the password or use another email.',
+      });
+      throw new Error('Email already exists');
+    }
+
+    // 3. Cria tenant normalmente se não existe
     const { data: tenantData, error: tenantError } = await supabase
       .from('tenants')
       .insert([{ name }])
@@ -145,19 +162,19 @@ export class AuthService {
       throw tenantError;
     }
 
-    // Garante que existe profile antes de atualizar
+    // 4. Garante que existe profile antes de atualizar
     const { data: profile } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
 
     if (!profile) {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: 'Profile not found after signup. Try again or contact support.',
+        detail: 'Profile not found after registration. Please try again or contact support.',
       });
       throw new Error('Profile not found!');
     }
 
-    // Atualiza o profile vinculado ao tenant!
+    // 5. Atualiza o profile vinculado ao tenant!
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
@@ -172,7 +189,7 @@ export class AuthService {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: profileError.message || 'Profile update error.',
+        detail: profileError.message || 'Error updating profile.',
       });
       throw profileError;
     }
