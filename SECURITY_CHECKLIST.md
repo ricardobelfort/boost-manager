@@ -6,8 +6,8 @@
 - [ ] Chaves protegidas
 
 ## Supabase
-- [ ] RLS habilitado
-- [ ] Policies revisadas
+- [✅] RLS habilitado
+- [✅] Policies revisadas
 - [ ] Backups automáticos
 
 ## Backend/API
@@ -20,11 +20,12 @@
 - [ ] Headers de segurança (CSP, X-Frame-Options)
 - [ ] Escapar outputs do usuário
 - [ ] Feedback de erros/autorização
+- [✅] Configuração de .env através de scripts
 
 ## Autenticação
 - [ ] Lockout após X tentativas
-- [ ] Tokens com expiração curta
-- [ ] Logout apaga sessão
+- [✅] Tokens com expiração curta
+- [✅] Logout apaga sessão
 
 ## Políticas & Cookies
 - [ ] Consentimento de cookies

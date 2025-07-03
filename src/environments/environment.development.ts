@@ -1,4 +1,5 @@
 export const environment = {
-  production: false,
-  apiUrl: 'http://my-dev-url'
+  production: true,
+  SUPABASE_URL: 'SUPABASE_URL_PLACEHOLDER',
+  SUPABASE_ANON_KEY: 'SUPABASE_ANON_KEY_PLACEHOLDER',
 };
