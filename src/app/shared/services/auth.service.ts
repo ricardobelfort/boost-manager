@@ -100,8 +100,10 @@ export class AuthService {
   }
 
   // Cria tenant e profile DEPOIS do login (quando session ativa)
+  // AuthService.ts
+
   async createTenantAndProfile(name: string, email: string, userId: string) {
-    // 1. Cria o tenant
+    // Cria o tenant
     const { data: tenantData, error: tenantError } = await supabase
       .from('tenants')
       .insert([{ name }])
@@ -117,58 +119,39 @@ export class AuthService {
       throw tenantError;
     }
 
-    // 2. Busca se já existe o profile
-    const { data: existingProfile, error: profileSelectError } = await supabase
+    // Garante que existe profile antes de tentar atualizar!
+    const { data: profile } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
+
+    if (!profile) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Profile not found after signup. Try again or contact support.',
+      });
+      throw new Error('Profile not found!');
+    }
+
+    // Atualiza o profile vinculado ao tenant!
+    const { error: profileError } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+      .update({
+        email,
+        role: email === 'rbelfort2004@gmail.com' ? 'superadmin' : 'owner',
+        name,
+        tenant_id: tenantData.id,
+      })
+      .eq('id', userId);
 
-    if (profileSelectError && profileSelectError.code !== 'PGRST116') {
-      // PGRST116 = no rows found (ok se não existe ainda)
+    if (profileError) {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: profileSelectError.message || 'Profile select error.',
+        detail: profileError.message || 'Profile update error.',
       });
-      throw profileSelectError;
+      throw profileError;
     }
 
-    let profileResp;
-    if (existingProfile) {
-      // UPDATE profile existente
-      profileResp = await supabase
-        .from('profiles')
-        .update({
-          name,
-          email,
-          role: 'owner', // aqui pode ser 'superadmin' para você!
-          tenant_id: tenantData.id,
-        })
-        .eq('id', userId);
-    } else {
-      // INSERT profile se não existir
-      profileResp = await supabase.from('profiles').insert([
-        {
-          id: userId,
-          name,
-          email,
-          role: 'owner',
-          tenant_id: tenantData.id,
-        },
-      ]);
-    }
-
-    if (profileResp.error) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: profileResp.error.message || 'Profile upsert error.',
-      });
-      throw profileResp.error;
-    }
-
-    return { tenant: tenantData, profile: profileResp.data };
+    return { tenant: tenantData };
   }
 
   async getUserProfile() {
