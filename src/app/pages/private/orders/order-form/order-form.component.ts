@@ -255,7 +255,7 @@ export class OrderFormComponent {
       case 'EUR':
         return 'de-DE';
       case 'BTC':
-        return 'en-US'; // bitcoin não tem locale, trate especial
+        return 'en-US';
       default:
         return 'en-US';
     }
