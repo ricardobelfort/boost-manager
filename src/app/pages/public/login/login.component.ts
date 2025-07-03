@@ -145,16 +145,51 @@ export class LoginComponent implements OnInit {
 
           const user = response.data.session.user;
 
-          try {
-            // << NOVO FLUXO GARANTIDO AQUI!
-            await this.ensureProfileAndTenant(email ?? '', email ?? '', user.id);
-          } catch (err) {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'Error ensuring tenant/profile. Contact support.',
+          // 1. Busca o profile do usuário
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, name, email, role, tenant_id')
+            .eq('id', user.id)
+            .single();
+
+          // 2. Verifica se falta completar (nome, tenant, role)
+          if (!profile?.name || !profile?.tenant_id || !profile?.role || profile.role === 'user') {
+            // 3. Cria tenant, se necessário
+            let tenantId = profile?.tenant_id;
+            if (!tenantId) {
+              const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
+              const { data: tenant, error: tenantError } = await supabase
+                .from('tenants')
+                .insert([{ name: companyName }])
+                .select()
+                .single();
+              if (tenantError) {
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: tenantError.message || 'Error creating tenant.',
+                });
+                return;
+              }
+              tenantId = tenant.id;
+              localStorage.removeItem('pendingCompanyName');
+            }
+
+            // 4. Atualize o profile via RPC (opção 1 Supabase)
+            const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
+            const { error: updateError } = await supabase.rpc('update_profile', {
+              user_name: companyName,
+              user_role: email === 'rbelfort2004@gmail.com' ? 'superadmin' : 'owner',
+              user_tenant_id: tenantId,
             });
-            return;
+            if (updateError) {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: updateError.message || 'Error updating profile.',
+              });
+              return;
+            }
           }
 
           await this.auth.loadUserProfileAndTenant();

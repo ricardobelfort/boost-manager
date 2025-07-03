@@ -105,7 +105,7 @@ export class AuthService {
   }
 
   async createTenantAndProfile(name: string, email: string, userId: string) {
-    // Verifica se já existe um tenant com o mesmo nome
+    // 1. Verifica se já existe um tenant com o mesmo nome
     const { data: existingTenant, error: lookupTenantError } = await supabase
       .from('tenants')
       .select('id')
@@ -130,36 +130,7 @@ export class AuthService {
       throw new Error('Tenant name already exists');
     }
 
-    // 1. Busca o usuário autenticado (pode passar userId se quiser)
-    const { data: user } = await supabase.auth.getUser();
-    const currentUserId = userId || user?.user?.id;
-    if (!currentUserId) throw new Error('Usuário não autenticado!');
-
-    // 2. Garante que o profile existe (cria se não existir)
-    let { data: profile } = await supabase.from('profiles').select('id').eq('id', currentUserId).maybeSingle();
-
-    if (!profile) {
-      const { error: insertError } = await supabase.from('profiles').insert([
-        {
-          id: currentUserId,
-          email,
-          name,
-          role: email === 'rbelfort2004@gmail.com' ? 'superadmin' : 'owner',
-          tenant_id: null,
-        },
-      ]);
-      if (insertError) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: insertError.message || 'Erro ao criar o profile.',
-        });
-        throw insertError;
-      }
-      profile = { id: currentUserId };
-    }
-
-    // 3. Cria o tenant
+    // 2. Cria o tenant
     const { data: tenantData, error: tenantError } = await supabase
       .from('tenants')
       .insert([{ name }])
@@ -175,13 +146,12 @@ export class AuthService {
       throw tenantError;
     }
 
-    // 4. Atualiza o profile com tenant_id
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        tenant_id: tenantData.id,
-      })
-      .eq('id', currentUserId);
+    // 3. Atualiza o profile usando a RPC (update_profile)
+    const { error: updateError } = await supabase.rpc('update_profile', {
+      user_name: name,
+      user_role: email === 'rbelfort2004@gmail.com' ? 'superadmin' : 'owner',
+      user_tenant_id: tenantData.id,
+    });
 
     if (updateError) {
       this.messageService.add({
