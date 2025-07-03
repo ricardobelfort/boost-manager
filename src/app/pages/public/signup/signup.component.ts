@@ -43,9 +43,9 @@ export class SignupComponent {
     this.showPassword = !this.showPassword;
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.signupForm.invalid) {
-      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Please fill in all fields correctly.' });
+      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Preencha todos os campos corretamente.' });
       return;
     }
 
@@ -55,41 +55,98 @@ export class SignupComponent {
 
     if (password !== confirmPassword) {
       this.signupForm.get('confirmPassword')?.setErrors({ notMatching: true });
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Passwords do not match.' });
+      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Senhas não conferem.' });
+      this.loading.hide();
       return;
     }
 
-    // AuthService para Multi-Tenant:
-    // 1. signUp apenas cria usuário no Auth (e-mail/senha)
-    // 2. Após o primeiro login (com e-mail confirmado), cria tenant/profile
-    // 3. Cada usuário está sempre associado a um tenant
+    // Opcional: check em profiles para UX
+    if (await this.auth.emailExists(email!)) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'E-mail já registrado',
+        detail: 'Já existe conta com esse e-mail. Faça login ou recupere a senha.',
+      });
+      this.loading.hide();
+      return;
+    }
 
-    localStorage.setItem('pendingCompanyName', name ?? '');
-
+    // Aqui começa o fluxo correto
     this.auth.signUp(email!, password!).subscribe({
       next: (response) => {
         this.loading.hide();
+        // ATENÇÃO: aqui pode vir { error: { message: ... } }
         if (response.error) {
+          let detail = response.error.message || 'Erro ao cadastrar. Tente outro e-mail.';
+          if (
+            detail.toLowerCase().includes('already registered') ||
+            detail.toLowerCase().includes('user already exists') ||
+            detail.toLowerCase().includes('invalid login credentials')
+          ) {
+            detail = 'Já existe cadastro com este e-mail. Faça login ou recupere sua senha.';
+          }
           this.messageService.add({
             severity: 'error',
-            summary: 'Error',
-            detail: response.error.message || 'Error registering. Please try again.',
+            summary: 'Erro',
+            detail,
           });
           return;
         }
+        // Mesmo sem erro, pode faltar user
+        if (!response.data?.user) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Erro ao criar conta. Tente novamente ou use outro e-mail.',
+          });
+          return;
+        }
+        // Sucesso REAL
+        localStorage.setItem('pendingCompanyName', name ?? '');
         this.messageService.add({
           severity: 'success',
-          summary: 'Success',
-          detail: 'Registration completed! Check your email to confirm your account.',
+          summary: 'Sucesso!',
+          detail: 'Cadastro realizado! Confirme no seu e-mail.',
         });
         this.router.navigate(['/auth/login']);
       },
       error: (err) => {
         this.loading.hide();
+        if (err.status === 0) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro de conexão',
+            detail: 'Não foi possível se conectar ao servidor.',
+          });
+          return;
+        }
+        // Trate erro 400/409 do Supabase (usuário já existe)
+        if (
+          err.status === 400 ||
+          err.status === 409 ||
+          (err.error?.message && err.error.message.toLowerCase().includes('already registered'))
+        ) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Usuário já cadastrado',
+            detail: 'Já existe uma conta com esse e-mail. Tente recuperar sua senha.',
+          });
+          return;
+        }
+        // Erro detalhado
+        if (err?.error?.message) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: err.error.message,
+          });
+          return;
+        }
+        // Fallback
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: err?.message || 'Error registering. Please try again.',
+          summary: 'Erro inesperado',
+          detail: 'Ocorreu um erro. Tente novamente.',
         });
       },
     });
@@ -98,7 +155,6 @@ export class SignupComponent {
   get name() {
     return this.signupForm.get('name');
   }
-
   get email() {
     return this.signupForm.get('email');
   }
@@ -111,14 +167,8 @@ export class SignupComponent {
 
   onPasswordInput(): void {
     const passwordValue = this.password?.value || '';
+    this.passwordTouched = passwordValue.length > 0;
 
-    if (passwordValue.length > 0) {
-      this.passwordTouched = true;
-    } else {
-      this.passwordTouched = false;
-    }
-
-    // Calcule a força
     let strength = 0;
     if (passwordValue.length >= 8) strength++;
     if (/[a-z]/.test(passwordValue)) strength++;
@@ -146,15 +196,12 @@ export class SignupComponent {
   passwordHasLowerCase(): boolean {
     return /[a-z]/.test(this.password?.value || '');
   }
-
   passwordHasUpperCase(): boolean {
     return /[A-Z]/.test(this.password?.value || '');
   }
-
   passwordHasNumber(): boolean {
     return /\d/.test(this.password?.value || '');
   }
-
   passwordHasMinLength(): boolean {
     return (this.password?.value || '').length >= 8;
   }

@@ -90,7 +90,16 @@ export class AuthService {
     });
   }
 
-  // Só registra o usuário no Auth
+  async tenantExists(name: string): Promise<boolean> {
+    const { data } = await supabase.from('tenants').select('id').eq('name', name).maybeSingle();
+    return !!data;
+  }
+
+  async emailExists(email: string): Promise<boolean> {
+    const { data } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle();
+    return !!data;
+  }
+
   signUp(email: string, password: string) {
     return from(supabase.auth.signUp({ email, password }));
   }
