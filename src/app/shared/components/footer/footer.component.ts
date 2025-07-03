@@ -14,7 +14,10 @@ import { APP_VERSION } from 'src/version';
     >
       <div>
         <span class="font-semibold text-gray-700">BoostManager</span>
-        &copy; {{ currentYear }}. All rights reserved.
+        &copy; {{ currentYear }}. All rights reserved. |
+        <a routerLink="/privacy" class="underline hover:text-lime-500">Privacy Policies</a> |
+        <a routerLink="/terms" class="underline hover:text-lime-500">Terms</a> |
+        <a routerLink="/cookies" class="underline hover:text-lime-500">Cookie Policies</a>
       </div>
       <div>
         Version <span class="font-mono bg-gray-100 rounded px-2 py-0.5">{{ APP_VERSION }}</span> | Designed by
