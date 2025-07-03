@@ -8,12 +8,12 @@
     <form [formGroup]="signupForm" class="w-full min-w-full flex flex-col gap-4">
       <div>
         <label class="block text-base text-gray-700">
-          <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">Company name</span>
+          <span class="text-gray-700 after:ml-0.5 after:text-red-500 after:content-['*']">Name</span>
           <input
             class="w-full mt-1 border border-gray-300 px-3 py-3 rounded-sm shadow-xs focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500"
             type="text"
             formControlName="name"
-            placeholder="Your company or project name"
+            placeholder="Your name"
             autocomplete="off"
             required
           />
@@ -22,7 +22,7 @@
           *ngIf="name?.invalid && (name?.dirty || name?.touched)"
           class="text-sm text-red-500 mt-1"
         >
-          <div *ngIf="name?.hasError('required')">Company name is required.</div>
+          <div *ngIf="name?.hasError('required')">Name is required.</div>
           <div *ngIf="name?.hasError('minlength')">Minimum 2 characters.</div>
         </div>
       </div>

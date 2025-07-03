@@ -117,7 +117,7 @@ export class LoginComponent implements OnInit {
               this.messageService.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Erro ao criar tenant/profile. Contate o suporte.',
+                detail: 'Error creating tenant/profile. Contact support.',
               });
               return;
             }

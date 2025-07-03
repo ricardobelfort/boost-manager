@@ -103,7 +103,33 @@ export class AuthService {
   // AuthService.ts
 
   async createTenantAndProfile(name: string, email: string, userId: string) {
-    // Cria o tenant
+    // 1. Verifica se já existe um tenant com o mesmo nome
+    const { data: existingTenant, error: lookupError } = await supabase
+      .from('tenants')
+      .select('id')
+      .eq('name', name)
+      .maybeSingle();
+
+    if (lookupError) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error verifying name.',
+      });
+      throw lookupError;
+    }
+
+    if (existingTenant) {
+      // Se já existe, lança erro e mostra toast
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Name already exists',
+        detail: 'There is already a tenant registered with that name. Please choose another one.',
+      });
+      throw new Error('Tenant name already exists');
+    }
+
+    // 2. Cria tenant normalmente se não existe
     const { data: tenantData, error: tenantError } = await supabase
       .from('tenants')
       .insert([{ name }])
@@ -119,7 +145,7 @@ export class AuthService {
       throw tenantError;
     }
 
-    // Garante que existe profile antes de tentar atualizar!
+    // Garante que existe profile antes de atualizar
     const { data: profile } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
 
     if (!profile) {
