@@ -24,7 +24,7 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'pt' },
     provideNgcCookieConsent({
       cookie: {
-        domain: 'https://boost-manager.vercel.app',
+        domain: 'boost-manager.vercel.app',
       },
       palette: {
         popup: {
