@@ -1,7 +1,9 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from '@core/guards/auth.guard';
+import { OnboardingCompletedGuard, OnboardingGuard } from '@core/guards/onboarding.guard';
 import { SuperAdminGuard } from '@core/guards/super-admin.guard';
 import { TenantGuard } from '@core/guards/tenant.guard';
+import { AuthCallbackComponent } from '@pages/public/auth-callback.component';
 import { LoginComponent } from '@pages/public/login/login.component';
 import { OnboardingComponent } from '@pages/public/onboarding.component';
 import { PrivacyComponent } from '@pages/public/privacy/privacy.component';
@@ -18,9 +20,10 @@ export const routes: Routes = [
   },
   { path: 'auth/signup', component: SignupComponent },
   { path: 'auth/recovery', component: RecoveryComponent },
+  { path: 'auth/callback', component: AuthCallbackComponent },
   { path: 'privacy', component: PrivacyComponent },
   { path: 'terms', component: TermsComponent },
-  { path: 'onboarding', component: OnboardingComponent },
+  { path: 'onboarding', component: OnboardingComponent, canActivate: [OnboardingGuard] },
   {
     path: 'superadmin',
     loadChildren: () => import('./pages/private/superadmin/superadmin.routes').then((r) => r.SUPERADMIN_ROUTES),
@@ -32,7 +35,7 @@ export const routes: Routes = [
     data: {
       breadcrumb: 'Dashboard',
     },
-    canActivate: [AuthGuard, TenantGuard],
+    canActivate: [AuthGuard, TenantGuard, OnboardingCompletedGuard],
   },
   { path: '**', component: PageNotFoundComponent },
 ];
