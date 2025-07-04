@@ -63,52 +63,6 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  private async ensureProfileAndTenant(email: string, name: string, userId: string) {
-    // Busca ou cria profile, cria tenant e associa ao profile, se necessário
-    let { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
-
-    if (!profile) {
-      // Cria o profile se não existir
-      const { error: insertError } = await supabase.from('profiles').insert([
-        {
-          id: userId,
-          email,
-          name,
-          role: email === 'rbelfort2004@gmail.com' ? 'superadmin' : 'owner',
-          tenant_id: null,
-        },
-      ]);
-      if (insertError) throw insertError;
-      // reconsulta
-      ({ data: profile } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle());
-    }
-
-    // Cria o tenant se não houver
-    if (!profile?.tenant_id || !profile.role || !profile.name) {
-      const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
-      // Só cria tenant se não houver
-      const { data: tenantData, error: tenantError } = await supabase
-        .from('tenants')
-        .insert([{ name: companyName }])
-        .select()
-        .single();
-      if (tenantError) throw tenantError;
-
-      // Atualiza o profile com o tenant criado
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          name: companyName,
-          tenant_id: tenantData.id,
-          role: email === 'rbelfort2004@gmail.com' ? 'superadmin' : 'owner',
-        })
-        .eq('id', userId);
-
-      if (updateError) throw updateError;
-      localStorage.removeItem('pendingCompanyName');
-    }
-  }
-
   async onSubmit() {
     if (this.loginForm.invalid) {
       this.messageService.add({
@@ -179,7 +133,8 @@ export class LoginComponent implements OnInit {
             const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
             const { error: updateError } = await supabase.rpc('update_profile', {
               user_name: companyName,
-              user_role: email === 'rbelfort2004@gmail.com' ? 'superadmin' : 'owner',
+              // MODIFICAÇÃO AQUI: Usar o método do AuthService
+              user_role: this.auth.isSuperAdminEmail(email!) ? 'superadmin' : 'owner',
               user_tenant_id: tenantId,
             });
             if (updateError) {
@@ -211,7 +166,8 @@ export class LoginComponent implements OnInit {
             detail: `Welcome, ${email}!`,
           });
 
-          if (loadedProfile?.role === 'superadmin') {
+          // MODIFICAÇÃO AQUI: Usar o método do AuthService
+          if (await this.auth.isCurrentUserSuperAdmin()) {
             this.router.navigate(['/superadmin']);
           } else {
             this.router.navigate(['/dashboard']);

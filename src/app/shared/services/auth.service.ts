@@ -104,7 +104,12 @@ export class AuthService {
     return from(supabase.auth.signUp({ email, password }));
   }
 
-  async createTenantAndProfile(tenantName: string, userName: string, userId: string, userEmail: string): Promise<void> {
+  async createTenantAndProfile(
+    tenantName: string,
+    userName: string,
+    userId: string,
+    userEmail: string
+  ): Promise<string> {
     // 1. Criar o tenant
     const { data: tenant, error: tenantError } = await supabase
       .from('tenants')
@@ -118,8 +123,9 @@ export class AuthService {
     // 2. Verificar se o perfil já existe
     const { data: existingProfile } = await supabase.from('profiles').select('id').eq('id', userId).single();
 
-    // Use 'admin' que já sabemos que funciona
-    const role = 'admin';
+    // Determinar a role com base no email
+    // Se for o email do superadmin, atribuir role 'superadmin', caso contrário 'admin'
+    const role = userEmail === 'rbelfort2004@gmail.com' ? 'superadmin' : 'admin';
 
     if (existingProfile) {
       // 3a. Atualizar o perfil existente
@@ -148,18 +154,72 @@ export class AuthService {
 
       if (profileError) throw profileError;
     }
+
+    // Atualizar o tenantId no serviço
+    this.tenantId = tenant.id;
+
+    // Retornar a role para que o componente de onboarding saiba para onde redirecionar
+    return role;
+  }
+
+  // Método para verificar se um email é de superadmin
+  isSuperAdminEmail(email: string): boolean {
+    // Lista de emails de superadmin
+    const superAdminEmails = ['rbelfort2004@gmail.com'];
+    return superAdminEmails.includes(email.toLowerCase());
+  }
+
+  // Método para verificar se o usuário atual é superadmin
+  async isCurrentUserSuperAdmin(): Promise<boolean> {
+    try {
+      // Se não houver usuário logado, retorna false
+      if (!this.currentUser) {
+        return false;
+      }
+
+      // Busca o perfil do usuário
+      const { data, error } = await supabase.from('profiles').select('role').eq('id', this.currentUser.id).single();
+
+      if (error || !data) {
+        console.error('Error checking if user is superadmin:', error);
+        return false;
+      }
+
+      return data.role === 'superadmin';
+    } catch (error) {
+      console.error('Error checking if user is superadmin:', error);
+      return false;
+    }
+  }
+
+  // Método para obter a role do usuário atual
+  async getUserRole(): Promise<string | null> {
+    try {
+      // Se não houver usuário logado, retorna null
+      if (!this.currentUser) {
+        return null;
+      }
+
+      // Busca o perfil do usuário
+      const { data, error } = await supabase.from('profiles').select('role').eq('id', this.currentUser.id).single();
+
+      if (error || !data) {
+        console.error('Error getting user role:', error);
+        return null;
+      }
+
+      return data.role;
+    } catch (error) {
+      console.error('Error getting user role:', error);
+      return null;
+    }
   }
 
   async getUserProfile() {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user?.id) return null;
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.user.id).single();
+    const { data } = await supabase.from('profiles').select('*').eq('id', user.user.id).single();
     return data;
-  }
-
-  async getUserRole() {
-    const profile = await this.getUserProfile();
-    return profile?.role ?? null;
   }
 
   async getUserTenant() {

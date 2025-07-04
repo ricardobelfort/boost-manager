@@ -126,7 +126,9 @@ export class OnboardingComponent implements OnInit {
         this.loadingService.hide();
         return;
       }
-      await this.authService.createTenantAndProfile(tenantName, name, currentUser.id, currentUser.email);
+
+      // Chamar o método createTenantAndProfile e capturar a role retornada
+      const role = await this.authService.createTenantAndProfile(tenantName, name, currentUser.id, currentUser.email);
 
       const { error: updateError } = await supabase
         .from('profiles')
@@ -138,7 +140,13 @@ export class OnboardingComponent implements OnInit {
       if (updateError) throw updateError;
 
       await this.authService.loadUserProfileAndTenant();
-      this.router.navigate(['/dashboard']);
+
+      // Redirecionar com base na role
+      if (role === 'superadmin') {
+        this.router.navigate(['/superadmin']);
+      } else {
+        this.router.navigate(['/dashboard']);
+      }
     } catch (err: any) {
       this.messageService.add({
         severity: 'error',
