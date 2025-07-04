@@ -63,7 +63,7 @@ export class AuthService {
   /** Verifica se a conta está bloqueada antes de tentar login */
   async checkAccountLockout(email: string): Promise<{ locked: boolean; message?: string }> {
     try {
-      const response = await fetch(`${(supabase as any)._supabaseUrl}/functions/v1/check-lockout`, {
+      const response = await fetch(`${this.supabaseUrl}/functions/v1/check-lockout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ export class AuthService {
     try {
       const userAgent = navigator.userAgent;
 
-      const response = await fetch(`${(supabase as any)._supabaseUrl}/functions/v1/record-login-failure`, {
+      const response = await fetch(`${this.supabaseUrl}/functions/v1/record-login-failure`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
