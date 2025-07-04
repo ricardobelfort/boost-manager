@@ -1,6 +1,5 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import type { Session, User } from '@supabase/supabase-js';
-import { MessageService } from 'primeng/api';
 import { BehaviorSubject, from, map, Observable, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { supabase } from 'supabase.client';
@@ -8,12 +7,11 @@ import { Md5 } from 'ts-md5';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  readonly supabaseUrl = (supabase as any)._supabaseUrl || environment.SUPABASE_ANON_KEY;
+  readonly supabaseUrl = (supabase as any)._supabaseUrl || environment.SUPABASE_URL;
   readonly anonKey = (supabase as any)._anonKey || environment.SUPABASE_ANON_KEY;
 
   private sessionSubject = new BehaviorSubject<Session | null>(null);
   private tenantId: string | null = null;
-  private readonly messageService = inject(MessageService);
   supabase = supabase;
 
   constructor() {
