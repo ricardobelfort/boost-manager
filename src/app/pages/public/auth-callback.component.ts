@@ -77,72 +77,56 @@ export class AuthCallbackComponent implements OnInit {
 
   async handleAuthCallback(): Promise<void> {
     try {
-      // Verificar se há um hash na URL (para OAuth)
+      // 1. Confirmação de e-mail
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
-
-      // Verificar se há parâmetros de confirmação de e-mail na URL
       const urlParams = new URLSearchParams(window.location.search);
       const confirmationToken = urlParams.get('token') || urlParams.get('confirmation_token');
       const type = urlParams.get('type');
 
-      // Se temos um token de confirmação de e-mail
+      // CONFIRMAÇÃO DE EMAIL
       if (confirmationToken && (type === 'email' || !type)) {
-        // Processar a confirmação de e-mail
         const response = await this.authService.handleEmailConfirmation(confirmationToken).toPromise();
 
         if (response.error) {
           this.error = response.error.message || 'Erro ao confirmar e-mail. Por favor, tente novamente.';
           return;
         }
-
-        // Se a confirmação foi bem-sucedida, verificar o perfil do usuário
-        const profile = await this.authService.loadUserProfileAndTenant();
-
-        if (!profile) {
-          this.router.navigate(['/auth/login']);
-          return;
-        }
-
-        // Verificar se o onboarding foi completado
-        if (!profile.onboarding_completed) {
-          this.router.navigate(['/onboarding']);
-        } else {
-          // Se já tiver perfil completo, redirecionar para dashboard
-          this.router.navigate(['/dashboard']);
-        }
-        return;
+        // Após confirmar o e-mail, força refresh da sessão
+        await this.authService.refreshSession();
       }
 
-      // Se temos um token de acesso na URL (OAuth)
-      if (accessToken) {
-        // Se temos um token na URL, vamos para o onboarding
-        // O componente de onboarding já está configurado para pegar o token da URL
-        this.router.navigate(['/onboarding']);
-        return;
+      // SE HOUVER TOKEN DE ACESSO (OAuth ou link mágico)
+      let currentAccessToken = accessToken;
+      if (!currentAccessToken) {
+        // Garante que a sessão está atualizada e pega o access_token
+        const session = await this.authService.refreshSession();
+        currentAccessToken = session?.access_token || '';
       }
 
-      // Se não temos token na URL, verificamos a sessão atual
-      await this.authService.refreshSession();
-
-      if (!this.authService.isLoggedIn()) {
+      if (!currentAccessToken) {
+        // Não está autenticado
         this.router.navigate(['/auth/login']);
         return;
       }
 
-      // Carregar o perfil do usuário e verificar o status de onboarding
-      const profile = await this.authService.loadUserProfileAndTenant();
+      // CHAMA EDGE FUNCTION PARA SABER PRA ONDE VAI
+      const resp = await fetch('https://nqaipmnlcoioqqqzcghu.supabase.co/functions/v1/check-new-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessToken: currentAccessToken }),
+      });
+      const result = await resp.json();
 
-      if (!profile) {
-        this.router.navigate(['/auth/login']);
+      if (result.error) {
+        this.error = result.error || 'Erro ao validar usuário.';
         return;
       }
 
-      // Verificar se o onboarding foi completado
-      if (!profile.onboarding_completed) {
+      // Redireciona conforme resposta do backend
+      if (result.shouldRedirect) {
         this.router.navigate(['/onboarding']);
       } else {
-        // Se já tiver perfil completo, redirecionar para dashboard
         this.router.navigate(['/dashboard']);
       }
     } catch (error: any) {
