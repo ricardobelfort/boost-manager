@@ -5,12 +5,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@shared/services/auth.service';
 import { LoadingService } from '@shared/services/loading.service';
 import { MessageService } from 'primeng/api';
+import { MessageModule } from 'primeng/message';
 import { supabase } from 'supabase.client';
 
 @Component({
   standalone: true,
   selector: 'app-onboarding',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MessageModule],
   template: `
     <div class="flex flex-col items-center justify-center min-h-screen">
       <div class="w-full max-w-md p-8 rounded-2xl shadow-xs bg-white">
@@ -18,7 +19,7 @@ import { supabase } from 'supabase.client';
           <img src="assets/images/boost.png" width="64" class="mb-4" alt="" />
           <h1 class="text-2xl font-bold">Boost Manager</h1>
         </div>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-2 text-center">Complete seu cadastro</h2>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2 text-center">Complete seu cadastro</h2>
         <p class="text-gray-500 mb-7 text-center">
           Precisamos de algumas informações adicionais para configurar sua conta.
         </p>
@@ -37,7 +38,9 @@ import { supabase } from 'supabase.client';
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-lime-200 outline-none transition"
             />
           </div>
-          <div *ngIf="error" class="text-red-600 text-sm font-medium mt-2">{{ error }}</div>
+          <div *ngIf="error" class="text-red-600 text-sm font-medium mt-2">
+            <p-message severity="error" icon="pi pi-times-circle">{{ error }}</p-message>
+          </div>
           <button
             type="submit"
             [disabled]="form.invalid"
