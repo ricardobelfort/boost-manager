@@ -58,7 +58,113 @@ export class AuthService {
     this.tenantId = value;
   }
 
-  /** Efetua login com persistência de sessão */
+  /** Verifica se a conta está bloqueada antes de tentar login */
+  async checkAccountLockout(email: string): Promise<{ locked: boolean; message?: string }> {
+    try {
+      const response = await fetch(`${supabase}/functions/v1/check-lockout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        console.error('Erro ao verificar bloqueio de conta:', response.statusText);
+        return { locked: false }; // Em caso de erro, permitir o login
+      }
+
+      const data = await response.json();
+      return {
+        locked: data.locked || false,
+        message: data.message,
+      };
+    } catch (error) {
+      console.error('Erro ao verificar bloqueio de conta:', error);
+      return { locked: false }; // Em caso de erro, permitir o login
+    }
+  }
+
+  /** Registra uma falha de login */
+  async recordLoginFailure(email: string): Promise<{
+    remainingAttempts: number;
+    isLocked: boolean;
+  }> {
+    try {
+      const userAgent = navigator.userAgent;
+
+      const response = await fetch(`${supabase}/functions/v1/record-login-failure`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          user_agent: userAgent,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Erro ao registrar falha de login:', response.statusText);
+        return { remainingAttempts: 5, isLocked: false }; // Valor padrão em caso de erro
+      }
+
+      const data = await response.json();
+      return {
+        remainingAttempts: data.remainingAttempts || 0,
+        isLocked: data.isLocked || false,
+      };
+    } catch (error) {
+      console.error('Erro ao registrar falha de login:', error);
+      return { remainingAttempts: 5, isLocked: false }; // Valor padrão em caso de erro
+    }
+  }
+
+  /** Efetua login com verificação de bloqueio e persistência de sessão */
+  async signInWithLockoutCheck(
+    email: string,
+    password: string,
+    rememberMe: boolean
+  ): Promise<{
+    data?: any;
+    error?: string;
+  }> {
+    try {
+      // 1. Verificar se a conta está bloqueada
+      const lockoutCheck = await this.checkAccountLockout(email);
+
+      if (lockoutCheck.locked) {
+        return {
+          error:
+            lockoutCheck.message || 'Conta temporariamente bloqueada devido a múltiplas tentativas de login falhas.',
+        };
+      }
+
+      // 2. Tentar fazer login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: {
+          persistSession: rememberMe ? 'local' : 'session',
+        } as any,
+      });
+
+      // 3. Se o login falhar, registrar a falha
+      if (error) {
+        const failureData = await this.recordLoginFailure(email);
+
+        if (failureData.isLocked) {
+          return { error: 'Conta bloqueada devido a múltiplas tentativas de login falhas.' };
+        } else {
+          return { error: `Senha incorreta. Tentativas restantes: ${failureData.remainingAttempts}` };
+        }
+      }
+
+      // Login bem-sucedido
+      return { data };
+    } catch (err) {
+      console.error('Erro ao processar login:', err);
+      return { error: 'Erro ao processar login. Tente novamente.' };
+    }
+  }
+
+  /** Método original de login (mantido para compatibilidade) */
   signIn(email: string, password: string, rememberMe: boolean): Observable<any> {
     // Opção nativa do Supabase
     return from(
@@ -74,7 +180,7 @@ export class AuthService {
   }
 
   async getRemainingAttempts(email: string, maxAttempts = 5, lockoutMinutes = 30) {
-    const url = 'https://nqaipmnlcoioqqqzcghu.supabase.co/functions/v1/remaining-attempts';
+    const url = `${(supabase as any)._supabaseUrl || (window as any).SUPABASE_URL || ''}/functions/v1/remaining-attempts`;
 
     const res = await fetch(url, {
       method: 'POST',

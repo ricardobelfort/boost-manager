@@ -15,9 +15,18 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       const status = error.status;
       const apiMessage = error?.error?.message || error?.message || 'Erro inesperado.';
 
+      // Ignore 401 errors for Edge Functions related to authentication
+      const isAuthFunction =
+        req.url.includes('/functions/v1/check-lockout') ||
+        req.url.includes('/functions/v1/record-login-failure') ||
+        req.url.includes('/functions/v1/remaining-attempts');
+
+      // Ignore 401 errors for login/register endpoints
+      const isAuthEndpoint = req.url.includes('/auth/v1/token') || req.url.includes('/auth/v1/signup');
+
       // Trate casos especiais
-      if (status === 401) {
-        // This will already be handled by AuthInterceptor, but it may display something
+      if (status === 401 && !isAuthFunction && !isAuthEndpoint) {
+        // Only show session expired for non-auth endpoints
         messageService.add({
           severity: 'warn',
           summary: 'Session Expired',
@@ -36,8 +45,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           summary: 'No connection',
           detail: 'Unable to connect to the server.',
         });
-      } else {
+      } else if (!isAuthFunction && !isAuthEndpoint) {
         // For any other error, display a friendly message
+        // But don't show errors for auth functions/endpoints
         messageService.add({
           severity: 'error',
           summary: `Error ${status}`,
