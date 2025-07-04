@@ -119,10 +119,18 @@ export class AuthService {
 
     if (tenantError) throw tenantError;
 
-    if (!tenant) throw new Error('Failed to create tenant');
+    if (!tenant) throw new Error('Falha ao criar tenant');
 
     // 2. Verificar se o perfil já existe
-    const { data: existingProfile } = await supabase.from('profiles').select('id').eq('id', userId).single();
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id, role') // Também selecionar a role atual para verificação
+      .eq('id', userId)
+      .single();
+
+    // Valores possíveis para role (ajuste conforme os valores permitidos na sua restrição)
+    // Opções comuns: 'admin', 'user', 'owner', 'manager', 'editor', 'viewer'
+    const role = 'admin'; // Use 'admin' em vez de 'owner' como tentativa
 
     if (existingProfile) {
       // 3a. Atualizar o perfil existente
@@ -130,9 +138,8 @@ export class AuthService {
         .from('profiles')
         .update({
           name: userName,
-          role: 'owner',
-          tenant_id: tenant.id,
-          // Não incluir updated_at, deixe o trigger do Postgres lidar com isso
+          role: role, // Usando o valor correto para role
+          tenant_id: tenant.id, // Assumindo que o nome correto é tenant_id
         })
         .eq('id', userId);
 
@@ -143,9 +150,8 @@ export class AuthService {
         {
           id: userId,
           name: userName,
-          role: 'owner',
-          tenant_id: tenant.id,
-          // Não incluir updated_at, deixe o trigger do Postgres lidar com isso
+          role: role, // Usando o valor correto para role
+          tenant_id: tenant.id, // Assumindo que o nome correto é tenant_id
         },
       ]);
 
