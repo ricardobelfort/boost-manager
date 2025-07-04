@@ -3,6 +3,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@shared/services/auth.service';
+import { LoadingService } from '@shared/services/loading.service';
 import { MessageService } from 'primeng/api';
 import { supabase } from 'supabase.client';
 
@@ -11,7 +12,7 @@ import { supabase } from 'supabase.client';
   selector: 'app-onboarding',
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+    <div class="flex flex-col items-center justify-center min-h-screen">
       <div class="w-full max-w-md p-8 rounded-2xl shadow-lg bg-white mt-12">
         <h2 class="text-2xl font-semibold text-gray-900 mb-2 text-center">Complete seu cadastro</h2>
         <p class="text-gray-500 mb-7 text-center">
@@ -35,10 +36,10 @@ import { supabase } from 'supabase.client';
           <div *ngIf="error" class="text-red-600 text-sm font-medium mt-2">{{ error }}</div>
           <button
             type="submit"
-            [disabled]="loading || form.invalid"
-            class="w-full py-2 rounded-lg font-bold bg-lime-500 hover:bg-lime-600 text-white shadow-md transition disabled:opacity-70"
+            [disabled]="form.invalid"
+            class="w-full py-2 rounded-lg font-bold bg-lime-500 hover:bg-lime-600 text-white shadow-md transition disabled:opacity-70 cursor-pointer"
           >
-            {{ loading ? 'Processando...' : 'Concluir cadastro' }}
+            Concluir cadastro
           </button>
         </form>
       </div>
@@ -50,6 +51,7 @@ export class OnboardingComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly loadingService = inject(LoadingService);
   private readonly messageService = inject(MessageService);
 
   form = this.fb.group({
@@ -57,12 +59,10 @@ export class OnboardingComponent implements OnInit {
     tenantName: ['', [Validators.required, Validators.minLength(2)]],
   });
 
-  loading = false;
   error = '';
   accessToken: string | null = null;
 
   ngOnInit() {
-    // Pega o token da hash da URL: #access_token=...
     this.route.fragment.subscribe((fragment) => {
       if (fragment) {
         const params = new URLSearchParams(fragment);
@@ -73,16 +73,12 @@ export class OnboardingComponent implements OnInit {
           sessionStorage.setItem('access_token', this.accessToken);
         }
       } else {
-        // Se não tiver fragment, tenta pegar o token da sessão
         this.accessToken = sessionStorage.getItem('access_token');
-
-        // Se não tiver token na sessão, verifica se o usuário está logado
         if (!this.accessToken) {
           supabase.auth.getSession().then(({ data }) => {
             if (!data.session) {
               this.router.navigate(['/auth/login']);
             } else {
-              // Se estiver logado, usa o token da sessão
               this.accessToken = data.session.access_token;
             }
           });
@@ -94,49 +90,40 @@ export class OnboardingComponent implements OnInit {
   async onSubmit() {
     if (this.form.invalid) return;
 
-    this.loading = true;
+    this.loadingService.show();
     this.error = '';
 
     const { name, tenantName } = this.form.value;
 
     try {
-      // Verificar se já existe um tenant com o mesmo nome
       const tenantExists = await this.authService.tenantExists(tenantName!);
 
       if (tenantExists) {
         this.error = 'A company with that name is already registered. Please choose another name.';
-        this.loading = false;
+        this.loadingService.hide();
         return;
       }
 
-      // Obter o ID do usuário atual
       const currentUser = this.authService.currentUser;
 
       if (!currentUser) {
         this.error = 'Unauthenticated user';
-        this.loading = false;
+        this.loadingService.hide();
         return;
       }
 
-      // Criar tenant e atualizar perfil
       await this.authService.createTenantAndProfile(tenantName!, name!, currentUser.id);
 
-      // Atualizar o campo onboarding_completed sem usar updated_at
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
           onboarding_completed: true,
-          // Não incluir updated_at, deixe o trigger do Postgres lidar com isso
-          // ou se não houver trigger, o valor padrão será usado
         })
         .eq('id', currentUser.id);
 
       if (updateError) throw updateError;
 
-      // Recarregar o perfil do usuário para atualizar o tenant_id
       await this.authService.loadUserProfileAndTenant();
-
-      // Onboarding completo, vá para dashboard!
       this.router.navigate(['/dashboard']);
     } catch (err: any) {
       this.messageService.add({
@@ -146,7 +133,7 @@ export class OnboardingComponent implements OnInit {
       });
       this.error = err?.message || 'Error completing onboarding';
     } finally {
-      this.loading = false;
+      this.loadingService.hide();
     }
   }
 }
