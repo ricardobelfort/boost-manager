@@ -16,7 +16,7 @@
       [contentStyle]="{ 'text-align': 'center' }"
     >
       <div class="mb-3">
-        <img src="assets/images/alert.png" width="128" alt="Something Wrong">
+        <img src="assets/images/alert.png" width="128" alt="Something Wrong" />
       </div>
       <div class="text-gray-800 my-2" [innerHTML]="lockoutDialogMessage"></div>
       <div class="mt-2 text-lg text-gray-500">
@@ -24,8 +24,14 @@
         <a href="mailto:support@boostmanager.com.br" class="hover:underline text-lime-500">contact support.</a>.
       </div>
       <div class="mt-6 flex gap-2">
-        <p-button label="Redefinir senha" (click)="goToRecovery()"></p-button>
-        <p-button label="Fechar" severity="secondary" (click)="lockoutDialogVisible = false"></p-button>
+        <div class="mt-6 flex gap-2">
+          <p-button
+            *ngIf="lockoutDialogHeader === 'Conta bloqueada'"
+            label="Redefinir senha"
+            (click)="goToRecovery()"
+          ></p-button>
+          <p-button label="Fechar" severity="secondary" (click)="lockoutDialogVisible = false"></p-button>
+        </div>
       </div>
     </p-dialog>
 
