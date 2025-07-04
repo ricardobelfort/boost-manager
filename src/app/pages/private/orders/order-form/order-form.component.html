@@ -18,7 +18,7 @@
 
   <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
     <!-- Bot Lobby MODE: Só mostra Supplier + external_supplier_id -->
-    <ng-container *ngIf="isBotLobby(); else fullOrderForm">
+    <div *ngIf="isBotLobby()">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="font-medium text-gray-700 mb-2 block">Supplier <span class="text-red-500">*</span></label>
@@ -42,10 +42,10 @@
           />
         </div>
       </div>
-    </ng-container>
+    </div>
 
     <!-- Full Form -->
-    <ng-template #fullOrderForm>
+    <div *ngIf="!isBotLobby()">
       <!-- Row 2: account data -->
       <div>
         <h3 class="text-lg font-semibold text-gray-800 mb-2">Account Data</h3>
@@ -439,7 +439,7 @@
           Notes must be at most 500 characters.
         </small>
       </div>
-    </ng-template>
+    </div>
 
     <div class="flex justify-center md:justify-end gap-4 mt-2">
       <p-button label="Cancel" variant="outlined" severity="secondary" (click)="onCancel()" />

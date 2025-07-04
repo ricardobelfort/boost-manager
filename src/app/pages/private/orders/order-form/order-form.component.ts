@@ -188,44 +188,90 @@ export class OrderFormComponent {
 
     this.orderForm.get('service_type')!.valueChanges.subscribe((value) => {
       const isBotLobby = (value ?? '').toLowerCase() === 'bot lobby';
-
-      // External Supplier ID é required só se for Bot Lobby
       const extIdCtrl = this.orderForm.get('external_supplier_id');
+      const supplierCtrl = this.orderForm.get('supplier');
+
+      // Sempre: habilita supplier e external_supplier_id (o resto só se for Bot Lobby)
+      supplierCtrl?.enable();
+      extIdCtrl?.enable();
+
+      // Set Validators
       if (isBotLobby) {
+        // Torna só esses dois required
+        supplierCtrl?.setValidators([Validators.required]);
         extIdCtrl?.setValidators([Validators.required]);
-        extIdCtrl?.enable();
+
+        // Limpa e remove validators dos outros campos
+        [
+          'booster',
+          'account_email',
+          'account_password',
+          'recovery_code',
+          'recovery_email',
+          'platform',
+          'start_date',
+          'end_date',
+          'status',
+          'currency',
+          'total_value',
+          'booster_value',
+          'weapon_quantity',
+          'observation',
+        ].forEach((field) => {
+          const ctrl = this.orderForm.get(field);
+          ctrl?.setValue(''); // Limpa o valor (garante form limpo)
+          ctrl?.clearValidators(); // Remove validators
+          ctrl?.disable(); // Desabilita campo no form
+          ctrl?.updateValueAndValidity({ emitEvent: false });
+        });
       } else {
+        // Restaura todos os validators e habilita campos
+        this.orderForm.get('booster')?.setValidators([Validators.required]);
+        this.orderForm.get('account_email')?.setValidators([Validators.required, Validators.email]);
+        this.orderForm.get('account_password')?.setValidators([Validators.required]);
+        this.orderForm.get('platform')?.setValidators([Validators.required]);
+        this.orderForm.get('start_date')?.setValidators([Validators.required]);
+        this.orderForm.get('status')?.setValidators([Validators.required]);
+        this.orderForm.get('currency')?.setValidators([Validators.required]);
+        this.orderForm
+          .get('total_value')
+          ?.setValidators([Validators.required, Validators.min(0), Validators.max(999999.99)]);
+        this.orderForm
+          .get('booster_value')
+          ?.setValidators([Validators.required, Validators.min(0), Validators.max(999999.99)]);
+        this.orderForm.get('service_type')?.setValidators([Validators.required]);
+        this.orderForm.get('weapon_quantity')?.clearValidators();
+        this.orderForm.get('observation')?.clearValidators();
         extIdCtrl?.clearValidators();
+
+        [
+          'booster',
+          'account_email',
+          'account_password',
+          'recovery_code',
+          'recovery_email',
+          'platform',
+          'start_date',
+          'end_date',
+          'status',
+          'currency',
+          'total_value',
+          'booster_value',
+          'weapon_quantity',
+          'observation',
+        ].forEach((field) => {
+          const ctrl = this.orderForm.get(field);
+          ctrl?.enable();
+          ctrl?.updateValueAndValidity({ emitEvent: false });
+        });
+
+        supplierCtrl?.setValidators([Validators.required]);
         extIdCtrl?.setValue('');
         extIdCtrl?.disable();
       }
-      extIdCtrl?.updateValueAndValidity();
 
-      // O resto dos campos fica desabilitado se for Bot Lobby
-      [
-        'booster',
-        'account_email',
-        'account_password',
-        'recovery_code',
-        'recovery_email',
-        'platform',
-        'start_date',
-        'end_date',
-        'status',
-        'currency',
-        'total_value',
-        'booster_value',
-        'weapon_quantity',
-        'observation',
-      ].forEach((field) => {
-        const ctrl = this.orderForm.get(field);
-        if (isBotLobby) {
-          ctrl?.disable();
-          ctrl?.setValue('');
-        } else {
-          ctrl?.enable();
-        }
-      });
+      supplierCtrl?.updateValueAndValidity();
+      extIdCtrl?.updateValueAndValidity();
     });
   }
 
