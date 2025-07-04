@@ -8,6 +8,9 @@ import { Md5 } from 'ts-md5';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  readonly supabaseUrl = (supabase as any)._supabaseUrl || environment.SUPABASE_ANON_KEY;
+  readonly anonKey = (supabase as any)._anonKey || environment.SUPABASE_ANON_KEY;
+
   private sessionSubject = new BehaviorSubject<Session | null>(null);
   private tenantId: string | null = null;
   private readonly messageService = inject(MessageService);
@@ -62,11 +65,11 @@ export class AuthService {
   /** Verifica se a conta está bloqueada antes de tentar login */
   async checkAccountLockout(email: string): Promise<{ locked: boolean; message?: string }> {
     try {
-      const response = await fetch(`${supabase}/functions/v1/check-lockout`, {
+      const response = await fetch(`${(supabase as any)._supabaseUrl}/functions/v1/check-lockout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          apikey: (supabase as any)._anonKey || environment.SUPABASE_ANON_KEY,
+          apikey: this.anonKey,
         },
         body: JSON.stringify({ email }),
       });
@@ -95,11 +98,11 @@ export class AuthService {
     try {
       const userAgent = navigator.userAgent;
 
-      const response = await fetch(`${supabase}/functions/v1/record-login-failure`, {
+      const response = await fetch(`${(supabase as any)._supabaseUrl}/functions/v1/record-login-failure`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          apikey: (supabase as any)._anonKey || environment.SUPABASE_ANON_KEY,
+          apikey: this.anonKey,
         },
         body: JSON.stringify({
           email,
