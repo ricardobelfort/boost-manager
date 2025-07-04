@@ -17,9 +17,8 @@
   <p-divider />
 
   <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
-    <!-- Bot Lobby MODE: Só mostra Supplier + external_supplier_id -->
-    <div *ngIf="isBotLobby()">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="w-full">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" *ngIf="isBotLobby()">
         <div>
           <label class="font-medium text-gray-700 mb-2 block">Supplier <span class="text-red-500">*</span></label>
           <p-select
@@ -34,6 +33,7 @@
             >External Supplier ID <span class="text-red-500">*</span></label
           >
           <input
+            [style]="{ width: '100%' }"
             styleClass="w-full"
             pInputText
             formControlName="external_supplier_id"
@@ -47,7 +47,7 @@
     <!-- Full Form -->
     <div *ngIf="!isBotLobby()">
       <!-- Row 2: account data -->
-      <div>
+      <div class="mb-4">
         <h3 class="text-lg font-semibold text-gray-800 mb-2">Account Data</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="flex flex-col">
@@ -152,7 +152,7 @@
       </div>
 
       <!-- Row 1: selects -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         <div>
           <label class="font-medium text-gray-700 mb-2 block"> Service Type <span class="text-red-500">*</span> </label>
           <p-select
@@ -236,7 +236,7 @@
       </div>
 
       <!-- Row 3: dates -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <label class="font-medium text-gray-700 mb-2 block"> Start Date <span class="text-red-500">*</span> </label>
           <p-datepicker
@@ -319,7 +319,7 @@
       </div>
 
       <!-- Row 5: values -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <label class="font-medium text-gray-700 mb-2 block" for="currency"
             >Currency <span class="text-red-500">*</span></label
