@@ -19,4 +19,5 @@ export interface Order {
   created_at?: string;
   currency?: string;
   booster_currency?: string;
+  external_supplier_id?: string;
 }

@@ -137,6 +137,7 @@ export class OrderFormComponent {
       total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
       booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
       observation: ['', [Validators.maxLength(500)]],
+      external_supplier_id: [''],
     },
     {
       validators: this.dateRangeValidator.bind(this),
@@ -184,6 +185,52 @@ export class OrderFormComponent {
     this.orderForm.get('currency')?.valueChanges.subscribe(() => this.updateConvertedValue());
     this.orderForm.get('total_value')?.valueChanges.subscribe(() => this.updateConvertedValue());
     this.orderForm.get('booster_value')?.valueChanges.subscribe(() => this.updateBoosterConvertedValue());
+
+    this.orderForm.get('service_type')!.valueChanges.subscribe((value) => {
+      const isBotLobby = (value ?? '').toLowerCase() === 'bot lobby';
+
+      // External Supplier ID é required só se for Bot Lobby
+      const extIdCtrl = this.orderForm.get('external_supplier_id');
+      if (isBotLobby) {
+        extIdCtrl?.setValidators([Validators.required]);
+        extIdCtrl?.enable();
+      } else {
+        extIdCtrl?.clearValidators();
+        extIdCtrl?.setValue('');
+        extIdCtrl?.disable();
+      }
+      extIdCtrl?.updateValueAndValidity();
+
+      // O resto dos campos fica desabilitado se for Bot Lobby
+      [
+        'booster',
+        'account_email',
+        'account_password',
+        'recovery_code',
+        'recovery_email',
+        'platform',
+        'start_date',
+        'end_date',
+        'status',
+        'currency',
+        'total_value',
+        'booster_value',
+        'weapon_quantity',
+        'observation',
+      ].forEach((field) => {
+        const ctrl = this.orderForm.get(field);
+        if (isBotLobby) {
+          ctrl?.disable();
+          ctrl?.setValue('');
+        } else {
+          ctrl?.enable();
+        }
+      });
+    });
+  }
+
+  isBotLobby(): boolean {
+    return (this.orderForm.get('service_type')?.value ?? '').toLowerCase() === 'bot lobby';
   }
 
   onCurrencyChange() {
@@ -340,6 +387,9 @@ export class OrderFormComponent {
   get currency() {
     return this.orderForm.get('currency')!;
   }
+  get external_supplier_id() {
+    return this.orderForm.get('external_supplier_id')!;
+  }
 
   onSubmit() {
     if (this.orderForm.invalid) {
@@ -379,6 +429,7 @@ export class OrderFormComponent {
         total_value: formValue.total_value ?? 0,
         booster_value: formValue.booster_value ?? 0,
         observation: formValue.observation ?? '',
+        external_supplier_id: formValue.external_supplier_id ?? '',
       };
       return order;
     };
