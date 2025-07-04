@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import type { Session, User } from '@supabase/supabase-js';
 import { MessageService } from 'primeng/api';
 import { BehaviorSubject, from, map, Observable, tap } from 'rxjs';
+import { environment } from 'src/environments/environment';
 import { supabase } from 'supabase.client';
 import { Md5 } from 'ts-md5';
 
@@ -63,7 +64,10 @@ export class AuthService {
     try {
       const response = await fetch(`${supabase}/functions/v1/check-lockout`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: (supabase as any)._anonKey || environment.SUPABASE_ANON_KEY,
+        },
         body: JSON.stringify({ email }),
       });
 
@@ -93,7 +97,10 @@ export class AuthService {
 
       const response = await fetch(`${supabase}/functions/v1/record-login-failure`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: (supabase as any)._anonKey || environment.SUPABASE_ANON_KEY,
+        },
         body: JSON.stringify({
           email,
           user_agent: userAgent,
