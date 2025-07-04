@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import type { Session, User } from '@supabase/supabase-js';
 import { MessageService } from 'primeng/api';
-import { BehaviorSubject, from, Observable } from 'rxjs';
+import { BehaviorSubject, from, Observable, tap } from 'rxjs';
 import { supabase } from 'supabase.client';
 import { Md5 } from 'ts-md5';
 
@@ -100,8 +100,36 @@ export class AuthService {
     return !!data;
   }
 
-  signUp(email: string, password: string) {
-    return from(supabase.auth.signUp({ email, password }));
+  signUp(email: string, password: string, redirectTo?: string): Observable<any> {
+    const options = redirectTo
+      ? { emailRedirectTo: redirectTo }
+      : { emailRedirectTo: `${window.location.origin}/auth/callback` };
+
+    return from(
+      supabase.auth.signUp({
+        email,
+        password,
+        options,
+      })
+    );
+  }
+
+  handleEmailConfirmation(token: string): Observable<any> {
+    return from(
+      supabase.auth.verifyOtp({
+        token_hash: token,
+        type: 'email',
+      })
+    ).pipe(
+      tap((response) => {
+        if (response.error) {
+          console.error('Error confirming email:', response.error);
+        } else {
+          // Se a confirmação for bem-sucedida, carregue os dados do usuário
+          this.loadUserProfileAndTenant();
+        }
+      })
+    );
   }
 
   async createTenantAndProfile(

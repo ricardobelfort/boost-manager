@@ -71,8 +71,11 @@ export class SignupComponent {
       return;
     }
 
+    // Especificar a URL de redirecionamento completa
+    const redirectUrl = `${window.location.origin}/auth/callback`;
+
     // Aqui começa o fluxo correto
-    this.auth.signUp(email!, password!).subscribe({
+    this.auth.signUp(email!, password!, redirectUrl).subscribe({
       next: (response) => {
         this.loading.hide();
         // ATENÇÃO: aqui pode vir { error: { message: ... } }
