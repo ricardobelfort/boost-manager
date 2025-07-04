@@ -129,9 +129,9 @@ export class AuthService {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          user_name: userName,
-          user_role: 'owner',
-          user_tenant_id: tenant.id,
+          name: userName,
+          role: 'owner',
+          tenant_id: tenant.id,
           // Não incluir updated_at, deixe o trigger do Postgres lidar com isso
         })
         .eq('id', userId);
@@ -142,9 +142,9 @@ export class AuthService {
       const { error: profileError } = await supabase.from('profiles').insert([
         {
           id: userId,
-          user_name: userName,
-          user_role: 'owner',
-          user_tenant_id: tenant.id,
+          name: userName,
+          role: 'owner',
+          tenant_id: tenant.id,
           // Não incluir updated_at, deixe o trigger do Postgres lidar com isso
         },
       ]);
