@@ -7,7 +7,7 @@
     </div>
 
     <p-dialog
-      header="Conta bloqueada"
+      [header]="lockoutDialogHeader"
       [(visible)]="lockoutDialogVisible"
       [modal]="true"
       [closable]="false"

@@ -44,6 +44,7 @@ export class LoginComponent implements OnInit {
   rememberMe = false;
   lockoutDialogVisible = false;
   lockoutDialogMessage = '';
+  lockoutDialogHeader = 'Erro ao autenticar';
 
   loginForm = this.fb.nonNullable.group({
     email: this.fb.nonNullable.control('', [Validators.email, Validators.required, Validators.minLength(5)]),
@@ -100,7 +101,7 @@ export class LoginComponent implements OnInit {
                 // 3. Se o login falhar, registra a falha de login
                 this.lockout.recordLoginFailure(email!).subscribe();
                 this.handleLoginFailure(email!);
-                this.lockoutDialogMessage = response.error;
+                this.setDialogHeaderAndMessage(response.error);
                 this.lockoutDialogVisible = true;
                 return;
               }
@@ -208,6 +209,28 @@ export class LoginComponent implements OnInit {
         });
       },
     });
+  }
+
+  setDialogHeaderAndMessage(detail: string) {
+    const lower = (detail || '').toLowerCase();
+    if (lower.includes('already registered') || lower.includes('user already exists')) {
+      this.lockoutDialogHeader = 'E-mail já cadastrado';
+      this.lockoutDialogMessage = 'Já existe uma conta cadastrada com este e-mail.';
+      return;
+    }
+    if (lower.includes('invalid login credentials')) {
+      this.lockoutDialogHeader = 'Credenciais inválidas';
+      this.lockoutDialogMessage = 'E-mail ou senha incorretos. Tente novamente.';
+      return;
+    }
+    if (lower.includes('bloquead') || lower.includes('locked')) {
+      this.lockoutDialogHeader = 'Conta bloqueada';
+      this.lockoutDialogMessage =
+        'Sua conta está temporariamente bloqueada devido a múltiplas tentativas de login. Redefina sua senha ou aguarde alguns minutos.';
+      return;
+    }
+    this.lockoutDialogHeader = 'Erro ao autenticar';
+    this.lockoutDialogMessage = detail || 'Não foi possível autenticar. Tente novamente.';
   }
 
   async handleLoginFailure(email: string) {
