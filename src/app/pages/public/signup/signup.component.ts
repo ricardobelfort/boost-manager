@@ -45,7 +45,7 @@ export class SignupComponent {
 
   async onSubmit() {
     if (this.signupForm.invalid) {
-      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Preencha todos os campos corretamente.' });
+      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Fill in all fields correctly.' });
       return;
     }
 
@@ -55,7 +55,7 @@ export class SignupComponent {
 
     if (password !== confirmPassword) {
       this.signupForm.get('confirmPassword')?.setErrors({ notMatching: true });
-      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Senhas não conferem.' });
+      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Passwords dont match.' });
       this.loading.hide();
       return;
     }
@@ -64,8 +64,8 @@ export class SignupComponent {
     if (await this.auth.emailExists(email!)) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'E-mail já registrado',
-        detail: 'Já existe conta com esse e-mail. Faça login ou recupere a senha.',
+        summary: 'Email already registered',
+        detail: 'An account with this email already exists. Log in or recover your password.',
       });
       this.loading.hide();
       return;
@@ -77,17 +77,17 @@ export class SignupComponent {
         this.loading.hide();
         // ATENÇÃO: aqui pode vir { error: { message: ... } }
         if (response.error) {
-          let detail = response.error.message || 'Erro ao cadastrar. Tente outro e-mail.';
+          let detail = response.error.message || 'Error registering. Try another email.';
           if (
             detail.toLowerCase().includes('already registered') ||
             detail.toLowerCase().includes('user already exists') ||
             detail.toLowerCase().includes('invalid login credentials')
           ) {
-            detail = 'Já existe cadastro com este e-mail. Faça login ou recupere sua senha.';
+            detail = 'There is already a registration with this email. Log in or recover your password.';
           }
           this.messageService.add({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Error',
             detail,
           });
           return;
@@ -96,8 +96,8 @@ export class SignupComponent {
         if (!response.data?.user) {
           this.messageService.add({
             severity: 'error',
-            summary: 'Erro',
-            detail: 'Erro ao criar conta. Tente novamente ou use outro e-mail.',
+            summary: 'Error',
+            detail: 'Error creating account. Please try again or use another email.',
           });
           return;
         }
@@ -115,8 +115,8 @@ export class SignupComponent {
         if (err.status === 0) {
           this.messageService.add({
             severity: 'error',
-            summary: 'Erro de conexão',
-            detail: 'Não foi possível se conectar ao servidor.',
+            summary: 'Connection error',
+            detail: 'Could not connect to server.',
           });
           return;
         }
@@ -128,8 +128,8 @@ export class SignupComponent {
         ) {
           this.messageService.add({
             severity: 'warn',
-            summary: 'Usuário já cadastrado',
-            detail: 'Já existe uma conta com esse e-mail. Tente recuperar sua senha.',
+            summary: 'User already registered',
+            detail: 'An account with that email already exists. Try recovering your password.',
           });
           return;
         }
@@ -137,7 +137,7 @@ export class SignupComponent {
         if (err?.error?.message) {
           this.messageService.add({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Error',
             detail: err.error.message,
           });
           return;
@@ -145,8 +145,8 @@ export class SignupComponent {
         // Fallback
         this.messageService.add({
           severity: 'error',
-          summary: 'Erro inesperado',
-          detail: 'Ocorreu um erro. Tente novamente.',
+          summary: 'Unexpected error',
+          detail: 'An error has occurred. Please try again.',
         });
       },
     });

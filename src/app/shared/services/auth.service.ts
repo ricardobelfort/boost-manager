@@ -104,33 +104,22 @@ export class AuthService {
     return from(supabase.auth.signUp({ email, password }));
   }
 
-  async createTenantAndProfile(tenantName: string, userName: string, userId: string): Promise<void> {
+  async createTenantAndProfile(tenantName: string, userName: string, userId: string, userEmail: string): Promise<void> {
     // 1. Criar o tenant
     const { data: tenant, error: tenantError } = await supabase
       .from('tenants')
-      .insert([
-        {
-          name: tenantName,
-          // Adicione outros campos necessários para o tenant
-        },
-      ])
+      .insert([{ name: tenantName }])
       .select('id')
       .single();
 
     if (tenantError) throw tenantError;
-
     if (!tenant) throw new Error('Falha ao criar tenant');
 
     // 2. Verificar se o perfil já existe
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('id, role') // Também selecionar a role atual para verificação
-      .eq('id', userId)
-      .single();
+    const { data: existingProfile } = await supabase.from('profiles').select('id').eq('id', userId).single();
 
-    // Valores possíveis para role (ajuste conforme os valores permitidos na sua restrição)
-    // Opções comuns: 'admin', 'user', 'owner', 'manager', 'editor', 'viewer'
-    const role = 'admin'; // Use 'admin' em vez de 'owner' como tentativa
+    // Use 'admin' que já sabemos que funciona
+    const role = 'admin';
 
     if (existingProfile) {
       // 3a. Atualizar o perfil existente
@@ -138,8 +127,9 @@ export class AuthService {
         .from('profiles')
         .update({
           name: userName,
-          role: role, // Usando o valor correto para role
-          tenant_id: tenant.id, // Assumindo que o nome correto é tenant_id
+          email: userEmail, // Adicionando o email
+          role: role,
+          tenant_id: tenant.id,
         })
         .eq('id', userId);
 
@@ -150,8 +140,9 @@ export class AuthService {
         {
           id: userId,
           name: userName,
-          role: role, // Usando o valor correto para role
-          tenant_id: tenant.id, // Assumindo que o nome correto é tenant_id
+          email: userEmail, // Adicionando o email
+          role: role,
+          tenant_id: tenant.id,
         },
       ]);
 
@@ -169,6 +160,20 @@ export class AuthService {
   async getUserRole() {
     const profile = await this.getUserProfile();
     return profile?.role ?? null;
+  }
+
+  async getUserTenant() {
+    const profile = await this.getUserProfile();
+    if (!profile?.tenant_id) return null;
+
+    const { data, error } = await supabase.from('tenants').select('*').eq('id', profile.tenant_id).single();
+
+    if (error) {
+      console.error('Erro ao obter tenant:', error);
+      return null;
+    }
+
+    return data;
   }
 
   getGravatarUrl(email: string, size: number = 80) {

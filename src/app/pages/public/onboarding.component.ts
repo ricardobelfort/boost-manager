@@ -95,8 +95,13 @@ export class OnboardingComponent implements OnInit {
 
     const { name, tenantName } = this.form.value;
 
+    if (!name || !tenantName) {
+      this.error = 'Please fill in all required fields.';
+      return;
+    }
+
     try {
-      const tenantExists = await this.authService.tenantExists(tenantName!);
+      const tenantExists = await this.authService.tenantExists(tenantName);
 
       if (tenantExists) {
         this.error = 'A company with that name is already registered. Please choose another name.';
@@ -112,7 +117,12 @@ export class OnboardingComponent implements OnInit {
         return;
       }
 
-      await this.authService.createTenantAndProfile(tenantName!, name!, currentUser.id);
+      if (!currentUser.email) {
+        this.error = 'User email is missing.';
+        this.loadingService.hide();
+        return;
+      }
+      await this.authService.createTenantAndProfile(tenantName, name, currentUser.id, currentUser.email);
 
       const { error: updateError } = await supabase
         .from('profiles')
