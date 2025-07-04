@@ -15,27 +15,17 @@
       [style]="{ width: '400px' }"
       [contentStyle]="{ 'text-align': 'center' }"
     >
-      <div class="text-red-500 mb-3">
-        <i class="pi pi-lock !text-3xl"></i>
+      <div class="mb-3">
+        <img src="assets/images/alert.png" width="128" alt="Something Wrong">
       </div>
       <div class="text-gray-800 my-2" [innerHTML]="lockoutDialogMessage"></div>
       <div class="mt-2 text-lg text-gray-500">
-        If you need help, <a href="mailto:support@boostmanager.com.br" class="hover:underline text-lime-500">contact support.</a>.
+        If you need help,
+        <a href="mailto:support@boostmanager.com.br" class="hover:underline text-lime-500">contact support.</a>.
       </div>
-      <div class="mt-6 flex flex-col gap-2">
-        <p-button
-          pButton
-          type="button"
-          label="Redefinir senha"
-          (click)="goToRecovery()"
-        ></p-button>
-        <p-button
-          pButton
-          type="button"
-          label="Fechar"
-          severity="secondary"
-          (click)="lockoutDialogVisible = false"
-        ></p-button>
+      <div class="mt-6 flex gap-2">
+        <p-button label="Redefinir senha" (click)="goToRecovery()"></p-button>
+        <p-button label="Fechar" severity="secondary" (click)="lockoutDialogVisible = false"></p-button>
       </div>
     </p-dialog>
 
