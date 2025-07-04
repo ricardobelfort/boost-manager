@@ -73,6 +73,17 @@ export class AuthService {
     );
   }
 
+  async getRemainingAttempts(email: string, maxAttempts = 5, lockoutMinutes = 30) {
+    const url = 'https://nqaipmnlcoioqqqzcghu.supabase.co/functions/v1/remaining-attempts';
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, max_attempts: maxAttempts, lockout_minutes: lockoutMinutes }),
+    });
+    return await res.json();
+  }
+
   async loadUserProfileAndTenant() {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user?.id) return null;

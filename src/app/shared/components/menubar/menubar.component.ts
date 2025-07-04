@@ -91,7 +91,7 @@ export class MenubarComponent {
         this.messageService.add({
           severity: 'success',
           summary: 'Logout',
-          detail: 'Você saiu da sua conta com sucesso!',
+          detail: 'You have successfully logged out of your account.!',
         });
         this.router.navigate(['/auth/login']);
       },

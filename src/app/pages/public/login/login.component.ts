@@ -42,6 +42,8 @@ export class LoginComponent implements OnInit {
   passwordStrengthClass = '';
   passwordStrengthWidth = '0%';
   rememberMe = false;
+  lockoutDialogVisible = false;
+  lockoutDialogMessage = '';
 
   loginForm = this.fb.nonNullable.group({
     email: this.fb.nonNullable.control('', [Validators.email, Validators.required, Validators.minLength(5)]),
@@ -82,12 +84,11 @@ export class LoginComponent implements OnInit {
     this.lockout.checkAccountLockout(email!).subscribe({
       next: (lockoutRes) => {
         if (lockoutRes.locked) {
+          this.lockoutDialogMessage =
+            lockoutRes.message ||
+            'Your account has been temporarily locked due to multiple failed login attempts. Please try again after 30 minutes or <a routerLink="/auth/recovery" class="underline text-lime-500">reset your password</a>.';
+          this.lockoutDialogVisible = true;
           this.loading.hide();
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Account locked',
-            detail: lockoutRes.message || 'Account temporarily locked.',
-          });
           return;
         }
 
@@ -98,11 +99,7 @@ export class LoginComponent implements OnInit {
               if (response.error) {
                 // 3. Se o login falhar, registra a falha de login
                 this.lockout.recordLoginFailure(email!).subscribe();
-                this.messageService.add({
-                  severity: 'error',
-                  summary: 'Error',
-                  detail: response.error.message || 'Invalid email or password.',
-                });
+                this.handleLoginFailure(email!);
                 return;
               }
 
@@ -211,8 +208,21 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  get email() {
-    return this.loginForm.get('email');
+  async handleLoginFailure(email: string) {
+    // Consulta as tentativas restantes
+    const res = await this.auth.getRemainingAttempts(email);
+    let msg = 'Usuário ou senha incorretos.';
+
+    if (typeof res.remaining === 'number') {
+      if (res.remaining === 0) {
+        msg = `Sua conta foi bloqueada por tentativas repetidas. Tente novamente mais tarde ou redefina sua senha.`;
+      } else {
+        msg += `<br><b>Tentativas restantes:</b> ${res.remaining}`;
+      }
+    }
+
+    this.lockoutDialogMessage = msg;
+    this.lockoutDialogVisible = true;
   }
 
   onPasswordInput(): void {
@@ -249,6 +259,10 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  get email() {
+    return this.loginForm.get('email');
+  }
+
   get password() {
     return this.loginForm.get('password');
   }
@@ -275,6 +289,11 @@ export class LoginComponent implements OnInit {
 
   showDialog() {
     this.visible = true;
+  }
+
+  goToRecovery() {
+    this.lockoutDialogVisible = false;
+    this.router.navigate(['/auth/recovery']);
   }
 
   recovery() {
