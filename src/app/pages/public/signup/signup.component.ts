@@ -81,6 +81,7 @@ export class SignupComponent {
         // ATENÇÃO: aqui pode vir { error: { message: ... } }
         if (response.error) {
           let detail = response.error.message || 'Error registering. Try another email.';
+          console.log(detail);
           if (
             detail.toLowerCase().includes('already registered') ||
             detail.toLowerCase().includes('user already exists') ||

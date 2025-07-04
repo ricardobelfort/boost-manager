@@ -16,27 +16,26 @@
       [contentStyle]="{ 'text-align': 'center' }"
     >
       <div class="text-red-500 mb-3">
-        <i class="pi pi-lock text-3xl"></i>
+        <i class="pi pi-lock !text-3xl"></i>
       </div>
-      <div class="text-gray-800" [innerHTML]="lockoutDialogMessage"></div>
-      <div class="mt-2 text-xs text-gray-400">
-        If you need help, <a href="mailto:support@boostmanager.com.br" class="underline text-lime-500">contact support.</a>.
+      <div class="text-gray-800 my-2" [innerHTML]="lockoutDialogMessage"></div>
+      <div class="mt-2 text-lg text-gray-500">
+        If you need help, <a href="mailto:support@boostmanager.com.br" class="hover:underline text-lime-500">contact support.</a>.
       </div>
       <div class="mt-6 flex flex-col gap-2">
-        <button
+        <p-button
           pButton
           type="button"
           label="Redefinir senha"
-          class="p-button-text text-lime-600"
           (click)="goToRecovery()"
-        ></button>
-        <button
+        ></p-button>
+        <p-button
           pButton
           type="button"
           label="Fechar"
-          class="p-button-secondary"
+          severity="secondary"
           (click)="lockoutDialogVisible = false"
-        ></button>
+        ></p-button>
       </div>
     </p-dialog>
 
