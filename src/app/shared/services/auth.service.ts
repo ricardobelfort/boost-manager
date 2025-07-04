@@ -104,65 +104,53 @@ export class AuthService {
     return from(supabase.auth.signUp({ email, password }));
   }
 
-  async createTenantAndProfile(name: string, email: string, userId: string) {
-    // 1. Verifica se já existe um tenant com o mesmo nome
-    const { data: existingTenant, error: lookupTenantError } = await supabase
+  async createTenantAndProfile(tenantName: string, userName: string, userId: string): Promise<void> {
+    // 1. Criar o tenant
+    const { data: tenant, error: tenantError } = await supabase
       .from('tenants')
+      .insert([
+        {
+          name: tenantName,
+          // Adicione outros campos necessários para o tenant
+        },
+      ])
       .select('id')
-      .eq('name', name)
-      .maybeSingle();
-
-    if (lookupTenantError) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Error verifying name.',
-      });
-      throw lookupTenantError;
-    }
-
-    if (existingTenant) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Name already exists',
-        detail: 'A company with that name is already registered. Please choose another one.',
-      });
-      throw new Error('Tenant name already exists');
-    }
-
-    // 2. Cria o tenant
-    const { data: tenantData, error: tenantError } = await supabase
-      .from('tenants')
-      .insert([{ name }])
-      .select()
       .single();
 
-    if (tenantError) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: tenantError.message || 'Tenant creation error.',
-      });
-      throw tenantError;
+    if (tenantError) throw tenantError;
+
+    if (!tenant) throw new Error('Failed to create tenant');
+
+    // 2. Verificar se o perfil já existe
+    const { data: existingProfile } = await supabase.from('profiles').select('id').eq('id', userId).single();
+
+    if (existingProfile) {
+      // 3a. Atualizar o perfil existente
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          user_name: userName,
+          user_role: 'owner',
+          user_tenant_id: tenant.id,
+          // Não incluir updated_at, deixe o trigger do Postgres lidar com isso
+        })
+        .eq('id', userId);
+
+      if (updateError) throw updateError;
+    } else {
+      // 3b. Criar um novo perfil
+      const { error: profileError } = await supabase.from('profiles').insert([
+        {
+          id: userId,
+          user_name: userName,
+          user_role: 'owner',
+          user_tenant_id: tenant.id,
+          // Não incluir updated_at, deixe o trigger do Postgres lidar com isso
+        },
+      ]);
+
+      if (profileError) throw profileError;
     }
-
-    // 3. Atualiza o profile usando a RPC (update_profile)
-    const { error: updateError } = await supabase.rpc('update_profile', {
-      user_name: name,
-      user_role: email === 'rbelfort2004@gmail.com' ? 'superadmin' : 'owner',
-      user_tenant_id: tenantData.id,
-    });
-
-    if (updateError) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: updateError.message || 'Error updating profile.',
-      });
-      throw updateError;
-    }
-
-    return { tenant: tenantData };
   }
 
   async getUserProfile() {

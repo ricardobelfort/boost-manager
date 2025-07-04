@@ -44,43 +44,6 @@ import { supabase } from 'supabase.client';
       </div>
     </div>
   `,
-  styles: [
-    `
-      .onboarding-container {
-        max-width: 400px;
-        margin: 40px auto;
-        background: #fff;
-        padding: 24px;
-        border-radius: 8px;
-        box-shadow: 0 2px 12px #0001;
-      }
-      .onboarding-form {
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-      }
-      .error {
-        color: #d33;
-        margin: 0 0 12px 0;
-      }
-      label {
-        display: block;
-        margin-bottom: 4px;
-        font-weight: 500;
-      }
-      input {
-        width: 100%;
-        padding: 6px 10px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-      }
-      button {
-        padding: 10px 0;
-        border-radius: 6px;
-        font-weight: 600;
-      }
-    `,
-  ],
 })
 export class OnboardingComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
@@ -141,7 +104,7 @@ export class OnboardingComponent implements OnInit {
       const tenantExists = await this.authService.tenantExists(tenantName!);
 
       if (tenantExists) {
-        this.error = 'Uma empresa com esse nome já está registrada. Por favor, escolha outro nome.';
+        this.error = 'A company with that name is already registered. Please choose another name.';
         this.loading = false;
         return;
       }
@@ -150,7 +113,7 @@ export class OnboardingComponent implements OnInit {
       const currentUser = this.authService.currentUser;
 
       if (!currentUser) {
-        this.error = 'Usuário não autenticado';
+        this.error = 'Unauthenticated user';
         this.loading = false;
         return;
       }
@@ -158,10 +121,14 @@ export class OnboardingComponent implements OnInit {
       // Criar tenant e atualizar perfil
       await this.authService.createTenantAndProfile(tenantName!, name!, currentUser.id);
 
-      // Atualizar o campo onboarding_completed
+      // Atualizar o campo onboarding_completed sem usar updated_at
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ onboarding_completed: true })
+        .update({
+          onboarding_completed: true,
+          // Não incluir updated_at, deixe o trigger do Postgres lidar com isso
+          // ou se não houver trigger, o valor padrão será usado
+        })
         .eq('id', currentUser.id);
 
       if (updateError) throw updateError;
@@ -172,7 +139,12 @@ export class OnboardingComponent implements OnInit {
       // Onboarding completo, vá para dashboard!
       this.router.navigate(['/dashboard']);
     } catch (err: any) {
-      this.error = err?.message || 'Erro ao concluir onboarding';
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: err.message || 'Error completing onboarding.',
+      });
+      this.error = err?.message || 'Error completing onboarding';
     } finally {
       this.loading = false;
     }
