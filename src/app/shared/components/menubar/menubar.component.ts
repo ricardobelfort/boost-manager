@@ -25,6 +25,7 @@ export class MenubarComponent {
   ];
   userName = '';
   userRole = '';
+  tenantName = '';
   userAvatarUrl = 'assets/images/avatar-placeholder.png';
   dropdownOpen = false;
   userInitials = '';
@@ -37,8 +38,9 @@ export class MenubarComponent {
 
   async ngOnInit() {
     const profile = await this.auth.getUserProfile();
-    this.userName = profile?.full_name || profile?.email || 'Usuário';
-    this.userRole = profile?.role || 'Cliente';
+    this.userName = profile?.name || profile?.email || 'User';
+    this.userRole = profile?.role || 'Client';
+    this.tenantName = profile?.name || 'Company';
     this.userAvatarUrl = this.getGravatar(profile?.email);
 
     this.userInitials = this.getInitials(this.userName);
