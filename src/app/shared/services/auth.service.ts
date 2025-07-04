@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import type { Session, User } from '@supabase/supabase-js';
 import { MessageService } from 'primeng/api';
-import { BehaviorSubject, from, Observable, tap } from 'rxjs';
+import { BehaviorSubject, from, map, Observable, tap } from 'rxjs';
 import { supabase } from 'supabase.client';
 import { Md5 } from 'ts-md5';
 
@@ -10,6 +10,7 @@ export class AuthService {
   private sessionSubject = new BehaviorSubject<Session | null>(null);
   private tenantId: string | null = null;
   private readonly messageService = inject(MessageService);
+  supabase = supabase;
 
   constructor() {
     // Restaura a sessão ao iniciar o app
@@ -22,6 +23,17 @@ export class AuthService {
       this.sessionSubject.next(session);
     });
   }
+
+  newSignups$ = from(this.supabase.rpc('count_new_signups', { days: 7 })).pipe(map((resp: any) => resp.data || 0));
+
+  // Total de usuários cadastrados
+  totalUsers$ = from(this.supabase.rpc('count_users')).pipe(map((resp: any) => resp.data || 0));
+
+  // Falhas de login (exemplo fictício, ajuste para sua lógica)
+  loginFailures$ = from(this.supabase.rpc('count_login_failures')).pipe(map((resp: any) => resp.data || 0));
+
+  // Roles disponíveis
+  roles$ = from(this.supabase.rpc('count_roles')).pipe(map((resp: any) => resp.data || 0));
 
   /** Observable da sessão para uso reativo na app */
   session$ = this.sessionSubject.asObservable();
@@ -66,7 +78,6 @@ export class AuthService {
     if (!user?.user?.id) return null;
     const { data: profile } = await supabase.from('profiles').select('*, tenant_id').eq('id', user.user.id).single();
     this.tenantId = profile?.tenant_id ?? null;
-    console.log('[DEBUG] tenantId carregado:', this.tenantId);
     return profile;
   }
 

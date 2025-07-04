@@ -8,37 +8,52 @@
     <nav class="flex-1">
       <ul class="space-y-1 px-3">
         <li>
-          <a routerLink="/superadmin" routerLinkActive="bg-[#18181B] text-[#7BF2A7] font-semibold"
+          <a
+            routerLink="/superadmin"
+            routerLinkActive="bg-[#18181B] text-[#7BF2A7] font-semibold"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors">
+            class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors"
+          >
             <span class="material-symbols-rounded mr-2">dashboard</span>
             Dashboard
           </a>
         </li>
         <li>
-          <a routerLink="/superadmin/users" routerLinkActive="bg-[#18181B] text-[#7BF2A7] font-semibold"
-            class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors">
+          <a
+            routerLink="/superadmin/users"
+            routerLinkActive="bg-[#18181B] text-[#7BF2A7] font-semibold"
+            class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors"
+          >
             <span class="material-symbols-rounded mr-2">people</span>
             Usuários
           </a>
         </li>
         <li>
-          <a routerLink="/superadmin/tenants" routerLinkActive="bg-[#18181B] text-[#7BF2A7] font-semibold"
-            class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors">
+          <a
+            routerLink="/superadmin/tenants"
+            routerLinkActive="bg-[#18181B] text-[#7BF2A7] font-semibold"
+            class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors"
+          >
             <span class="material-symbols-rounded mr-2">business</span>
             Tenants
           </a>
         </li>
         <li>
-          <a routerLink="/superadmin/roles" routerLinkActive="bg-[#18181B] text-[#7BF2A7] font-semibold"
-            class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors">
+          <a
+            routerLink="/superadmin/roles"
+            routerLinkActive="bg-[#18181B] text-[#7BF2A7] font-semibold"
+            class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors"
+          >
             <span class="material-symbols-rounded mr-2">admin_panel_settings</span>
             Roles & Permissões
           </a>
         </li>
         <li>
-          <a routerLink="/superadmin/auditoria" routerLinkActive="bg-[#18181B] text-[#7BF2A7] font-semibold"
-            class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors">
+          <a
+            routerLink="/superadmin/auditoria"
+            routerLinkActive="bg-[#18181B] text-[#7BF2A7] font-semibold"
+            class="flex items-center px-3 py-2 rounded-lg hover:bg-[#222] text-gray-300 transition-colors"
+          >
             <span class="material-symbols-rounded mr-2">history</span>
             Auditoria
           </a>
@@ -53,11 +68,7 @@
     <header class="flex justify-end items-center h-20 px-8 bg-[#232328] border-b border-[#222] shadow-sm w-full">
       <div class="relative group">
         <div class="flex items-center gap-2 cursor-pointer" (click)="toggleDropdown()" tabindex="0">
-          <img
-            [src]="userAvatarUrl"
-            class="w-10 h-10 rounded-full border border-gray-400 object-cover"
-            alt="Avatar"
-          />
+          <img [src]="userAvatarUrl" class="w-10 h-10 rounded-full border border-gray-400 object-cover" alt="Avatar" />
           <span class="text-gray-200 text-sm font-semibold">{{ userName }}</span>
           <i class="pi pi-chevron-down text-gray-400 text-xs ml-2"></i>
         </div>
@@ -87,20 +98,108 @@
 
     <!-- Main content -->
     <main class="flex-1 p-8 bg-[#18181B] text-white">
+      <!-- Summary Cards Superadmin -->
+      <!-- Summary Cards Superadmin -->
+      <section class="mb-10">
+        <h2 class="text-2xl font-bold mb-6 text-white">Resumo do sistema</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <app-metric-card
+            icon="people"
+            title="Usuários"
+            [value]="totalUsers$ | async"
+            subtitle="Total cadastrados"
+          ></app-metric-card>
+          <app-metric-card
+            icon="business"
+            title="Tenants"
+            [value]="totalTenants$ | async"
+            subtitle="Ativos"
+          ></app-metric-card>
+          <app-metric-card
+            icon="admin_panel_settings"
+            title="Permissões"
+            [value]="roles$ | async"
+            subtitle="Funções disponíveis"
+          ></app-metric-card>
+          <app-metric-card
+            icon="history"
+            title="Auditoria"
+            [value]="auditCount$ | async"
+            subtitle="Ações registradas"
+          ></app-metric-card>
+          <app-metric-card
+            icon="wifi"
+            title="Usuários online"
+            [value]="onlineUsers$ | async"
+            subtitle="Agora mesmo"
+          ></app-metric-card>
+          <app-metric-card
+            icon="person_add"
+            title="Novos cadastros"
+            [value]="newSignups$ | async"
+            subtitle="Últimos 7 dias"
+          ></app-metric-card>
+          <app-metric-card
+            icon="lock_person"
+            title="Falhas de login"
+            [value]="loginFailures$ | async"
+            subtitle="Hoje"
+          ></app-metric-card>
+          <app-metric-card
+            icon="database"
+            title="Status Banco"
+            [value]="(dbStatus$ | async) === 'ok' ? 'Online' : 'Offline'"
+            subtitle="Atualizado agora"
+            [valueClass]="(dbStatus$ | async) === 'ok' ? 'text-green-400' : 'text-red-500'"
+          ></app-metric-card>
+          <app-metric-card
+            icon="workspace_premium"
+            title="Planos ativos"
+            [value]="activePlans$ | async"
+            subtitle="SaaS Billing"
+          ></app-metric-card>
+        </div>
+
+        <!-- Real-time Feed de Atividades -->
+        <div class="bg-[#232328] rounded-xl p-4 shadow-md border border-[#222] mt-8">
+          <h3 class="text-lg font-semibold text-[#7BF2A7] mb-3">Atividade em tempo real</h3>
+          <ul class="divide-y divide-[#222] text-sm max-h-64 overflow-y-auto">
+            <li class="py-2 text-gray-200" *ngFor="let item of feed$ | async">
+              {{ item.message }}
+              <span class="text-xs text-gray-400 ml-2">{{ item.timeAgo }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Alertas/Erros Recentes -->
+        <div class="bg-[#232328] rounded-xl p-4 shadow-md border border-[#222] mt-8">
+          <h3 class="text-lg font-semibold text-red-400 mb-3">Alertas e Erros</h3>
+          <ul class="divide-y divide-[#222] text-sm max-h-64 overflow-y-auto">
+            <li
+              class="py-2"
+              *ngFor="let err of errors$ | async"
+              [ngClass]="{ 'text-red-400': err.level === 'error', 'text-yellow-400': err.level === 'warn' }"
+            >
+              {{ err.message }} <span class="text-xs text-gray-400 ml-2">{{ err.created_at | date: 'shortTime' }}</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
       <!-- Se quiser cards iniciais, deixe aqui. Senão, só router-outlet! -->
       <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-[#232328] rounded-xl p-6 shadow-lg border border-[#222]">
+        <div class="bg-[#232328] rounded-xl p-6 shadow-md border border-[#222]">
           <h2 class="text-lg font-semibold mb-2 text-[#7BF2A7]">Usuários</h2>
           <p class="text-gray-300">Visualize, edite ou promova usuários na plataforma.</p>
           <!-- Aqui pode entrar routerLink ou tabela de usuários futuramente -->
         </div>
-        <div class="bg-[#232328] rounded-xl p-6 shadow-lg border border-[#222]">
+        <div class="bg-[#232328] rounded-xl p-6 shadow-md border border-[#222]">
           <h2 class="text-lg font-semibold mb-2 text-[#7BF2A7]">Tenants</h2>
           <p class="text-gray-300">Gerencie tenants cadastrados e permissões.</p>
         </div>
       </section>
       <!-- Se a rota mudar, mostra a tela filha -->
-      <router-outlet/>
+      <router-outlet />
     </main>
   </div>
 </div>

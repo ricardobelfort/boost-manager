@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@shared/services/auth.service';
 import { LoadingService } from '@shared/services/loading.service';
+import { LockoutService } from '@shared/services/lockout.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -36,6 +37,7 @@ export class LoginComponent implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly auth = inject(AuthService);
   private readonly loading = inject(LoadingService);
+  private readonly lockout = inject(LockoutService);
 
   passwordStrengthClass = '';
   passwordStrengthWidth = '0%';
@@ -74,114 +76,136 @@ export class LoginComponent implements OnInit {
     }
 
     const { email, password, rememberMe } = this.loginForm.value;
+
+    // 1. Verifica se a conta está bloqueada ANTES de tentar o login
     this.loading.show();
+    this.lockout.checkAccountLockout(email!).subscribe({
+      next: (lockoutRes) => {
+        if (lockoutRes.locked) {
+          this.loading.hide();
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Account locked',
+            detail: lockoutRes.message || 'Account temporarily locked.',
+          });
+          return;
+        }
 
-    this.auth.signIn(email!, password!, rememberMe ?? false).subscribe({
-      next: async (response) => {
-        try {
-          if (response.error) {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: response.error.message || 'Invalid email or password.',
-            });
-            return;
-          }
-
-          if (!response.data?.session) {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'Session not started. Please try again.',
-            });
-            return;
-          }
-
-          const user = response.data.session.user;
-
-          // 1. Busca o profile do usuário
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('id, name, email, role, tenant_id')
-            .eq('id', user.id)
-            .single();
-
-          // 2. Verifica se falta completar (nome, tenant, role)
-          if (!profile?.name || !profile?.tenant_id || !profile?.role || profile.role === 'user') {
-            // 3. Cria tenant, se necessário
-            let tenantId = profile?.tenant_id;
-            if (!tenantId) {
-              const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
-              const { data: tenant, error: tenantError } = await supabase
-                .from('tenants')
-                .insert([{ name: companyName }])
-                .select()
-                .single();
-              if (tenantError) {
+        // 2. Se não estiver bloqueada, tenta o login normalmente
+        this.auth.signIn(email!, password!, rememberMe ?? false).subscribe({
+          next: async (response) => {
+            try {
+              if (response.error) {
+                // 3. Se o login falhar, registra a falha de login
+                this.lockout.recordLoginFailure(email!).subscribe();
                 this.messageService.add({
                   severity: 'error',
                   summary: 'Error',
-                  detail: tenantError.message || 'Error creating tenant.',
+                  detail: response.error.message || 'Invalid email or password.',
                 });
                 return;
               }
-              tenantId = tenant.id;
-              localStorage.removeItem('pendingCompanyName');
-            }
 
-            // 4. Atualize o profile via RPC (opção 1 Supabase)
-            const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
-            const { error: updateError } = await supabase.rpc('update_profile', {
-              user_name: companyName,
-              // MODIFICAÇÃO AQUI: Usar o método do AuthService
-              user_role: this.auth.isSuperAdminEmail(email!) ? 'superadmin' : 'owner',
-              user_tenant_id: tenantId,
-            });
-            if (updateError) {
+              if (!response.data?.session) {
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: 'Session not started. Please try again.',
+                });
+                return;
+              }
+
+              // ---- O RESTANTE DO SEU FLUXO AQUI (NÃO MUDEI!) ----
+              const user = response.data.session.user;
+
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('id, name, email, role, tenant_id')
+                .eq('id', user.id)
+                .single();
+
+              if (!profile?.name || !profile?.tenant_id || !profile?.role || profile.role === 'user') {
+                let tenantId = profile?.tenant_id;
+                if (!tenantId) {
+                  const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
+                  const { data: tenant, error: tenantError } = await supabase
+                    .from('tenants')
+                    .insert([{ name: companyName }])
+                    .select()
+                    .single();
+                  if (tenantError) {
+                    this.messageService.add({
+                      severity: 'error',
+                      summary: 'Error',
+                      detail: tenantError.message || 'Error creating tenant.',
+                    });
+                    return;
+                  }
+                  tenantId = tenant.id;
+                  localStorage.removeItem('pendingCompanyName');
+                }
+
+                const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
+                const { error: updateError } = await supabase.rpc('update_profile', {
+                  user_name: companyName,
+                  user_role: this.auth.isSuperAdminEmail(email!) ? 'superadmin' : 'owner',
+                  user_tenant_id: tenantId,
+                });
+                if (updateError) {
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: updateError.message || 'Error updating profile.',
+                  });
+                  return;
+                }
+              }
+
+              await this.auth.loadUserProfileAndTenant();
+
+              const { data: loadedProfile } = await supabase
+                .from('profiles')
+                .select('id, name, email, role, tenant_id')
+                .eq('id', user.id)
+                .single();
+
+              if (loadedProfile?.tenant_id) {
+                localStorage.setItem('tenant_id', loadedProfile.tenant_id);
+              }
+
               this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: updateError.message || 'Error updating profile.',
+                severity: 'success',
+                summary: 'Success',
+                detail: `Welcome, ${email}!`,
               });
-              return;
+
+              if (await this.auth.isCurrentUserSuperAdmin()) {
+                this.router.navigate(['/superadmin']);
+              } else {
+                this.router.navigate(['/dashboard']);
+              }
+            } finally {
+              this.loading.hide();
             }
-          }
-
-          await this.auth.loadUserProfileAndTenant();
-
-          // Carrega novamente o profile atualizado
-          const { data: loadedProfile } = await supabase
-            .from('profiles')
-            .select('id, name, email, role, tenant_id')
-            .eq('id', user.id)
-            .single();
-
-          if (loadedProfile?.tenant_id) {
-            localStorage.setItem('tenant_id', loadedProfile.tenant_id);
-          }
-
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: `Welcome, ${email}!`,
-          });
-
-          // MODIFICAÇÃO AQUI: Usar o método do AuthService
-          if (await this.auth.isCurrentUserSuperAdmin()) {
-            this.router.navigate(['/superadmin']);
-          } else {
-            this.router.navigate(['/dashboard']);
-          }
-        } finally {
-          this.loading.hide();
-        }
+          },
+          error: (err) => {
+            this.loading.hide();
+            // (opcional) registra falha também aqui em caso de erro de infra
+            this.lockout.recordLoginFailure(email!).subscribe();
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: err?.message || 'Error communicating with the server.',
+            });
+          },
+        });
       },
       error: (err) => {
         this.loading.hide();
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: err?.message || 'Error communicating with the server.',
+          summary: 'Lockout error',
+          detail: err?.message || 'Error checking account status.',
         });
       },
     });
