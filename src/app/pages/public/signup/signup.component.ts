@@ -106,7 +106,7 @@ export class SignupComponent {
         this.messageService.add({
           severity: 'success',
           summary: 'Sucesso!',
-          detail: 'Cadastro realizado! Confirme no seu e-mail.',
+          detail: 'Registration completed! Confirm in your email.',
         });
         this.router.navigate(['/auth/login']);
       },

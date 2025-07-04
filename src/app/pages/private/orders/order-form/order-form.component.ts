@@ -395,7 +395,7 @@ export class OrderFormComponent {
           this.messageService.add({
             severity: 'success',
             summary: 'Sucesso',
-            detail: 'Pedido cadastrado com sucesso!',
+            detail: 'Request registered successfully!',
           });
           this.orderForm.reset();
           this.close.emit();
@@ -414,7 +414,7 @@ export class OrderFormComponent {
               this.messageService.add({
                 severity: 'success',
                 summary: 'Sucesso',
-                detail: 'Pedido atualizado com sucesso!',
+                detail: 'Order updated successfully!',
               });
               this.orderForm.reset();
               this.close.emit();
