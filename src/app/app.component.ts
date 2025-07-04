@@ -49,7 +49,16 @@ export class AppComponent {
   isPublicPage = false;
   isAdminPage = false;
 
-  publicPages = ['/auth/login', '/auth/signup', '/auth/recovery'];
+  publicPages = [
+    '/auth/login',
+    '/auth/signup',
+    '/auth/recovery',
+    '/auth/callback',
+    '/onboarding',
+    '/privacy',
+    '/terms',
+  ];
+
   adminPages = ['/superadmin'];
 
   constructor(

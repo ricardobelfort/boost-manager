@@ -11,24 +11,37 @@ import { supabase } from 'supabase.client';
   selector: 'app-onboarding',
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="onboarding-container">
-      <h1>Complete seu cadastro</h1>
-      <p>Precisamos de algumas informações adicionais para configurar sua conta.</p>
-
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="onboarding-form">
-        <div>
-          <label>Seu nome</label>
-          <input formControlName="name" />
-        </div>
-        <div>
-          <label>Nome da empresa/organização</label>
-          <input formControlName="tenantName" />
-        </div>
-        <div *ngIf="error" class="error">{{ error }}</div>
-        <button type="submit" [disabled]="loading || form.invalid">
-          {{ loading ? 'Processando...' : 'Concluir cadastro' }}
-        </button>
-      </form>
+    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <div class="w-full max-w-md p-8 rounded-2xl shadow-lg bg-white mt-12">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-2 text-center">Complete seu cadastro</h2>
+        <p class="text-gray-500 mb-7 text-center">
+          Precisamos de algumas informações adicionais para configurar sua conta.
+        </p>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+          <div>
+            <label class="block mb-1 font-medium text-gray-700">Seu nome</label>
+            <input
+              formControlName="name"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-lime-200 outline-none transition"
+            />
+          </div>
+          <div>
+            <label class="block mb-1 font-medium text-gray-700">Nome da empresa/organização</label>
+            <input
+              formControlName="tenantName"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-lime-200 outline-none transition"
+            />
+          </div>
+          <div *ngIf="error" class="text-red-600 text-sm font-medium mt-2">{{ error }}</div>
+          <button
+            type="submit"
+            [disabled]="loading || form.invalid"
+            class="w-full py-2 rounded-lg font-bold bg-lime-500 hover:bg-lime-600 text-white shadow-md transition disabled:opacity-70"
+          >
+            {{ loading ? 'Processando...' : 'Concluir cadastro' }}
+          </button>
+        </form>
+      </div>
     </div>
   `,
   styles: [
