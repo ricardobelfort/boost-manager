@@ -100,6 +100,8 @@ export class LoginComponent implements OnInit {
                 // 3. Se o login falhar, registra a falha de login
                 this.lockout.recordLoginFailure(email!).subscribe();
                 this.handleLoginFailure(email!);
+                this.lockoutDialogMessage = response.error;
+                this.lockoutDialogVisible = true;
                 return;
               }
 
