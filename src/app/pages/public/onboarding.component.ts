@@ -13,7 +13,11 @@ import { supabase } from 'supabase.client';
   imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="flex flex-col items-center justify-center min-h-screen">
-      <div class="w-full max-w-md p-8 rounded-2xl shadow-lg bg-white mt-12">
+      <div class="w-full max-w-md p-8 rounded-2xl shadow-xs bg-white">
+        <div class="flex flex-col items-center mb-3">
+          <img src="assets/images/boost.png" width="64" class="mb-4" alt="" />
+          <h1 class="text-2xl font-bold">Boost Manager</h1>
+        </div>
         <h2 class="text-2xl font-semibold text-gray-900 mb-2 text-center">Complete seu cadastro</h2>
         <p class="text-gray-500 mb-7 text-center">
           Precisamos de algumas informações adicionais para configurar sua conta.
