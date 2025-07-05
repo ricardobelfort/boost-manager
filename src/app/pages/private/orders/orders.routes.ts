@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { GamesComponent } from '../games/games.component';
 import { OrderFormComponent } from './order-form/order-form.component';
 import { OrderListComponent } from './order-list/order-list.component';
 
@@ -9,6 +10,10 @@ export const ordersRoutes: Routes = [
     data: {
       breadcrumb: 'Orders',
     },
+  },
+  {
+    path: 'select-game',
+    component: GamesComponent,
   },
   {
     path: 'new',

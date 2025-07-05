@@ -19,5 +19,8 @@ export interface Order {
   created_at?: string;
   currency?: string;
   booster_currency?: string;
-  external_supplier_id?: string;
+  customer_id?: string;
+  customer_order_id?: string;
+  lobby_price?: number;
+  lobby_quantity?: number;
 }

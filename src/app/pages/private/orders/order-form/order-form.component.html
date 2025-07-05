@@ -1,16 +1,21 @@
 <app-breadcrumb [items]="breadcrumb" />
 <div class="bg-white rounded-xl shadow-sm p-8">
   <div class="flex items-center justify-between mb-4">
-    <div>
-      <h2 class="!text-3xl font-bold text-black">
-        {{ editingId ? 'Edit Order' : 'New Order' }}
-        <span *ngIf="editingId && orderForm.value.order_number" class="text-gray-400 ml-2"
-          >#{{ orderForm.value.order_number }}</span
-        >
-      </h2>
-      <p class="text-gray-500">
-        {{ editingId ? 'Editing an existing order.' : 'Here you can create a New Order.' }}
-      </p>
+    <div class="flex items-center gap-3">
+      <div *ngIf="selectedGame as game">
+        <img [src]="game.image" [alt]="game.name" class="w-18 h-18 rounded-xl object-cover shadow mr-2" />
+      </div>
+      <div>
+        <h2 class="!text-3xl font-bold text-black">
+          {{ editingId ? 'Edit Order' : 'New Order' }}
+          <span *ngIf="editingId && orderForm.value.order_number" class="text-gray-400 ml-2"
+            >#{{ orderForm.value.order_number }}</span
+          >
+        </h2>
+        <p class="text-gray-500">
+          {{ editingId ? 'Editing an existing order.' : 'Here you can create a New Order.' }}
+        </p>
+      </div>
     </div>
   </div>
 
@@ -29,9 +34,7 @@
           ></p-select>
         </div>
         <div>
-          <label class="font-medium text-gray-700 mb-2 block"
-            >External Supplier ID <span class="text-red-500">*</span></label
-          >
+          <label class="font-medium text-gray-700 mb-2 block">Custome ID <span class="text-red-500">*</span></label>
           <input
             [style]="{ width: '100%' }"
             styleClass="w-full"
@@ -157,7 +160,7 @@
           <label class="font-medium text-gray-700 mb-2 block"> Service Type <span class="text-red-500">*</span> </label>
           <p-select
             styleClass="w-full"
-            [options]="serviceTypes"
+            [options]="getFilteredServiceTypes()"
             formControlName="service_type"
             placeholder="Select a service type"
           ></p-select>

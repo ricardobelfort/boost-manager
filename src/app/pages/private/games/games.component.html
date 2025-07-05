@@ -1,0 +1,29 @@
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-center mt-12">
+  <div
+    *ngFor="let game of games"
+    class="group bg-white rounded-2xl border border-gray-200 hover:border-lime-500 shadow-sm hover:shadow-lg transition-all flex flex-col items-center p-4 pb-6 relative"
+    [ngClass]="{ 'opacity-60 pointer-events-none': !game.available }"
+  >
+    <!-- Badge -->
+    <p-tag
+      *ngIf="game.badge"
+      class="absolute top-6 right-6"
+      [value]="game.badge"
+      [severity]="game.badgeSeverity"
+      styleClass="text-xs font-bold px-3 py-1 shadow"
+    ></p-tag>
+
+    <img [src]="game.image" [alt]="game.name" class="rounded-xl w-full h-40 object-cover mb-4" />
+    <h3 class="font-bold text-lg text-center mb-1 text-gray-800">{{ game.name }}</h3>
+    <div class="text-gray-500 text-center text-sm mb-4">{{ game.desc }}</div>
+
+    <button
+      class="bg-lime-500 text-white font-semibold rounded-full px-6 py-2 mt-2 transition-all shadow hover:bg-lime-600 active:scale-95 w-full max-w-[160px] mx-auto cursor-pointer"
+      [disabled]="!game.available"
+      (click)="startOrderFor(game); $event.stopPropagation()"
+      tabindex="0"
+    >
+      Order Now
+    </button>
+  </div>
+</div>

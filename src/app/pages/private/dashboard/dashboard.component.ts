@@ -53,7 +53,7 @@ export class DashboardComponent {
           valueColor: 'text-lime-500',
         },
         {
-          title: 'Orders',
+          title: 'Order Queue',
           value: orders.length,
           subtitle: 'Last 7 days',
           iconClass: 'pi pi-box text-lime-500 !text-3xl',

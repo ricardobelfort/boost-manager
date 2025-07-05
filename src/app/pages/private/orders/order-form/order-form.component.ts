@@ -6,6 +6,7 @@ import { BreadcrumbComponent, ManualBreadcrumbItem } from '@shared/components/br
 import { Order } from '@shared/models/order.model';
 import { LoadingService } from '@shared/services/loading.service';
 import { OrderService } from '@shared/services/order.service';
+import { SelectedGame, SelectedGameService } from '@shared/services/selected-game.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -44,6 +45,7 @@ export class OrderFormComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private currencyService = inject(CurrencyService);
+  private selectedGameService = inject(SelectedGameService);
   loadingService = inject(LoadingService);
 
   editingId?: string;
@@ -57,6 +59,7 @@ export class OrderFormComponent {
   exchangeRates: Record<string, number> = {};
   ratesLoaded = false;
   boosterConvertedValue: string | null = null;
+  selectedGame?: SelectedGame;
 
   boosters = [
     { label: 'Booster 1', value: 'booster 1' },
@@ -64,11 +67,62 @@ export class OrderFormComponent {
     { label: 'Booster 3', value: 'booster 3' },
   ];
   serviceTypes = [
-    { label: 'Camuflagem Dark Meter', value: 'camuflagem dark meter' },
-    { label: 'Ranked MP do BO6', value: 'ranked mp do bo6' },
-    { label: 'Ranked Warzone', value: 'ranked warzone' },
-    { label: 'Bot Lobby', value: 'bot lobby' },
+    {
+      label: 'Ranked Multiplayer',
+      value: 'ranked_mp',
+      games: ['cod_bo6'],
+    },
+    {
+      label: 'Bot Lobby',
+      value: 'bot_lobby',
+      games: ['cod_bo6', 'gta_v'],
+    },
+    {
+      label: 'Elojob',
+      value: 'elojob',
+      games: ['lol'],
+    },
+    // etc...
   ];
+
+  // gameData: { [key: string]: { name: string; desc: string; image: string } } = {
+  //   cod_bo6: { name: 'Call of Duty: Black Ops 6', desc: '...', image: '...' },
+  //   gta_v: { name: 'GTA V', desc: '...', image: '...' },
+  //   lol: { name: 'League of Legends', desc: '...', image: '...' },
+  // };
+
+  games = [
+    {
+      id: 'cod_bo6',
+      name: 'Call of Duty: Black Ops 6',
+      fallback: 'assets/icons/cod_bo6.png',
+      desc: 'Serviço de boosting no novo COD',
+      image: '',
+      available: true,
+      badge: 'Novo', // ou 'Disponível'
+      badgeColor: 'bg-lime-500 text-white',
+    },
+    {
+      id: 'gta_v',
+      name: 'GTA V',
+      fallback: 'assets/icons/gta_v.png',
+      desc: 'Boost para contas GTA Online',
+      image: '',
+      available: true,
+      badge: 'Disponível',
+      badgeColor: 'bg-blue-500 text-white',
+    },
+    {
+      id: 'lol',
+      name: 'League of Legends',
+      fallback: 'assets/icons/lol.png',
+      desc: 'Elojob e missões no LoL',
+      image: '',
+      available: false, // Indica que não há boost disponível no momento
+      badge: null,
+    },
+  ];
+
   suppliers = [
     { label: 'Supplier 1', value: 'Supplier 1' },
     { label: 'Supplier 2', value: 'Supplier 2' },
@@ -137,7 +191,10 @@ export class OrderFormComponent {
       total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
       booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
       observation: ['', [Validators.maxLength(500)]],
-      external_supplier_id: [''],
+      customer_id: ['', Validators.required],
+      customer_order_id: ['', Validators.required],
+      lobby_price: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
+      lobby_quantity: [0, Validators.required],
     },
     {
       validators: this.dateRangeValidator.bind(this),
@@ -168,6 +225,14 @@ export class OrderFormComponent {
       });
     }
 
+    this.route.queryParams.subscribe((params) => {
+      const gameId = params['game'];
+      if (gameId) {
+        const game = this.selectedGameService.get();
+        this.selectedGame = game === null ? undefined : game;
+      }
+    });
+
     this.orderForm.get('service_type')!.valueChanges.subscribe((value) => {
       const isCamuflagem = typeof value === 'string' && (value as string).toLowerCase().includes('camuflagem');
       const weaponCtrl = this.orderForm.get('weapon_quantity');
@@ -188,18 +253,27 @@ export class OrderFormComponent {
 
     this.orderForm.get('service_type')!.valueChanges.subscribe((value) => {
       const isBotLobby = (value ?? '').toLowerCase() === 'bot lobby';
-      const extIdCtrl = this.orderForm.get('external_supplier_id');
+      const customerCtrl = this.orderForm.get('customer_id');
+      const customerOrderrCtrl = this.orderForm.get('customer_order_id');
+      const lobbyPriceCtrl = this.orderForm.get('lobby_price');
+      const lobbyQtyCtrl = this.orderForm.get('lobby_quantity');
       const supplierCtrl = this.orderForm.get('supplier');
 
-      // Sempre: habilita supplier e external_supplier_id (o resto só se for Bot Lobby)
+      // Sempre: habilita supplier e customer_id (o resto só se for Bot Lobby)
       supplierCtrl?.enable();
-      extIdCtrl?.enable();
+      customerCtrl?.enable();
+      customerOrderrCtrl?.enable();
+      lobbyPriceCtrl?.enable();
+      lobbyQtyCtrl?.enable();
 
       // Set Validators
       if (isBotLobby) {
         // Torna só esses dois required
         supplierCtrl?.setValidators([Validators.required]);
-        extIdCtrl?.setValidators([Validators.required]);
+        customerCtrl?.setValidators([Validators.required]);
+        customerOrderrCtrl?.setValidators([Validators.required]);
+        lobbyPriceCtrl?.setValidators([Validators.required]);
+        lobbyQtyCtrl?.setValidators([Validators.required]);
 
         // Limpa e remove validators dos outros campos
         [
@@ -242,7 +316,10 @@ export class OrderFormComponent {
         this.orderForm.get('service_type')?.setValidators([Validators.required]);
         this.orderForm.get('weapon_quantity')?.clearValidators();
         this.orderForm.get('observation')?.clearValidators();
-        extIdCtrl?.clearValidators();
+        customerCtrl?.clearValidators();
+        customerOrderrCtrl?.clearValidators();
+        lobbyPriceCtrl?.clearValidators();
+        lobbyQtyCtrl?.clearValidators();
 
         [
           'booster',
@@ -266,13 +343,26 @@ export class OrderFormComponent {
         });
 
         supplierCtrl?.setValidators([Validators.required]);
-        extIdCtrl?.setValue('');
-        extIdCtrl?.disable();
+        customerCtrl?.setValue('');
+        customerCtrl?.disable();
+        customerOrderrCtrl?.setValue('');
+        customerOrderrCtrl?.disable();
+        lobbyPriceCtrl?.setValue(0);
+        lobbyPriceCtrl?.disable();
+        lobbyQtyCtrl?.setValue(0);
+        lobbyQtyCtrl?.disable();
       }
 
       supplierCtrl?.updateValueAndValidity();
-      extIdCtrl?.updateValueAndValidity();
+      customerCtrl?.updateValueAndValidity();
+      customerOrderrCtrl?.updateValueAndValidity();
+      lobbyPriceCtrl?.updateValueAndValidity();
+      lobbyQtyCtrl?.updateValueAndValidity();
     });
+  }
+
+  getFilteredServiceTypes() {
+    return this.serviceTypes || [];
   }
 
   isBotLobby(): boolean {
@@ -433,8 +523,8 @@ export class OrderFormComponent {
   get currency() {
     return this.orderForm.get('currency')!;
   }
-  get external_supplier_id() {
-    return this.orderForm.get('external_supplier_id')!;
+  get customer_id() {
+    return this.orderForm.get('customer_id')!;
   }
 
   onSubmit() {
@@ -475,7 +565,10 @@ export class OrderFormComponent {
         total_value: formValue.total_value ?? 0,
         booster_value: formValue.booster_value ?? 0,
         observation: formValue.observation ?? '',
-        external_supplier_id: formValue.external_supplier_id ?? '',
+        customer_id: formValue.customer_id ?? '',
+        customer_order_id: formValue.customer_id ?? '',
+        lobby_price: formValue.lobby_price ?? 0,
+        lobby_quantity: formValue.lobby_quantity ?? 0,
       };
       return order;
     };
@@ -522,12 +615,15 @@ export class OrderFormComponent {
       );
     }
 
+    this.selectedGameService.clear();
+
     // Sempre subscribe ao fluxo
     flow$.subscribe();
   }
 
   onCancel() {
     this.orderForm.reset();
+    this.selectedGameService.clear();
     this.close.emit?.();
     this.router.navigate(['/dashboard/orders']);
   }
