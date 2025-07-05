@@ -42,3 +42,25 @@ body {
   line-height: 1;
   vertical-align: middle;
 }
+
+.swal2-confirm-custom {
+  background: #e6e9ee !important;
+  color: #393d4a !important;
+  border-radius: 9999px !important;
+  font-weight: 600;
+  padding: 0.7rem 1.6rem;
+}
+.swal2-cancel-custom {
+  background: #84e052 !important;
+  color: #fff !important;
+  border-radius: 9999px !important;
+  font-weight: 600;
+  padding: 0.7rem 1.6rem;
+  margin-right: 0.7rem !important;
+}
+.swal2-message-custom {
+  color: #475569;
+  font-size: 1.1rem;
+  padding: 1.2rem 0 0 0;
+}
+

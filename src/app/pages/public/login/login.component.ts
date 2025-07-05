@@ -13,6 +13,7 @@ import { IftaLabelModule } from 'primeng/iftalabel';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { supabase } from 'supabase.client';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-login',
@@ -45,6 +46,7 @@ export class LoginComponent implements OnInit {
   lockoutDialogVisible = false;
   lockoutDialogMessage = '';
   lockoutDialogHeader = 'Erro ao autenticar';
+  lockoutDialogSubMessage = '';
 
   loginForm = this.fb.nonNullable.group({
     email: this.fb.nonNullable.control('', [Validators.email, Validators.required, Validators.minLength(5)]),
@@ -80,29 +82,32 @@ export class LoginComponent implements OnInit {
 
     const { email, password, rememberMe } = this.loginForm.value;
 
-    // 1. Verifica se a conta está bloqueada ANTES de tentar o login
     this.loading.show();
     this.lockout.checkAccountLockout(email!).subscribe({
       next: (lockoutRes) => {
         if (lockoutRes.locked) {
-          this.lockoutDialogMessage =
-            lockoutRes.message ||
-            'Your account has been temporarily locked due to multiple failed login attempts. Please try again after 30 minutes or <a routerLink="/auth/recovery" class="underline text-lime-500">reset your password</a>.';
-          this.lockoutDialogVisible = true;
+          this.showSweetAlert({
+            title: 'Conta bloqueada',
+            message:
+              lockoutRes.message ||
+              'Sua conta está temporariamente bloqueada devido a múltiplas tentativas de login. <br>Redefina sua senha ou aguarde alguns minutos.',
+            icon: 'error',
+            showResetPassword: true,
+          });
           this.loading.hide();
           return;
         }
 
-        // 2. Se não estiver bloqueada, tenta o login normalmente
         this.auth.signIn(email!, password!, rememberMe ?? false).subscribe({
           next: async (response) => {
             try {
               if (response.error) {
-                // 3. Se o login falhar, registra a falha de login
                 this.lockout.recordLoginFailure(email!).subscribe();
-                this.handleLoginFailure(email!);
-                this.setDialogHeaderAndMessage(response.error);
-                this.lockoutDialogVisible = true;
+                this.showSweetAlert({
+                  title: 'Credenciais inválidas',
+                  message: 'E-mail ou senha incorretos. Tente novamente.',
+                  icon: 'error',
+                });
                 return;
               }
 
@@ -211,41 +216,60 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  setDialogHeaderAndMessage(detail: string) {
-    const lower = (detail || '').toLowerCase();
-    if (lower.includes('already registered') || lower.includes('user already exists')) {
-      this.lockoutDialogHeader = 'E-mail já cadastrado';
-      this.lockoutDialogMessage = 'Já existe uma conta cadastrada com este e-mail.';
-      return;
-    }
-    if (lower.includes('invalid login credentials')) {
-      this.lockoutDialogHeader = 'Credenciais inválidas';
-      this.lockoutDialogMessage = 'E-mail ou senha incorretos. Tente novamente.';
-      return;
-    }
-    if (lower.includes('bloquead') || lower.includes('locked')) {
-      this.lockoutDialogHeader = 'Conta bloqueada';
-      this.lockoutDialogMessage =
-        'Sua conta está temporariamente bloqueada devido a múltiplas tentativas de login. Redefina sua senha ou aguarde alguns minutos.';
-      return;
-    }
-    this.lockoutDialogHeader = 'Erro ao autenticar';
-    this.lockoutDialogMessage = detail || 'Não foi possível autenticar. Tente novamente.';
+  // Este método pode ficar no próprio LoginComponent
+  showSweetAlert({
+    title,
+    message,
+    icon = 'error',
+    showResetPassword = false,
+    confirmButtonText = 'Fechar',
+  }: {
+    title: string;
+    message: string;
+    icon?: 'error' | 'success' | 'warning' | 'info' | 'question';
+    showResetPassword?: boolean;
+    confirmButtonText?: string;
+  }) {
+    return Swal.fire({
+      title: `<span class="text-gray-800">${title}</span>`,
+      html: `<div class="swal2-message-custom">${message}</div>`,
+      icon,
+      confirmButtonText,
+      showCancelButton: showResetPassword,
+      cancelButtonText: 'Redefinir senha',
+      customClass: {
+        popup: 'rounded-2xl p-6',
+        title: 'text-xl font-semibold',
+        confirmButton: 'swal2-confirm-custom',
+        cancelButton: 'swal2-cancel-custom',
+      },
+      focusConfirm: !showResetPassword,
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        this.goToRecovery();
+      }
+    });
   }
 
-  async handleLoginFailure(email: string) {
-    // Consulta as tentativas restantes
+  async handleLoginFailure(email: string, detail?: string) {
+    // Por padrão, usa o detail vindo do backend
+    let msg = detail || 'Usuário ou senha incorretos.';
+    let header = 'Credenciais inválidas';
+
+    // Consulta as tentativas restantes, mas só altera se fizer sentido
     const res = await this.auth.getRemainingAttempts(email);
-    let msg = 'Usuário ou senha incorretos.';
 
     if (typeof res.remaining === 'number') {
       if (res.remaining === 0) {
+        header = 'Conta bloqueada';
         msg = `Sua conta foi bloqueada por tentativas repetidas. Tente novamente mais tarde ou redefina sua senha.`;
       } else {
         msg += `<br><b>Tentativas restantes:</b> ${res.remaining}`;
       }
     }
 
+    this.lockoutDialogHeader = header;
     this.lockoutDialogMessage = msg;
     this.lockoutDialogVisible = true;
   }
