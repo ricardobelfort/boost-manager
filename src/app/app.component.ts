@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { LoadingComponent } from '@shared/components/loading/loading.component';
+import { DialogService } from '@shared/services/dialog.service';
 import { PrimeNG } from 'primeng/config';
 import { ToastModule } from 'primeng/toast';
 import { filter } from 'rxjs';
@@ -63,7 +64,8 @@ export class AppComponent {
 
   constructor(
     private primeng: PrimeNG,
-    private router: Router
+    private router: Router,
+    private dialog: DialogService
   ) {}
 
   async ngOnInit() {
@@ -81,8 +83,12 @@ export class AppComponent {
       this.router.navigate(['/auth/login']);
     }
     // Opcional: escute mudanças na sessão para logout automático!
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session) {
+        await this.dialog.warning(
+          'Session ended',
+          'Your session has expired or was ended on another device. Please log in again.'
+        );
         this.router.navigate(['/auth/login']);
       }
     });

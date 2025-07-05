@@ -139,8 +139,7 @@ export class AuthService {
 
       if (lockoutCheck.locked) {
         return {
-          error:
-            lockoutCheck.message || 'Conta temporariamente bloqueada devido a múltiplas tentativas de login falhas.',
+          error: lockoutCheck.message || 'Account temporarily locked due to multiple failed login attempts.',
         };
       }
 
@@ -158,17 +157,17 @@ export class AuthService {
         const failureData = await this.recordLoginFailure(email);
 
         if (failureData.isLocked) {
-          return { error: 'Conta bloqueada devido a múltiplas tentativas de login falhas.' };
+          return { error: 'Account blocked due to multiple failed login attempts.' };
         } else {
-          return { error: `Senha incorreta. Tentativas restantes: ${failureData.remainingAttempts}` };
+          return { error: `Incorrect password. Remaining attempts: ${failureData.remainingAttempts}` };
         }
       }
 
       // Login bem-sucedido
       return { data };
     } catch (err) {
-      console.error('Erro ao processar login:', err);
-      return { error: 'Erro ao processar login. Tente novamente.' };
+      console.error('Error processing login:', err);
+      return { error: 'Error processing login. Please try again.' };
     }
   }
 

@@ -1,4 +1,4 @@
-import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
@@ -13,6 +13,7 @@ import { providePrimeNG } from 'primeng/config';
 import { ToastModule } from 'primeng/toast';
 import { Noir } from 'src/style';
 import { routes } from './app.routes';
+import { initSupabaseClient } from './supabase.client';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -22,6 +23,11 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     importProvidersFrom(ToastModule),
     { provide: LOCALE_ID, useValue: 'pt' },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: () => () => initSupabaseClient(),
+      multi: true,
+    },
     provideNgcCookieConsent({
       cookie: {
         domain: 'boost-manager.vercel.app',
