@@ -40,3 +40,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Ignorar env de desenvolvimento
+src/environments/environment.development.ts
