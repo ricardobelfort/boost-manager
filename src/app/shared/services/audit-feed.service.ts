@@ -8,11 +8,9 @@ export class AuditFeedService {
   feed$ = new BehaviorSubject<any[]>([]);
 
   // Aqui: count de registros de auditoria
-  auditCount$ = from(
-    supabase
-      .from('audit_log')
-      .select('*', { count: 'exact', head: true })
-  ).pipe(map((resp: any) => resp.count || 0));
+  auditCount$ = from(supabase.from('audit_logs').select('*', { count: 'exact', head: true })).pipe(
+    map((resp: any) => resp.count || 0)
+  );
 
   constructor() {
     // Carrega os últimos 10 eventos
@@ -21,18 +19,14 @@ export class AuditFeedService {
     // Realtime: escuta inserts na tabela
     supabase
       .channel('audit-log')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'audit_log' }, payload => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'audit_logs' }, (payload) => {
         this.feed$.next([payload.new, ...this.feed$.value].slice(0, 20));
       })
       .subscribe();
   }
 
   async loadFeed() {
-    const { data } = await supabase
-      .from('audit_log')
-      .select('*')
-      .order('timestamp', { ascending: false })
-      .limit(20);
+    const { data } = await supabase.from('audit_logs').select('*').order('timestamp', { ascending: false }).limit(20);
     this.feed$.next(data || []);
   }
 }
