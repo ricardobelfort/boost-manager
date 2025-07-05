@@ -82,14 +82,7 @@ export class OrderFormComponent {
       value: 'elojob',
       games: ['lol'],
     },
-    // etc...
   ];
-
-  // gameData: { [key: string]: { name: string; desc: string; image: string } } = {
-  //   cod_bo6: { name: 'Call of Duty: Black Ops 6', desc: '...', image: '...' },
-  //   gta_v: { name: 'GTA V', desc: '...', image: '...' },
-  //   lol: { name: 'League of Legends', desc: '...', image: '...' },
-  // };
 
   games = [
     {
@@ -205,19 +198,31 @@ export class OrderFormComponent {
     this.fetchRates();
     this.editingId = this.route.snapshot.paramMap.get('id') || undefined;
     if (this.editingId) {
+      this.loadingService.show();
       this.orderService
         .getOrderById(this.editingId)
         .pipe(take(1))
-        .subscribe((orderParaEditar) => {
-          if (orderParaEditar) {
-            this.orderForm.patchValue({
-              ...orderParaEditar,
-              weapon_quantity:
-                typeof orderParaEditar.weapon_quantity === 'number' ? orderParaEditar.weapon_quantity : null,
-              start_date: orderParaEditar.start_date ? new Date(orderParaEditar.start_date) : undefined,
-              end_date: orderParaEditar.end_date ? new Date(orderParaEditar.end_date) : undefined,
-            } as Order);
-          }
+        .subscribe({
+          next: (orderParaEditar) => {
+            if (orderParaEditar) {
+              this.orderForm.patchValue({
+                ...orderParaEditar,
+                weapon_quantity:
+                  typeof orderParaEditar.weapon_quantity === 'number' ? orderParaEditar.weapon_quantity : null,
+                start_date: orderParaEditar.start_date ? new Date(orderParaEditar.start_date) : undefined,
+                end_date: orderParaEditar.end_date ? new Date(orderParaEditar.end_date) : undefined,
+              } as Order);
+            }
+            this.loadingService.hide();
+          },
+          error: (err) => {
+            this.loadingService.hide();
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to load request for editing.',
+            });
+          },
         });
 
       this.orderForm.get('currency')?.valueChanges.subscribe((base) => {
@@ -418,15 +423,23 @@ export class OrderFormComponent {
 
   fetchRates(base = 'USD') {
     this.ratesLoaded = false;
+    this.loadingService.show();
     this.currencyService.getExchangeRates(base).subscribe({
       next: (rates) => {
         this.exchangeRates = rates;
         this.ratesLoaded = true;
+        this.loadingService.hide();
       },
       error: () => {
+        this.loadingService.hide();
         // fallback para evitar crash
         this.exchangeRates = { USD: 1, BRL: 5, EUR: 0.92, BTC: 0.000015 };
         this.ratesLoaded = true;
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Quotes',
+          detail: 'Failed to fetch online quotes. Using default values.',
+        });
       },
     });
   }
