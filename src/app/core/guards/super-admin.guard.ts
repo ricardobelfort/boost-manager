@@ -1,19 +1,20 @@
 import { inject, Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
-import { supabase } from 'supabase.client';
+import { getSupabaseClient } from 'supabase.client';
 
 @Injectable({ providedIn: 'root' })
 export class SuperAdminGuard implements CanActivate {
   private router = inject(Router);
   private messageService = inject(MessageService);
+  private supabase = getSupabaseClient();
 
   async canActivate(): Promise<boolean> {
     try {
       // Checa session usando o método existente
       const {
         data: { session },
-      } = await supabase.auth.getSession();
+      } = await this.supabase.auth.getSession();
 
       if (!session) {
         this.router.navigate(['/auth/login']);
@@ -24,7 +25,7 @@ export class SuperAdminGuard implements CanActivate {
       const userId = session.user.id;
 
       // Busca o perfil desse usuário na tabela 'profiles'
-      const { data, error } = await supabase.from('profiles').select('role').eq('id', userId).single();
+      const { data, error } = await this.supabase.from('profiles').select('role').eq('id', userId).single();
 
       if (error || !data) {
         this.messageService.add({

@@ -2,26 +2,26 @@ import { Injectable } from '@angular/core';
 import type { Session, User } from '@supabase/supabase-js';
 import { BehaviorSubject, from, map, Observable, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { supabase } from 'supabase.client';
+import { getSupabaseClient } from 'supabase.client';
 import { Md5 } from 'ts-md5';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  readonly supabaseUrl = (supabase as any)._supabaseUrl || environment.SUPABASE_URL;
-  readonly anonKey = (supabase as any)._anonKey || environment.SUPABASE_ANON_KEY;
+  private supabase = getSupabaseClient();
+  readonly supabaseUrl = (this.supabase as any)._supabaseUrl || environment.SUPABASE_URL;
+  readonly anonKey = (this.supabase as any)._anonKey || environment.SUPABASE_ANON_KEY;
 
   private sessionSubject = new BehaviorSubject<Session | null>(null);
   private tenantId: string | null = null;
-  supabase = supabase;
 
   constructor() {
     // Restaura a sessão ao iniciar o app
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    this.supabase.auth.getSession().then(({ data: { session } }) => {
       this.sessionSubject.next(session);
     });
 
     // Observa mudanças de autenticação
-    supabase.auth.onAuthStateChange((_event, session) => {
+    this.supabase.auth.onAuthStateChange((_event, session) => {
       this.sessionSubject.next(session);
     });
   }
@@ -144,7 +144,7 @@ export class AuthService {
       }
 
       // 2. Tentar fazer login
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
         password,
         options: {
@@ -175,7 +175,7 @@ export class AuthService {
   signIn(email: string, password: string, rememberMe: boolean): Observable<any> {
     // Opção nativa do Supabase
     return from(
-      supabase.auth.signInWithPassword({
+      this.supabase.auth.signInWithPassword({
         email,
         password,
         options: {
@@ -187,7 +187,7 @@ export class AuthService {
   }
 
   async getRemainingAttempts(email: string, maxAttempts = 5, lockoutMinutes = 30) {
-    const url = `${(supabase as any)._supabaseUrl || (window as any).SUPABASE_URL || ''}/functions/v1/remaining-attempts`;
+    const url = `${(this.supabase as any)._supabaseUrl || (window as any).SUPABASE_URL || ''}/functions/v1/remaining-attempts`;
 
     const res = await fetch(url, {
       method: 'POST',
@@ -198,16 +198,20 @@ export class AuthService {
   }
 
   async loadUserProfileAndTenant() {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await this.supabase.auth.getUser();
     if (!user?.user?.id) return null;
-    const { data: profile } = await supabase.from('profiles').select('*, tenant_id').eq('id', user.user.id).single();
+    const { data: profile } = await this.supabase
+      .from('profiles')
+      .select('*, tenant_id')
+      .eq('id', user.user.id)
+      .single();
     this.tenantId = profile?.tenant_id ?? null;
     return profile;
   }
 
   signOut(): Observable<void> {
     return from(
-      supabase.auth.signOut().then(() => {
+      this.supabase.auth.signOut().then(() => {
         this.sessionSubject.next(null);
       })
     );
@@ -219,19 +223,20 @@ export class AuthService {
 
   /** Restaura/atualiza sessão manualmente, se necessário */
   refreshSession(): Promise<Session | null> {
-    return supabase.auth.getSession().then(({ data }) => {
+    return this.supabase.auth.getSession().then(({ data }) => {
       this.sessionSubject.next(data.session);
       return data.session;
     });
   }
 
   async tenantExists(name: string): Promise<boolean> {
+    const supabase = getSupabaseClient();
     const { data } = await supabase.from('tenants').select('id').eq('name', name).maybeSingle();
     return !!data;
   }
 
   async emailExists(email: string): Promise<boolean> {
-    const { data } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle();
+    const { data } = await this.supabase.from('profiles').select('id').eq('email', email).maybeSingle();
     return !!data;
   }
 
@@ -241,7 +246,7 @@ export class AuthService {
       : { emailRedirectTo: `${window.location.origin}/auth/callback` };
 
     return from(
-      supabase.auth.signUp({
+      this.supabase.auth.signUp({
         email,
         password,
         options,
@@ -251,7 +256,7 @@ export class AuthService {
 
   handleEmailConfirmation(token: string): Observable<any> {
     return from(
-      supabase.auth.verifyOtp({
+      this.supabase.auth.verifyOtp({
         token_hash: token,
         type: 'email',
       })
@@ -274,7 +279,7 @@ export class AuthService {
     userEmail: string
   ): Promise<string> {
     // 1. Criar o tenant
-    const { data: tenant, error: tenantError } = await supabase
+    const { data: tenant, error: tenantError } = await this.supabase
       .from('tenants')
       .insert([{ name: tenantName }])
       .select('id')
@@ -284,7 +289,7 @@ export class AuthService {
     if (!tenant) throw new Error('Falha ao criar tenant');
 
     // 2. Verificar se o perfil já existe
-    const { data: existingProfile } = await supabase.from('profiles').select('id').eq('id', userId).single();
+    const { data: existingProfile } = await this.supabase.from('profiles').select('id').eq('id', userId).single();
 
     // Determinar a role com base no email
     // Se for o email do superadmin, atribuir role 'superadmin', caso contrário 'admin'
@@ -292,7 +297,7 @@ export class AuthService {
 
     if (existingProfile) {
       // 3a. Atualizar o perfil existente
-      const { error: updateError } = await supabase
+      const { error: updateError } = await this.supabase
         .from('profiles')
         .update({
           name: userName,
@@ -305,7 +310,7 @@ export class AuthService {
       if (updateError) throw updateError;
     } else {
       // 3b. Criar um novo perfil
-      const { error: profileError } = await supabase.from('profiles').insert([
+      const { error: profileError } = await this.supabase.from('profiles').insert([
         {
           id: userId,
           name: userName,
@@ -341,7 +346,11 @@ export class AuthService {
       }
 
       // Busca o perfil do usuário
-      const { data, error } = await supabase.from('profiles').select('role').eq('id', this.currentUser.id).single();
+      const { data, error } = await this.supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', this.currentUser.id)
+        .single();
 
       if (error || !data) {
         console.error('Error checking if user is superadmin:', error);
@@ -364,7 +373,11 @@ export class AuthService {
       }
 
       // Busca o perfil do usuário
-      const { data, error } = await supabase.from('profiles').select('role').eq('id', this.currentUser.id).single();
+      const { data, error } = await this.supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', this.currentUser.id)
+        .single();
 
       if (error || !data) {
         console.error('Error getting user role:', error);
@@ -379,9 +392,9 @@ export class AuthService {
   }
 
   async getUserProfile() {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await this.supabase.auth.getUser();
     if (!user?.user?.id) return null;
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.user.id).single();
+    const { data } = await this.supabase.from('profiles').select('*').eq('id', user.user.id).single();
     return data;
   }
 
@@ -389,7 +402,7 @@ export class AuthService {
     const profile = await this.getUserProfile();
     if (!profile?.tenant_id) return null;
 
-    const { data, error } = await supabase.from('tenants').select('*').eq('id', profile.tenant_id).single();
+    const { data, error } = await this.supabase.from('tenants').select('*').eq('id', profile.tenant_id).single();
 
     if (error) {
       console.error('Erro ao obter tenant:', error);
@@ -405,6 +418,6 @@ export class AuthService {
   }
 
   recoverPassword(email: string): Observable<any> {
-    return from(supabase.auth.resetPasswordForEmail(email));
+    return from(this.supabase.auth.resetPasswordForEmail(email));
   }
 }

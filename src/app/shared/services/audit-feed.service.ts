@@ -1,20 +1,22 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { supabase } from 'supabase.client';
+import { getSupabaseClient } from 'supabase.client';
 
 @Injectable({ providedIn: 'root' })
 export class AuditFeedService {
   feed$ = new BehaviorSubject<any[]>([]);
+  private supabase = getSupabaseClient();
 
   // Aqui: count de registros de auditoria
-  auditCount$ = from(supabase.from('audit_logs').select('*', { count: 'exact', head: true })).pipe(
+  auditCount$ = from(this.supabase.from('audit_logs').select('*', { count: 'exact', head: true })).pipe(
     map((resp: any) => resp.count || 0)
   );
 
   constructor() {
     // Carrega os últimos 10 eventos
     this.loadFeed();
+    const supabase = getSupabaseClient();
 
     // Realtime: escuta inserts na tabela
     supabase
@@ -26,6 +28,7 @@ export class AuditFeedService {
   }
 
   async loadFeed() {
+    const supabase = getSupabaseClient();
     const { data } = await supabase.from('audit_logs').select('*').order('timestamp', { ascending: false }).limit(20);
     this.feed$.next(data || []);
   }

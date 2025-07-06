@@ -12,8 +12,8 @@ import { FilterMatchMode, MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import { ToastModule } from 'primeng/toast';
 import { Noir } from 'src/style';
+import { initSupabaseClient } from 'supabase.client';
 import { routes } from './app.routes';
-import { initSupabaseClient } from './supabase.client';
 
 export const appConfig: ApplicationConfig = {
   providers: [

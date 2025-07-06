@@ -6,7 +6,7 @@ import { AuthService } from '@shared/services/auth.service';
 import { LoadingService } from '@shared/services/loading.service';
 import { MessageService } from 'primeng/api';
 import { MessageModule } from 'primeng/message';
-import { supabase } from 'supabase.client';
+import { getSupabaseClient } from 'supabase.client';
 
 @Component({
   standalone: true,
@@ -60,6 +60,7 @@ export class OnboardingComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly loadingService = inject(LoadingService);
   private readonly messageService = inject(MessageService);
+  private supabase = getSupabaseClient();
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -82,7 +83,7 @@ export class OnboardingComponent implements OnInit {
       } else {
         this.accessToken = sessionStorage.getItem('access_token');
         if (!this.accessToken) {
-          supabase.auth.getSession().then(({ data }) => {
+          this.supabase.auth.getSession().then(({ data }) => {
             if (!data.session) {
               this.router.navigate(['/auth/login']);
             } else {
@@ -133,7 +134,7 @@ export class OnboardingComponent implements OnInit {
       // Chamar o método createTenantAndProfile e capturar a role retornada
       const role = await this.authService.createTenantAndProfile(tenantName, name, currentUser.id, currentUser.email);
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await this.supabase
         .from('profiles')
         .update({
           onboarding_completed: true,

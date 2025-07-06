@@ -12,7 +12,7 @@ import { DividerModule } from 'primeng/divider';
 import { IftaLabelModule } from 'primeng/iftalabel';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { supabase } from 'supabase.client';
+import { getSupabaseClient } from 'supabase.client';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -39,6 +39,7 @@ export class LoginComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly loading = inject(LoadingService);
   private readonly lockout = inject(LockoutService);
+  private supabase = getSupabaseClient();
 
   passwordStrengthClass = '';
   passwordStrengthWidth = '0%';
@@ -123,7 +124,7 @@ export class LoginComponent implements OnInit {
               // ---- O RESTANTE DO SEU FLUXO AQUI (NÃO MUDEI!) ----
               const user = response.data.session.user;
 
-              const { data: profile } = await supabase
+              const { data: profile } = await this.supabase
                 .from('profiles')
                 .select('id, name, email, role, tenant_id')
                 .eq('id', user.id)
@@ -133,7 +134,7 @@ export class LoginComponent implements OnInit {
                 let tenantId = profile?.tenant_id;
                 if (!tenantId) {
                   const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
-                  const { data: tenant, error: tenantError } = await supabase
+                  const { data: tenant, error: tenantError } = await this.supabase
                     .from('tenants')
                     .insert([{ name: companyName }])
                     .select()
@@ -151,7 +152,7 @@ export class LoginComponent implements OnInit {
                 }
 
                 const companyName = localStorage.getItem('pendingCompanyName') || email || 'My Company';
-                const { error: updateError } = await supabase.rpc('update_profile', {
+                const { error: updateError } = await this.supabase.rpc('update_profile', {
                   user_name: companyName,
                   user_role: this.auth.isSuperAdminEmail(email!) ? 'superadmin' : 'owner',
                   user_tenant_id: tenantId,
@@ -168,7 +169,7 @@ export class LoginComponent implements OnInit {
 
               await this.auth.loadUserProfileAndTenant();
 
-              const { data: loadedProfile } = await supabase
+              const { data: loadedProfile } = await this.supabase
                 .from('profiles')
                 .select('id, name, email, role, tenant_id')
                 .eq('id', user.id)

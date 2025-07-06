@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Order } from '@shared/models/order.model';
 import { BehaviorSubject, from, Observable } from 'rxjs';
-import { supabase } from 'supabase.client';
+import { getSupabaseClient } from 'supabase.client';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private ordersSubject = new BehaviorSubject<Order[]>([]);
   orders$ = this.ordersSubject.asObservable();
+  private supabase = getSupabaseClient();
 
   constructor() {
     this.refreshOrders();
@@ -14,14 +15,14 @@ export class OrderService {
 
   /** Recarrega os Orders do Supabase */
   refreshOrders() {
-    from(supabase.from('orders').select('*').order('created_at', { ascending: false })).subscribe(({ data }) => {
+    from(this.supabase.from('orders').select('*').order('created_at', { ascending: false })).subscribe(({ data }) => {
       if (data) this.ordersSubject.next(data as Order[]);
     });
   }
 
   addOrder(order: Order): Observable<Order> {
     return from(
-      supabase
+      this.supabase
         .from('orders')
         .insert(order)
         .select()
@@ -36,7 +37,7 @@ export class OrderService {
   getOrders(): Observable<Order[]> {
     // Você pode usar orders$ ou chamar direto no banco se quiser sempre o mais fresco
     return from(
-      supabase
+      this.supabase
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false })
@@ -46,7 +47,7 @@ export class OrderService {
 
   getOrderById(id: string): Observable<Order | undefined> {
     return from(
-      supabase
+      this.supabase
         .from('orders')
         .select('*')
         .eq('id', id)
@@ -57,7 +58,7 @@ export class OrderService {
 
   updateOrder(updated: Order): Observable<Order> {
     return from(
-      supabase
+      this.supabase
         .from('orders')
         .update(updated)
         .eq('id', updated.id)
@@ -72,7 +73,7 @@ export class OrderService {
 
   deleteOrder(order: Order): Observable<any> {
     return from(
-      supabase
+      this.supabase
         .from('orders')
         .delete()
         .eq('id', order.id)

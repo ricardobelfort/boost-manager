@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { supabase } from 'supabase.client';
+import { getSupabaseClient } from 'supabase.client';
 
 @Injectable({ providedIn: 'root' })
 export class TenantGuard implements CanActivate {
+  private supabase = getSupabaseClient();
   constructor(private router: Router) {}
 
   async canActivate(): Promise<boolean> {
     // Pega o usuário logado
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: userData } = await this.supabase.auth.getUser();
     const userId = userData?.user?.id;
     if (!userId) {
       this.router.navigate(['/auth/login']);
@@ -16,15 +17,11 @@ export class TenantGuard implements CanActivate {
     }
 
     // Busca o profile
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', userId)
-      .single();
+    const { data: profile, error } = await this.supabase.from('profiles').select('role').eq('id', userId).single();
 
     if (error || !profile) {
       // Não achou o perfil ou deu erro: força logout
-      await supabase.auth.signOut();
+      await this.supabase.auth.signOut();
       this.router.navigate(['/auth/login']);
       return false;
     }

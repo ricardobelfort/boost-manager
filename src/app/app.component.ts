@@ -6,7 +6,7 @@ import { DialogService } from '@shared/services/dialog.service';
 import { PrimeNG } from 'primeng/config';
 import { ToastModule } from 'primeng/toast';
 import { filter } from 'rxjs';
-import { supabase } from 'supabase.client';
+import { getSupabaseClient } from 'supabase.client';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { MenubarComponent } from './shared/components/menubar/menubar.component';
 
@@ -75,6 +75,8 @@ export class AppComponent {
       this.isPublicPage = this.publicPages.some((path) => this.router.url.startsWith(path));
       this.isAdminPage = this.adminPages.some((path) => this.router.url.startsWith(path));
     });
+
+    const supabase = getSupabaseClient();
 
     const { data } = await supabase.auth.getSession();
 
