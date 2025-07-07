@@ -36,6 +36,109 @@
         </ng-container>
       </ng-container>
     </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Card Boosters Ativos -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="text-lg font-semibold text-gray-700 mb-5">Active Boosters</div>
+        <p-table [value]="activeBoosters" class="p-datatable-sm" [style]="{ width: '100%' }">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>#Order</th>
+              <th>Booster</th>
+              <th>Amount to Pay</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>
+                <span class="font-mono text-gray-500">{{ row.orderId }}</span>
+              </td>
+              <td>
+                <div class="flex items-center gap-2">
+                  <img [src]="row.avatar" class="w-8 h-8 rounded-full" *ngIf="row.avatar" />
+                  <span class="font-medium text-gray-800">{{ row.name }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="font-semibold text-gray-700">{{ row.amount | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="3" class="text-gray-400 italic text-center py-4">No active boosters</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+      <!-- Card Pedidos em Progresso -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="text-lg font-semibold text-gray-700 mb-5">Orders In Progress</div>
+        <p-table [value]="ordersInProgress" class="p-datatable-sm" [style]="{ width: '100%' }">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Booster</th>
+              <th>Service</th>
+              <th>Progress</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>
+                <span class="font-medium text-gray-800">{{ row.boosterName }}</span>
+              </td>
+              <td>
+                <span class="text-gray-500">{{ row.serviceName }}</span>
+              </td>
+              <td>
+                <div class="flex items-center gap-2">
+                  <div class="w-30 h-2 bg-gray-100 rounded">
+                    <div [ngClass]="row.progressBarColor" class="h-2 rounded" [style.width.%]="row.progress"></div>
+                  </div>
+                  <span [ngClass]="row.progressColor" class="font-semibold text-xs">{{ row.progressLabel }}</span>
+                  <span class="ml-2 text-xs text-gray-400 font-mono">
+                    {{ row.timeOpen | async }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <ng-container *ngIf="!row.concluded; else concludedIcon">
+                  <button
+                    pButton
+                    [icon]="
+                      row.concluding ? 'pi pi-spin pi-spinner' : row.concludingRequested ? 'pi pi-check' : 'pi pi-eye'
+                    "
+                    class="p-button-rounded p-button-text"
+                    [ngClass]="row.concluding ? 'p-button-secondary' : 'p-button-info'"
+                    (click)="row.concluding ? null : startConclude(row)"
+                    [disabled]="row.concluding"
+                    [pTooltip]="
+                      row.concluding
+                        ? 'Finalizando...'
+                        : row.concludingRequested
+                          ? 'Finalizar pedido'
+                          : 'Visualizar pedido'
+                    "
+                    tooltipPosition="top"
+                  ></button>
+                </ng-container>
+                <ng-template #concludedIcon>
+                  <i class="pi pi-check text-emerald-500 text-xl" pTooltip="Concluído"></i>
+                </ng-template>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4" class="text-gray-400 italic text-center py-4">No orders in progress</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
   </ng-container>
   <ng-template #childView>
     <div class="mt-6">

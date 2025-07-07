@@ -5,6 +5,9 @@ import { DashboardCardComponent } from '@shared/components/dashboard-card/dashbo
 import { Order } from '@shared/models/order.model';
 import { OrderService } from '@shared/services/order.service';
 import { MenuItem } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { TooltipModule } from 'primeng/tooltip';
 import { combineLatest, interval, map, Observable, startWith, switchMap } from 'rxjs';
 
 interface DashboardCard {
@@ -20,9 +23,22 @@ interface DashboardCard {
   route: string;
 }
 
+export interface OrderInProgress {
+  boosterName: string;
+  serviceName: string;
+  progress: number;
+  progressLabel: string;
+  readonly progressBarColor: string;
+  readonly progressColor: string;
+  startedAt: Date;
+  concluding: boolean;
+  concluded: boolean;
+  timeOpen?: Observable<string>; // << ADICIONE ESTA LINHA
+}
+
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterOutlet, DashboardCardComponent, CommonModule, RouterLink],
+  imports: [RouterOutlet, DashboardCardComponent, CommonModule, RouterLink, TableModule, ButtonModule, TooltipModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
@@ -32,6 +48,99 @@ export class DashboardComponent {
 
   items: MenuItem[] | undefined;
   home: MenuItem | undefined;
+
+  activeBoosters = [
+    {
+      name: 'Matheus',
+      orderId: 1,
+      amount: 350,
+      avatar: 'https://primefaces.org/cdn/primeng/images/demo/avatar/onyamalimba.png',
+    },
+    {
+      name: 'Murillo',
+      orderId: 2,
+      amount: 425,
+      avatar: 'https://primefaces.org/cdn/primeng/images/demo/avatar/ionibowcher.png',
+    },
+    {
+      name: 'Erick',
+      orderId: 3,
+      amount: 850,
+      avatar: 'https://primefaces.org/cdn/primeng/images/demo/avatar/xuxuefeng.png',
+    },
+  ];
+
+  ordersInProgress: OrderInProgress[] = [
+    {
+      boosterName: 'Matheus',
+      serviceName: 'Valorant Boost - Platinum I',
+      progress: 68,
+      progressLabel: '%68',
+      get progressBarColor() {
+        if (this.progress < 40) return 'bg-red-400';
+        if (this.progress < 70) return 'bg-yellow-400';
+        return 'bg-green-400';
+      },
+      get progressColor() {
+        if (this.progress < 40) return 'text-red-500';
+        if (this.progress < 70) return 'text-yellow-500';
+        return 'text-green-500';
+      },
+      startedAt: new Date(Date.now() - 2 * 3600 * 1000 - 23 * 60 * 1000 - 12 * 1000),
+
+      concluding: false,
+      concluded: false,
+    },
+    {
+      boosterName: 'Murillo',
+      serviceName: 'LoL Boost - Gold IV',
+      progress: 35,
+      progressLabel: '%35',
+      get progressBarColor() {
+        if (this.progress < 40) return 'bg-red-400';
+        if (this.progress < 70) return 'bg-yellow-400';
+        return 'bg-green-400';
+      },
+      get progressColor() {
+        if (this.progress < 40) return 'text-red-500';
+        if (this.progress < 70) return 'text-yellow-500';
+        return 'text-green-500';
+      },
+      startedAt: new Date(Date.now() - 2 * 3600 * 1000 - 23 * 60 * 1000 - 12 * 1000),
+      concluding: false,
+      concluded: false,
+    },
+    {
+      boosterName: 'Erick',
+      serviceName: 'LoL Boost - Gold IV',
+      progress: 85,
+      progressLabel: '%85',
+      get progressBarColor() {
+        if (this.progress < 40) return 'bg-red-400';
+        if (this.progress < 70) return 'bg-yellow-400';
+        return 'bg-green-400';
+      },
+      get progressColor() {
+        if (this.progress < 40) return 'text-red-500';
+        if (this.progress < 70) return 'text-yellow-500';
+        return 'text-green-500';
+      },
+      startedAt: new Date(Date.now() - 2 * 3600 * 1000 - 23 * 60 * 1000 - 12 * 1000),
+      concluding: false,
+      concluded: false,
+    },
+  ];
+
+  startConclude(row: any) {
+    // Inicia a solicitação de conclusão
+    row.concluding = true;
+    // Simula chamada à API:
+    setTimeout(() => {
+      row.concluding = false;
+      row.concluded = true;
+      // Aqui você pode disparar a chamada real, feedback, etc.
+    }, 1500);
+  }
 
   orders$: Observable<Order[]> = this.orderService.orders$;
   dollarRate$: Observable<number> = interval(10 * 60 * 1000).pipe(
@@ -98,6 +207,20 @@ export class DashboardComponent {
 
   ngOnInit() {
     this.dollarRate$ = this.fetchDollarRate();
+    this.ordersInProgress.forEach((order) => {
+      order.timeOpen = interval(1000).pipe(
+        startWith(0),
+        map(() => this.getElapsedTimeString(order.startedAt))
+      );
+    });
+  }
+
+  getElapsedTimeString(startedAt: Date): string {
+    const now = new Date();
+    const diff = Math.floor((+now - +new Date(startedAt)) / 1000);
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    return `${h}h ${m.toString().padStart(2, '0')}m`;
   }
 
   navigateToCard(card: DashboardCard) {
