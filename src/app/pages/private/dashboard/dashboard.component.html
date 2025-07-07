@@ -47,7 +47,7 @@
               <th class="w-[80px]">#Order</th>
               <th>Booster</th>
               <th>Amount to Pay</th>
-              <th class="w-[80px] ! text-right">Actions</th>
+              <th class="w-[80px] !text-right">Actions</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-row>
@@ -63,14 +63,15 @@
                 <span class="font-semibold text-gray-700">{{ row.amount | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
               </td>
               <td class="!text-right">
-                <button
-                  pButton
-                  icon="pi pi-eye"
-                  class="p-button-rounded p-button-text p-button-info"
+                <p-button
+                  icon="pi pi-search"
+                  [rounded]="true"
+                  severity="info"
+                  [outlined]="true"
                   [pTooltip]="'View Report'"
                   tooltipPosition="top"
                   (click)="viewBoosterReport(row)"
-                ></button>
+                ></p-button>
               </td>
             </tr>
           </ng-template>
@@ -84,14 +85,17 @@
 
       <!-- Card Pedidos em Progresso -->
       <div class="bg-white rounded-xl shadow-sm p-6">
-        <div class="text-lg font-semibold text-gray-700 mb-5">Orders In Progress</div>
+        <div class="w-full flex justify-between items-center border-b-gray-400 mb-5">
+          <div class="text-lg font-semibold text-gray-700 mb-5">Orders In Progress</div>
+          <div class="text-lg font-semibold text-gray-700 mb-5">View All</div>
+        </div>
         <p-table [value]="ordersInProgress" class="p-datatable-sm" [style]="{ width: '100%' }">
           <ng-template pTemplate="header">
             <tr>
               <th>Booster</th>
               <th>Service</th>
               <th>Progress</th>
-              <th class="w-[80px] ! text-right">Actions</th>
+              <th class="w-[80px] !text-right">Actions</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-row>
@@ -113,23 +117,19 @@
                   </span>
                 </div>
               </td>
-              <td class="w-[80px] !text-right">
+              <td class="w-[80px] !text-center">
                 <ng-container *ngIf="!row.concluded; else concludedIcon">
                   <button
                     pButton
                     [icon]="
-                      row.concluding ? 'pi pi-spin pi-spinner' : row.concludingRequested ? 'pi pi-check' : 'pi pi-eye'
+                      row.concluding ? 'pi pi-spin pi-spinner' : row.concludingRequested ? 'pi pi-check' : 'pi pi-stop'
                     "
                     class="p-button-rounded p-button-text"
                     [ngClass]="row.concluding ? 'p-button-secondary' : 'p-button-info'"
                     (click)="row.concluding ? null : startConclude(row)"
                     [disabled]="row.concluding"
                     [pTooltip]="
-                      row.concluding
-                        ? 'Finalizando...'
-                        : row.concludingRequested
-                          ? 'Finalizar pedido'
-                          : 'Visualizar pedido'
+                      row.concluding ? 'Finalizando...' : row.concludingRequested ? 'Finish requested' : 'View order'
                     "
                     tooltipPosition="top"
                   ></button>

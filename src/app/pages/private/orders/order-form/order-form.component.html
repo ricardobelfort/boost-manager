@@ -1,7 +1,7 @@
 <app-breadcrumb [items]="breadcrumb" />
 <div class="bg-white rounded-xl shadow-sm p-8">
   <div class="flex items-center justify-between mb-4">
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 mb-3">
       <div *ngIf="selectedGame as game">
         <img [src]="game.image" [alt]="game.name" class="w-18 h-18 rounded-xl object-cover shadow mr-2" />
       </div>
@@ -19,7 +19,377 @@
     </div>
   </div>
 
-  <p-divider />
+  <div class="w-full p-8 border border-gray-200 rounded-xl">
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0"><i class="pi pi-trophy text-lime-500"></i> Rank Boost</p-tab>
+        <p-tab value="1"><i class="pi pi-users text-blue-400"></i> Bot Lobbies</p-tab>
+        <p-tab value="2"><i class="pi pi-star text-yellow-400"></i> Camo Service</p-tab>
+        <p-tab value="3"><i class="pi pi-chart-line text-purple-500"></i> Power Leveling</p-tab>
+        <p-tab value="4"><i class="pi pi-box text-orange-500"></i> Account Premade</p-tab>
+        <p-tab value="5"><i class="pi pi-comment text-gray-500"></i> Custom Request</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <!-- RANK BOOST -->
+        <p-tabpanel value="0" class="px-8">
+          <form [formGroup]="rankBoostForm" (ngSubmit)="saveRankBoost()">
+            <div class="bg-gray-50 rounded-xl shadow-xs p-8 mb-6">
+              <h3 class="font-semibold text-2xl text-gray-800 flex items-center gap-2">Rank Boost Details</h3>
+              <p>Fill your details below to create a Rank Boost order.</p>
+              <p-divider class="!mb-10" />
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-6">
+                  <div>
+                    <div class="flex items-center gap-2 mb-4">
+                      <img [src]="getRankObj(rankBoostForm.value.currentRank ?? '').image" width="70" alt="" class="mb-4" />
+                      <div class="mb-4">
+                        <h2 class="block mb-2 text-gray-700">Current Rank</h2>
+                        <p class="text-3xl font-bold text-gray-600">{{ getRankObj(rankBoostForm.value.currentRank ?? '').label }}</p>
+                      </div>
+                    </div>
+                    <label class="block mb-2 font-medium text-gray-700"> Current Rank </label>
+                    <p-select
+                      [options]="currentRankOptions"
+                      formControlName="currentRank"
+                      styleClass="w-full"
+                      placeholder="Select a rank"
+                    ></p-select>
+                  </div>
+                  <div>
+                    <label class="block mb-2 font-medium text-gray-700">Current SR</label>
+                    <input
+                      type="number"
+                      pInputText
+                      formControlName="currentSr"
+                      min="0"
+                      max="10000"
+                      class="w-full"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label class="block mb-2 font-medium text-gray-700">Game</label>
+                    <p-select
+                      [options]="chooseGame"
+                      formControlName="game"
+                      styleClass="w-full"
+                      placeholder="Select a game"
+                    ></p-select>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-6">
+                  <div>
+                    <div class="flex items-center gap-2 mb-4">
+                      <img [src]="getRankObj(rankBoostForm.value.desiredRank ?? '').image" width="70" alt="" class="mb-4" />
+                      <div class="mb-4">
+                        <h2 class="block mb-2 text-gray-700">Desired Rank</h2>
+                        <p class="text-3xl font-bold text-gray-600">{{ getRankObj(rankBoostForm.value.desiredRank ?? '').label }}</p>
+                      </div>
+                    </div>
+                    <label class="block mb-2 font-medium text-gray-700"> Desired Rank </label>
+                    <p-select
+                      [options]="desiredRankOptions"
+                      formControlName="desiredRank"
+                      styleClass="w-full"
+                      placeholder="Select a rank"
+                    ></p-select>
+                  </div>
+                  <div>
+                    <label class="block mb-2 font-medium text-gray-700">Desired SR</label>
+                    <input
+                      type="number"
+                      pInputText
+                      formControlName="desiredSr"
+                      min="0"
+                      max="10000"
+                      class="w-full"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label class="block mb-2 font-medium text-gray-700">Platform</label>
+                    <p-select
+                      [options]="choosePlatform"
+                      formControlName="platform"
+                      styleClass="w-full"
+                      placeholder="Select a platform"
+                    ></p-select>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6">
+                <label class="block mb-2 font-medium text-gray-700">Additional Info</label>
+                <textarea
+                  pTextarea
+                  formControlName="notes"
+                  rows="3"
+                  class="w-full"
+                  placeholder="Anything important..."
+                ></textarea>
+              </div>
+            </div>
+            <div class="flex justify-center md:justify-end gap-4 mt-2">
+              <p-button label="Cancel" variant="outlined" severity="secondary" (click)="onCancel()" />
+              <p-button label="Save Order" icon="pi pi-check" [disabled]="rankBoostForm.invalid" (click)="onSubmit()" />
+            </div>
+          </form>
+        </p-tabpanel>
+
+        <!-- BOT LOBBIES -->
+        <p-tabpanel value="1">
+          <form [formGroup]="botLobbyForm" (ngSubmit)="saveBotLobby()">
+            <div class="bg-gray-50 rounded-xl shadow-sm p-8 mb-6">
+              <h3 class="font-semibold text-2xl text-gray-800 flex items-center gap-2">Bot Lobby Details</h3>
+              <p class="mb-6">Fill your details below to create a Bot Lobby order.</p>
+              <p-divider class="!mb-10" />
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Number of bot lobbies</label>
+                  <input type="number" pInputText formControlName="botLobbies" min="1" class="w-full" placeholder="1" />
+                </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Supplier</label>
+                  <p-select
+                    [options]="suppliers"
+                    formControlName="supplier"
+                    styleClass="w-full"
+                    placeholder="Select..."
+                  ></p-select>
+                </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Supplier order</label>
+                  <input
+                    pInputText
+                    formControlName="supplierOrder"
+                    class="w-full"
+                    placeholder="Supplier order number..."
+                  />
+                </div>
+              </div>
+              <div class="mt-6">
+                <label class="block mb-2 font-medium text-gray-700">Additional Info</label>
+                <textarea
+                  pTextarea
+                  formControlName="notes"
+                  rows="3"
+                  class="w-full"
+                  placeholder="Anything important..."
+                ></textarea>
+              </div>
+            </div>
+            <div class="flex justify-center md:justify-end gap-4 mt-2">
+              <p-button label="Cancel" variant="outlined" severity="secondary" (click)="onCancel()" />
+              <p-button label="Save Order" icon="pi pi-check" [disabled]="botLobbyForm.invalid" (click)="onSubmit()" />
+            </div>
+          </form>
+        </p-tabpanel>
+
+        <!-- CAMO SERVICE -->
+        <p-tabpanel value="2">
+          <form [formGroup]="camoServiceForm" (ngSubmit)="saveCamoService()">
+            <div class="bg-gray-50 rounded-xl shadow-sm p-8 mb-6">
+              <h3 class="font-semibold text-lg text-gray-800 flex items-center gap-2">Camo Service Details</h3>
+              <p class="mb-6">Fill your details below to create a Camo Service order.</p>
+              <p-divider class="!mb-10" />
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Desired camo</label>
+                  <p-select
+                    [options]="camos"
+                    formControlName="desiredCamo"
+                    styleClass="w-full"
+                    placeholder="Select..."
+                  ></p-select>
+                </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Game</label>
+                  <p-select
+                    [options]="chooseGame"
+                    formControlName="game"
+                    styleClass="w-full"
+                    placeholder="Select a game"
+                  ></p-select>
+                </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Platform</label>
+                  <p-select
+                    [options]="platforms"
+                    formControlName="platform"
+                    styleClass="w-full"
+                    placeholder="Select a platform"
+                  ></p-select>
+                </div>
+              </div>
+              <div class="mt-6">
+                <label class="block mb-2 font-medium text-gray-700">Additional Info</label>
+                <textarea
+                  pTextarea
+                  formControlName="notes"
+                  rows="3"
+                  class="w-full"
+                  placeholder="Anything important..."
+                ></textarea>
+              </div>
+            </div>
+            <div class="flex justify-center md:justify-end gap-4 mt-2">
+              <p-button label="Cancel" variant="outlined" severity="secondary" (click)="onCancel()" />
+              <p-button label="Save Order" icon="pi pi-check" [disabled]="camoServiceForm.invalid" (click)="onSubmit()" />
+            </div>
+          </form>
+        </p-tabpanel>
+
+        <!-- POWER LEVELING -->
+        <p-tabpanel value="3">
+          <form [formGroup]="powerLevelingForm" (ngSubmit)="savePowerLeveling()">
+            <div class="bg-gray-50 rounded-xl shadow-sm p-8 mb-6">
+              <h3 class="font-semibold text-lg text-gray-800 flex items-center gap-2">Power Leveling Details</h3>
+              <p class="mb-6">Fill your details below to create a Power Leveling order.</p>
+              <p-divider class="!mb-10" />
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Current level</label>
+                  <input
+                    type="number"
+                    pInputText
+                    formControlName="currentLevel"
+                    min="1"
+                    class="w-full"
+                    placeholder="1"
+                  />
+                </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Desired level</label>
+                  <input
+                    type="number"
+                    pInputText
+                    formControlName="desiredLevel"
+                    min="1"
+                    class="w-full"
+                    placeholder="55"
+                  />
+                </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Game</label>
+                  <p-select
+                    [options]="chooseGame"
+                    formControlName="game"
+                    styleClass="w-full"
+                    placeholder="Select a game"
+                  ></p-select>
+                </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Platform</label>
+                  <p-select
+                    [options]="platforms"
+                    formControlName="platform"
+                    styleClass="w-full"
+                    placeholder="Select a platform"
+                  ></p-select>
+                </div>
+              </div>
+              <div class="mt-6">
+                <label class="block mb-2 font-medium text-gray-700">Additional Info</label>
+                <textarea
+                  pTextarea
+                  formControlName="notes"
+                  rows="3"
+                  class="w-full"
+                  placeholder="Anything important..."
+                ></textarea>
+              </div>
+            </div>
+            <div class="flex justify-center md:justify-end gap-4 mt-2">
+              <p-button label="Cancel" variant="outlined" severity="secondary" (click)="onCancel()" />
+              <p-button label="Save Order" icon="pi pi-check" [disabled]="powerLevelingForm.invalid" (click)="onSubmit()" />
+            </div>
+          </form>
+        </p-tabpanel>
+
+        <!-- ACCOUNT PREMADE -->
+        <p-tabpanel value="4">
+          <form [formGroup]="accountPremadeForm" (ngSubmit)="saveAccountPremade()">
+            <div class="bg-gray-50 rounded-xl shadow-sm p-8 mb-6">
+              <h3 class="font-semibold text-lg text-gray-800 flex items-center gap-2">Account Premade Details</h3>
+              <p class="mb-6">Fill your details below to create an Account Premade order.</p>
+              <p-divider class="!mb-10" />
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Account Email</label>
+                  <input
+                    type="email"
+                    pInputText
+                    formControlName="accountEmail"
+                    class="w-full"
+                    placeholder="Enter account email"
+                  />
+                </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Account Password</label>
+                  <input
+                    type="password"
+                    pInputText
+                    formControlName="accountPassword"
+                    class="w-full"
+                    placeholder="Enter account password"
+                  />
+                </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700">Choose Camo</label>
+                  <p-select
+                    [options]="camos"
+                    formControlName="availableCamo"
+                    styleClass="w-full"
+                    placeholder="Select a camo"
+                  ></p-select>
+                </div>
+              </div>
+              <div class="mt-6">
+                  <label class="block mb-2 font-medium text-gray-700">Additional Info</label>
+                  <textarea
+                    pTextarea
+                    formControlName="notes"
+                    rows="3"
+                    class="w-full"
+                    placeholder="Anything important..."
+                  ></textarea>
+                </div>
+            </div>
+            <div class="flex justify-center md:justify-end gap-4 mt-2">
+              <p-button label="Cancel" variant="outlined" severity="secondary" (click)="onCancel()" />
+              <p-button label="Save Order" icon="pi pi-check" [disabled]="accountPremadeForm.invalid" (click)="onSubmit()" />
+            </div>
+          </form>
+        </p-tabpanel>
+
+        <!-- CUSTOM REQUEST -->
+        <p-tabpanel value="5">
+          <form [formGroup]="customRequestForm" (ngSubmit)="saveCustomRequest()">
+            <div class="bg-gray-50 rounded-xl shadow-sm p-8 mb-6">
+              <h3 class="font-semibold text-lg text-gray-800 flex items-center gap-2">Custom Request</h3>
+              <p class="mb-6">Fill your details below about the Custom Request order.</p>
+              <p-divider class="!mb-10" />
+              <div>
+                <label class="block mb-2 font-medium text-gray-700">Details</label>
+                <textarea
+                  pTextarea
+                  formControlName="notes"
+                  rows="6"
+                  class="w-full"
+                  placeholder="Describe your custom request..."
+                ></textarea>
+              </div>
+            </div>
+            <div class="flex justify-center md:justify-end gap-4 mt-2">
+              <p-button label="Cancel" variant="outlined" severity="secondary" (click)="onCancel()" />
+              <p-button label="Save Order" icon="pi pi-check" [disabled]="customRequestForm.invalid" (click)="onSubmit()" />
+            </div>
+          </form>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
 
   <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
     <div class="w-full">

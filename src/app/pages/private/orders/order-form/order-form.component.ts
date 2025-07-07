@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbComponent, ManualBreadcrumbItem } from '@shared/components/breadcrumb/breadcrumb.component';
 import { Order } from '@shared/models/order.model';
+import { CurrencyService } from '@shared/services/currency.service';
 import { LoadingService } from '@shared/services/loading.service';
 import { OrderService } from '@shared/services/order.service';
 import { SelectedGame, SelectedGameService } from '@shared/services/selected-game.service';
@@ -14,9 +15,10 @@ import { DividerModule } from 'primeng/divider';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { TabsModule } from 'primeng/tabs';
 import { TextareaModule } from 'primeng/textarea';
 import { of, switchMap, take, tap } from 'rxjs';
-import { CurrencyService } from './../../../../shared/services/currency.service';
+import { getSupabaseClient } from 'supabase.client';
 
 @Component({
   selector: 'app-order-form',
@@ -32,13 +34,14 @@ import { CurrencyService } from './../../../../shared/services/currency.service'
     ReactiveFormsModule,
     DividerModule,
     BreadcrumbComponent,
+    TabsModule,
   ],
   templateUrl: './order-form.component.html',
   styleUrl: './order-form.component.css',
 })
 export class OrderFormComponent {
   @Output() close = new EventEmitter<void>();
-
+  private supabase = getSupabaseClient();
   private orderService = inject(OrderService);
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
@@ -60,6 +63,83 @@ export class OrderFormComponent {
   ratesLoaded = false;
   boosterConvertedValue: string | null = null;
   selectedGame?: SelectedGame;
+
+  rankList = [
+    { label: 'Bronze I', value: 'bronze1', image: 'assets/images/bronze-1.webp' },
+    { label: 'Bronze II', value: 'bronze2', image: 'assets/images/bronze-1.webp' },
+    { label: 'Bronze III', value: 'bronze3', image: 'assets/images/bronze-1.webp' },
+    { label: 'Silver I', value: 'silver1', image: 'assets/images/silver-1.webp' },
+    { label: 'Silver II', value: 'silver2', image: 'assets/images/silver-1.webp' },
+    { label: 'Silver III', value: 'silver3', image: 'assets/images/silver-1.webp' },
+    { label: 'Gold I', value: 'gold1', image: 'assets/images/gold-1.webp' },
+    { label: 'Gold II', value: 'gold2', image: 'assets/images/gold-1.webp' },
+    { label: 'Gold III', value: 'gold3', image: 'assets/images/gold-1.webp' },
+    { label: 'Platinum I', value: 'platinum1', image: 'assets/images/platinum-1.webp' },
+    { label: 'Platinum II', value: 'platinum2', image: 'assets/images/platinum-1.webp' },
+    { label: 'Platinum III', value: 'platinum3', image: 'assets/images/platinum-1.webp' },
+    { label: 'Diamond I', value: 'diamond1', image: 'assets/images/diamond-1.webp' },
+    { label: 'Diamond II', value: 'diamond2', image: 'assets/images/diamond-1.webp' },
+    { label: 'Diamond III', value: 'diamond3', image: 'assets/images/diamond-1.webp' },
+    { label: 'Iridescent', value: 'iridescent', image: 'assets/images/iridescent.webp' },
+    { label: 'Top 250', value: 'top250', image: 'assets/images/top-250.webp' },
+  ];
+  chooseGame = [
+    { label: 'Warzone', value: 'warzone' },
+    { label: 'Modern Warfare 3', value: 'mw3' },
+    { label: 'Black Ops 6', value: 'bo6' },
+  ];
+  choosePlatform = [
+    { label: 'PC', value: 'pc' },
+    { label: 'Xbox', value: 'xbox' },
+    { label: 'PlayStation', value: 'ps' },
+  ];
+  suppliers2 = [
+    { label: 'Supplier 1', value: 'supplier1' },
+    { label: 'Supplier 2', value: 'supplier2' },
+  ];
+  camos = [
+    { label: 'Abyss', value: 'abyss' },
+    { label: 'Dark Matter', value: 'darkmatter' },
+    { label: 'Nebula', value: 'nebula' },
+  ];
+
+  rankBoostForm = this.fb.group({
+    currentRank: ['bronze1', Validators.required],
+    currentSr: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
+    game: ['', Validators.required],
+    desiredRank: ['top250', Validators.required],
+    desiredSr: [10000, [Validators.required, Validators.min(0), Validators.max(10000)]],
+    platform: ['', Validators.required],
+    notes: [''],
+  });
+  botLobbyForm = this.fb.group({
+    botLobbies: [1, [Validators.required, Validators.min(1)]],
+    supplier: ['', Validators.required],
+    supplierOrder: [''],
+    notes: [''],
+  });
+  camoServiceForm = this.fb.group({
+    desiredCamo: ['', Validators.required],
+    game: ['', Validators.required],
+    platform: ['', Validators.required],
+    notes: [''],
+  });
+  powerLevelingForm = this.fb.group({
+    currentLevel: ['', [Validators.required, Validators.min(1)]],
+    desiredLevel: ['', [Validators.required, Validators.min(1)]],
+    game: ['', Validators.required],
+    platform: ['', Validators.required],
+    notes: [''],
+  });
+  accountPremadeForm = this.fb.group({
+    accountEmail: ['', [Validators.required, Validators.email]],
+    accountPassword: ['', Validators.required],
+    availableCamo: ['', [Validators.email]],
+    notes: [''],
+  });
+  customRequestForm = this.fb.group({
+    notes: ['', Validators.required],
+  });
 
   boosters = [
     { label: 'Booster 1', value: 'booster 1' },
@@ -111,11 +191,10 @@ export class OrderFormComponent {
       fallback: 'assets/icons/lol.png',
       desc: 'Elojob e missões no LoL',
       image: '',
-      available: false, // Indica que não há boost disponível no momento
+      available: false,
       badge: null,
     },
   ];
-
   suppliers = [
     { label: 'Supplier 1', value: 'Supplier 1' },
     { label: 'Supplier 2', value: 'Supplier 2' },
@@ -195,7 +274,7 @@ export class OrderFormComponent {
   );
 
   ngOnInit() {
-    this.fetchRates();
+    // this.fetchRates();
     this.editingId = this.route.snapshot.paramMap.get('id') || undefined;
     if (this.editingId) {
       this.loadingService.show();
@@ -364,6 +443,87 @@ export class OrderFormComponent {
       lobbyPriceCtrl?.updateValueAndValidity();
       lobbyQtyCtrl?.updateValueAndValidity();
     });
+  }
+
+  async saveRankBoost() {
+    const formValue = this.rankBoostForm.value;
+    const { error } = await this.supabase.from('orders').insert([
+      {
+        ...formValue,
+        service_type: 'rank_boost',
+        user_id: (await this.supabase.auth.getUser()).data.user?.id,
+      },
+    ]);
+    // feedback de sucesso/erro
+  }
+  async saveBotLobby() {
+    const formValue = this.botLobbyForm.value;
+    const { error } = await this.supabase.from('orders').insert([
+      {
+        ...formValue,
+        service_type: 'bot_lobby',
+        user_id: (await this.supabase.auth.getUser()).data.user?.id,
+      },
+    ]);
+    // feedback de sucesso/erro
+  }
+  async saveCamoService() {
+    const formValue = this.rankBoostForm.value;
+    const { error } = await this.supabase.from('orders').insert([
+      {
+        ...formValue,
+        service_type: 'camo_service',
+        user_id: (await this.supabase.auth.getUser()).data.user?.id,
+      },
+    ]);
+    // feedback de sucesso/erro
+  }
+  async savePowerLeveling() {
+    const formValue = this.powerLevelingForm.value;
+    const { error } = await this.supabase.from('orders').insert([
+      {
+        ...formValue,
+        service_type: 'power_leveling',
+        user_id: (await this.supabase.auth.getUser()).data.user?.id,
+      },
+    ]);
+    // feedback de sucesso/erro
+  }
+  async saveAccountPremade() {
+    const formValue = this.accountPremadeForm.value;
+    const { error } = await this.supabase.from('orders').insert([
+      {
+        ...formValue,
+        service_type: 'account_premade',
+        user_id: (await this.supabase.auth.getUser()).data.user?.id,
+      },
+    ]);
+    // feedback de sucesso/erro
+  }
+  async saveCustomRequest() {
+    const formValue = this.customRequestForm.value;
+    const { error } = await this.supabase.from('orders').insert([
+      {
+        ...formValue,
+        service_type: 'custom_request',
+        user_id: (await this.supabase.auth.getUser()).data.user?.id,
+      },
+    ]);
+    // feedback de sucesso/erro
+  }
+
+  getRankObj(value: string) {
+    return this.rankList.find((r) => r.value === value) || this.rankList[0];
+  }
+
+  get currentRankOptions() {
+    // Retorna todos menos Top 250
+    return this.rankList.filter((rank) => rank.value !== 'top250');
+  }
+
+  get desiredRankOptions() {
+    // Retorna todos menos Bronze I
+    return this.rankList.filter((rank) => rank.value !== 'bronze1');
   }
 
   getFilteredServiceTypes() {
