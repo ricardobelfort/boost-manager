@@ -18,7 +18,7 @@
     <div class="text-gray-500 text-center text-sm mb-4">{{ game.desc }}</div>
 
     <button
-      class="bg-lime-500 text-white font-semibold rounded-full px-6 py-2 mt-2 transition-all shadow hover:bg-lime-600 active:scale-95 w-full max-w-[160px] mx-auto cursor-pointer"
+      class="bg-lime-500 text-white font-semibold rounded-md px-6 py-2 mt-2 transition-all shadow hover:bg-lime-600 active:scale-95 w-full max-w-[160px] mx-auto cursor-pointer"
       [disabled]="!game.available"
       [ngClass]="{ 
         'bg-lime-500 hover:bg-lime-600': game.available,

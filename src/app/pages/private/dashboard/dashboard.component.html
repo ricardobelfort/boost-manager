@@ -1,34 +1,38 @@
 <div class="mt-4">
   <ng-container *ngIf="isRoot; else childView">
-    <h2 class="!text-3xl font-bold text-black mb-4">Summary</h2>
+    <div class="w-full flex justify-between items-center mb-8">
+      <h2 class="!text-3xl font-bold text-black">Dashboard</h2>
+      <button
+        class="ml-4 px-5 py-3 bg-lime-500 hover:bg-lime-600 text-white rounded-lg font-semibold shadow transition cursor-pointer"
+        routerLink="orders/select-game"
+      >
+        + New Order
+      </button>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
       <ng-container *ngIf="cards$ | async as cards">
         <ng-container *ngFor="let card of cards; let i = index">
           <div
-            *ngIf="card.title === 'Payroll Boosters'; else normalCard"
-            class="cursor-pointer transition-transform hover:-translate-y-1"
-            (click)="goToPayrollBoosters()"
+            class="cursor-pointer transition-transform hover:-translate-y-1 focus:ring-2 focus:ring-lime-500"
             tabindex="0"
             role="button"
-            aria-label="Go to Payroll Boosters"
+            [attr.aria-label]="'Go to ' + card.title"
+            (click)="navigateToCard(card)"
+            (keydown.enter)="navigateToCard(card)"
           >
             <app-dashboard-card
               [title]="card.title"
               [value]="card.value"
-              [subtitle]="card.subtitle"
-              [iconClass]="card.iconClass"
-              [valueColor]="card.valueColor"
+              [subtitleValue]="card.subtitleValue !== undefined ? card.subtitleValue.toString() : ''"
+              [subtitleText]="card.subtitleText !== undefined ? card.subtitleText : ''"
+              [subtitleValueColor]="card.subtitleValueColor !== undefined ? card.subtitleValueColor : ''"
+              [subtitleTextColor]="card.subtitleTextColor !== undefined ? card.subtitleTextColor : ''"
+              [iconClass]="card.iconClass !== undefined ? card.iconClass : ''"
+              [iconBgClass]="card.iconBgClass !== undefined ? card.iconBgClass : ''"
+              [valueColor]="card.valueColor !== undefined ? card.valueColor : ''"
             />
           </div>
-          <ng-template #normalCard>
-            <app-dashboard-card
-              [title]="card.title"
-              [value]="card.value"
-              [subtitle]="card.subtitle"
-              [iconClass]="card.iconClass"
-              [valueColor]="card.valueColor"
-            />
-          </ng-template>
         </ng-container>
       </ng-container>
     </div>

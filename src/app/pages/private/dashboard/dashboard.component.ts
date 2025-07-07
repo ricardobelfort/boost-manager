@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { DashboardCardComponent } from '@shared/components/dashboard-card/dashboard-card.component';
 import { Order } from '@shared/models/order.model';
 import { OrderService } from '@shared/services/order.service';
@@ -9,15 +9,20 @@ import { combineLatest, interval, map, Observable, startWith, switchMap } from '
 
 interface DashboardCard {
   title: string;
-  value: string | number;
-  subtitle: string;
-  iconClass: string;
-  valueColor: string;
+  value: number | string;
+  subtitleValue?: number | string;
+  subtitleText?: string;
+  subtitleValueColor?: string;
+  subtitleTextColor?: string;
+  iconClass?: string;
+  iconBgClass?: string;
+  valueColor?: string;
+  route: string;
 }
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterOutlet, DashboardCardComponent, CommonModule],
+  imports: [RouterOutlet, DashboardCardComponent, CommonModule, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
@@ -40,38 +45,52 @@ export class DashboardComponent {
       const salesValueUSD = salesValue / dollarRate;
       return [
         {
-          title: 'Sales',
-          value: 'U$ ' + salesValue.toLocaleString('en-US', { minimumFractionDigits: 2 }),
-          // subtitle: new Intl.NumberFormat('en-US', {
-          //   style: 'currency',
-          //   currency: 'USD',
-          //   minimumFractionDigits: 2,
-          //   maximumFractionDigits: 2,
-          // }).format(salesValueUSD),
-          subtitle: 'Last 7 days',
-          iconClass: 'pi pi-dollar text-lime-500 !text-3xl',
-          valueColor: 'text-lime-500',
+          title: 'Revenue',
+          value: '$2.100',
+          subtitleValue: '%52+',
+          subtitleText: 'since last week',
+          subtitleValueColor: 'text-emerald-500 font-semibold',
+          subtitleTextColor: 'text-gray-400',
+          iconClass: 'pi pi-dollar text-orange-500 !text-xl',
+          iconBgClass: 'bg-orange-100',
+          valueColor: 'text-black',
+          route: '/dashboard/revenue',
         },
         {
-          title: 'Order Queue',
-          value: orders.length,
-          subtitle: 'Last 7 days',
-          iconClass: 'pi pi-box text-lime-500 !text-3xl',
-          valueColor: 'text-lime-500',
+          title: 'Orders',
+          value: 152,
+          subtitleValue: '24',
+          subtitleText: 'in progress',
+          subtitleValueColor: 'text-emerald-500 font-semibold',
+          subtitleTextColor: 'text-gray-400',
+          iconClass: 'pi pi-shopping-cart text-blue-500 !text-xl',
+          iconBgClass: 'bg-blue-100',
+          valueColor: 'text-black',
+          route: '/dashboard/orders',
         },
         {
-          title: 'Clients',
-          value: 0,
-          subtitle: 'Last 7 days',
-          iconClass: 'pi pi-users text-lime-500 !text-3xl',
-          valueColor: 'text-lime-500',
+          title: 'Customers',
+          value: 28441,
+          subtitleValue: '520',
+          subtitleText: 'newly registered',
+          subtitleValueColor: 'text-emerald-500 font-semibold',
+          subtitleTextColor: 'text-gray-400',
+          iconClass: 'pi pi-users text-cyan-500 !text-xl',
+          iconBgClass: 'bg-cyan-100',
+          valueColor: 'text-black',
+          route: '/dashboard/customers',
         },
         {
           title: 'Payroll Boosters',
-          value: 0,
-          subtitle: 'Last 7 days',
-          iconClass: 'pi pi-tags text-lime-500 !text-3xl',
-          valueColor: 'text-lime-500',
+          value: '15 boosters',
+          subtitleValue: '5',
+          subtitleText: 'Payment pending',
+          subtitleValueColor: 'text-emerald-500 font-semibold',
+          subtitleTextColor: 'text-gray-400',
+          iconClass: 'pi pi-calculator text-purple-500 !text-xl',
+          iconBgClass: 'bg-purple-100',
+          valueColor: 'text-black',
+          route: '/dashboard/payroll-boosters',
         },
       ];
     })
@@ -81,8 +100,10 @@ export class DashboardComponent {
     this.dollarRate$ = this.fetchDollarRate();
   }
 
-  goToPayrollBoosters() {
-    this.router.navigate(['/dashboard/payroll-boosters']);
+  navigateToCard(card: DashboardCard) {
+    if (card.route) {
+      this.router.navigate([card.route]);
+    }
   }
 
   fetchDollarRate(): Observable<number> {

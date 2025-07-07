@@ -6,27 +6,47 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-white rounded-xl shadow-sm p-6 flex justify-between items-start h-full">
+    <div class="bg-white rounded-xl shadow-xs p-8 flex justify-between items-start h-full">
       <div>
-        <h3 class="text-2xl font-semibold text-gray-800 mb-3">{{ title }}</h3>
-        <p class="text-4xl font-bold mb-2" [ngClass]="valueColor">{{ value }}</p>
-        <p
-          class="text-sm text-gray-500"
-          [ngClass]="{
-            'text-base font-semibold !text-grey-800': subtitle.includes('$'),
-          }"
-        >
-          {{ subtitle }}
-        </p>
+        <!-- Título -->
+        <div class="text-xl text-gray-500 font-normal mb-2">{{ title }}</div>
+        <!-- Valor -->
+        <div class="text-2xl font-bold text-gray-800 mb-3">{{ value }}</div>
+        <!-- Subtítulo em duas partes -->
+        <div class="flex gap-1 items-baseline">
+          <span [ngClass]="subtitleValueColor">{{ subtitleValue }}</span>
+          <span [ngClass]="subtitleTextColor">{{ subtitleText }}</span>
+        </div>
       </div>
-      <i [ngClass]="iconClass"></i>
+      <div [ngClass]="iconBgClass + ' px-3 py-2 rounded-xl flex items-center'">
+        <i [ngClass]="iconClass"></i>
+      </div>
     </div>
   `,
 })
 export class DashboardCardComponent {
   @Input() title = '';
   @Input() value: string | number = '';
-  @Input() subtitle = '';
+  @Input() subtitleValue = '';
+  @Input() subtitleText = '';
+  @Input() subtitleValueColor = 'text-emerald-500 font-semibold';
+  @Input() subtitleTextColor = 'text-gray-400';
   @Input() iconClass = '';
+  @Input() iconBgClass = '';
   @Input() valueColor = '';
+
+  get subtitleColorClass() {
+    // Se o subtitleValue ou subtitleText tiver porcentagem ou número, use verde, senão cinza
+    const subtitle = `${this.subtitleValue} ${this.subtitleText}`;
+    if (
+      subtitle &&
+      (subtitle.includes('new') ||
+        subtitle.includes('+') ||
+        subtitle.includes('registered') ||
+        subtitle.includes('responded'))
+    ) {
+      return 'text-green-500 font-medium';
+    }
+    return 'text-gray-400';
+  }
 }

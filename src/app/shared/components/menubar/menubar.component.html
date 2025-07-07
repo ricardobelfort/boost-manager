@@ -6,7 +6,17 @@
 
   <!-- Navegação -->
   <nav class="flex items-center gap-7 ml-5">
-    <a
+    <p-button
+      [label]="item.label"
+      [icon]="item.icon"
+      variant="text"
+      severity="secondary"
+      *ngFor="let item of items"
+      [routerLink]="item.routerLink"
+      routerLinkActive="text-lime-600 font-semibold"
+      [routerLinkActiveOptions]="{ exact: item.routerLink === '/dashboard' }"
+    />
+    <!-- <a
       *ngFor="let item of items"
       [routerLink]="item.routerLink"
       routerLinkActive="text-lime-600 font-semibold"
@@ -15,7 +25,7 @@
     >
       <i [class]="item.icon"></i>
       <span>{{ item.label }}</span>
-    </a>
+    </a> -->
   </nav>
 
   <!-- Spacer -->
@@ -25,7 +35,7 @@
     <div class="flex items-center cursor-pointer" (click)="toggleDropdown()" tabindex="0">
       <span class="text-xl font-bold text-gray-600 mr-2">{{ tenantName | titlecase }}</span>
       <div
-        class="w-[36px] h-[36px] mr-2 rounded-full border border-gray-300 flex items-center justify-center font-semibold text-gray-700 select-none bg-slate-200"
+        class="w-[36px] h-[36px] mr-2 rounded-full flex items-center justify-center font-semibold text-gray-700 select-none bg-slate-200"
       >
         {{ userInitials }}
       </div>
