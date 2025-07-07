@@ -15,7 +15,7 @@ export const PRIVATE_ROUTES: Routes = [
       {
         path: 'payroll-boosters',
         component: PayrollBoostersComponent,
-        data: { title: 'Payrool Boosters' },
+        data: { title: 'Payroll Boosters' },
       },
     ],
   },

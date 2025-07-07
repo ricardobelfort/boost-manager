@@ -51,20 +51,23 @@ export class DashboardComponent {
 
   activeBoosters = [
     {
-      name: 'Matheus',
       orderId: 1,
+      name: 'Matheus',
+      boosterId: '123',
       amount: 350,
       avatar: 'https://primefaces.org/cdn/primeng/images/demo/avatar/onyamalimba.png',
     },
     {
-      name: 'Murillo',
       orderId: 2,
+      name: 'Murillo',
+      boosterId: '123',
       amount: 425,
       avatar: 'https://primefaces.org/cdn/primeng/images/demo/avatar/ionibowcher.png',
     },
     {
-      name: 'Erick',
       orderId: 3,
+      name: 'Erick',
+      boosterId: '123',
       amount: 850,
       avatar: 'https://primefaces.org/cdn/primeng/images/demo/avatar/xuxuefeng.png',
     },
@@ -213,6 +216,15 @@ export class DashboardComponent {
         map(() => this.getElapsedTimeString(order.startedAt))
       );
     });
+  }
+
+  viewBoosterReport(row: any) {
+    // Troque 'boosterId' pela propriedade correta do seu objeto!
+    if (!row.boosterId) {
+      alert('BoosterId is missing!');
+      return;
+    }
+    this.router.navigate(['/dashboard/booster-report', row.boosterId]);
   }
 
   getElapsedTimeString(startedAt: Date): string {

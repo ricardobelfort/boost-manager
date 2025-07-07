@@ -3,6 +3,7 @@ import { AuthGuard } from '@core/guards/auth.guard';
 import { OnboardingCompletedGuard, OnboardingGuard } from '@core/guards/onboarding.guard';
 import { SuperAdminGuard } from '@core/guards/super-admin.guard';
 import { TenantGuard } from '@core/guards/tenant.guard';
+import { BoosterReportComponent } from '@pages/private/reports/booster-report/booster-report.component';
 import { AuthCallbackComponent } from '@pages/public/auth-callback.component';
 import { LoginComponent } from '@pages/public/login/login.component';
 import { OnboardingComponent } from '@pages/public/onboarding.component';
@@ -36,6 +37,10 @@ export const routes: Routes = [
       breadcrumb: 'Dashboard',
     },
     canActivate: [AuthGuard, TenantGuard, OnboardingCompletedGuard],
+  },
+  {
+    path: 'dashboard/booster-report/:id',
+    component: BoosterReportComponent,
   },
   { path: '**', component: PageNotFoundComponent },
 ];
