@@ -44,10 +44,10 @@
         <p-table [value]="activeBoosters" class="p-datatable-sm" [style]="{ width: '100%' }">
           <ng-template pTemplate="header">
             <tr>
-              <th>#Order</th>
+              <th class="w-[80px]">#Order</th>
               <th>Booster</th>
               <th>Amount to Pay</th>
-              <th class="w-[80px]">Actions</th>
+              <th class="w-[80px] ! text-right">Actions</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-row>
@@ -62,7 +62,7 @@
               <td>
                 <span class="font-semibold text-gray-700">{{ row.amount | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
               </td>
-              <td>
+              <td class="!text-right">
                 <button
                   pButton
                   icon="pi pi-eye"
@@ -91,7 +91,7 @@
               <th>Booster</th>
               <th>Service</th>
               <th>Progress</th>
-              <th>Actions</th>
+              <th class="w-[80px] ! text-right">Actions</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-row>
@@ -113,7 +113,7 @@
                   </span>
                 </div>
               </td>
-              <td>
+              <td class="w-[80px] !text-right">
                 <ng-container *ngIf="!row.concluded; else concludedIcon">
                   <button
                     pButton
