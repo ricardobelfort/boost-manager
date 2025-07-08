@@ -33,7 +33,8 @@ export interface OrderInProgress {
   startedAt: Date;
   concluding: boolean;
   concluded: boolean;
-  timeOpen?: Observable<string>; // << ADICIONE ESTA LINHA
+  timeOpen?: Observable<string>;
+  finishedTime?: string;
 }
 
 @Component({
@@ -134,17 +135,6 @@ export class DashboardComponent {
     },
   ];
 
-  startConclude(row: any) {
-    // Inicia a solicitação de conclusão
-    row.concluding = true;
-    // Simula chamada à API:
-    setTimeout(() => {
-      row.concluding = false;
-      row.concluded = true;
-      // Aqui você pode disparar a chamada real, feedback, etc.
-    }, 1500);
-  }
-
   orders$: Observable<Order[]> = this.orderService.orders$;
   dollarRate$: Observable<number> = interval(10 * 60 * 1000).pipe(
     startWith(0),
@@ -218,6 +208,23 @@ export class DashboardComponent {
     });
   }
 
+  startConclude(row: any) {
+    row.concluding = true;
+    setTimeout(() => {
+      row.concluding = false;
+      row.concluded = true;
+      row.progress = 100;
+      row.progressLabel = '%100';
+      // Pega o valor exibido no timer no momento da conclusão
+      // Se você usa async pipe, precisa "pegar" o último valor emitido:
+      row.timeOpen
+        ?.subscribe((timerVal: string) => {
+          row.finishedTime = timerVal;
+        })
+        .unsubscribe(); // cancela logo depois de pegar o valor atual
+    }, 1500);
+  }
+
   viewBoosterReport(row: any) {
     // Troque 'boosterId' pela propriedade correta do seu objeto!
     if (!row.boosterId) {
@@ -232,7 +239,10 @@ export class DashboardComponent {
     const diff = Math.floor((+now - +new Date(startedAt)) / 1000);
     const h = Math.floor(diff / 3600);
     const m = Math.floor((diff % 3600) / 60);
-    return `${h}h ${m.toString().padStart(2, '0')}m`;
+    const s = diff % 60;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
   }
 
   navigateToCard(card: DashboardCard) {

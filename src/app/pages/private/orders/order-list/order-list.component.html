@@ -37,7 +37,7 @@
         <th class="!text-gray-400" pSortableColumn="booster_value">
           Booster Price <p-sortIcon field="booster_value" />
         </th>
-        <th class="!text-gray-400">Actions</th>
+        <th class="!text-gray-400 w-[140px]"></th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-order>
@@ -62,7 +62,7 @@
         <td class="text-sm">{{ order.end_date ? (order.end_date | date: 'dd/MM/yy' : '' : 'pt-BR') : '-' }}</td>
         <td class="text-sm">{{ order.total_value | currency: 'USD' : 'symbol' : '1.2-2' : 'en-US' }}</td>
         <td class="text-sm">{{ order.booster_value | currency: 'USD' : 'symbol' : '1.2-2' : 'en-US' }}</td>
-        <td>
+        <td class="!text-right">
           <p-button
             icon="pi pi-tag"
             [rounded]="true"
@@ -74,7 +74,7 @@
             title="Visualizar"
           />
           <p-button
-            icon="pi pi-pencil"
+            icon="pi pi-file-edit"
             [rounded]="true"
             [text]="true"
             severity="success"

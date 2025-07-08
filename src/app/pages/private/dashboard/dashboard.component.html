@@ -86,8 +86,10 @@
       <!-- Card Pedidos em Progresso -->
       <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="w-full flex justify-between items-center border-b-gray-400 mb-5">
-          <div class="text-lg font-semibold text-gray-700 mb-5">Orders In Progress</div>
-          <div class="text-lg font-semibold text-gray-700 mb-5">View All</div>
+          <div class="text-lg font-semibold text-gray-700">Orders In Progress</div>
+          <a routerLink="/dashboard/orders-in-progress" class="hover:text-lime-500 cursor-pointer hover:underline"
+            >View All</a
+          >
         </div>
         <p-table [value]="ordersInProgress" class="p-datatable-sm" [style]="{ width: '100%' }">
           <ng-template pTemplate="header">
@@ -95,7 +97,7 @@
               <th>Booster</th>
               <th>Service</th>
               <th>Progress</th>
-              <th class="w-[80px] !text-right">Actions</th>
+              <th class="w-[80px] !text-center">Actions</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-row>
@@ -106,15 +108,26 @@
               <td>
                 <span class="text-gray-500">{{ row.serviceName }}</span>
               </td>
-              <td>
+              <td class="flex flex-col gap-2">
                 <div class="flex items-center gap-2">
                   <div class="w-30 h-2 bg-gray-100 rounded">
                     <div [ngClass]="row.progressBarColor" class="h-2 rounded" [style.width.%]="row.progress"></div>
                   </div>
                   <span [ngClass]="row.progressColor" class="font-semibold text-xs">{{ row.progressLabel }}</span>
-                  <span class="ml-2 text-xs text-gray-400 font-mono">
-                    {{ row.timeOpen | async }}
-                  </span>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div class="text-xs text-gray-400">Started: {{ row.startedAt | date: 'dd/MM/yyyy HH:mm' }}</div>
+                  <div class="flex items-center gap-1">
+                    <i class="pi pi-clock !text-xs text-blue-500" pTooltip="Time Opened"></i>
+                    <span class="ml-2 text-xs text-blue-500 font-mono">
+                      <ng-container *ngIf="!row.concluded; else finished">
+                        {{ row.timeOpen | async }}
+                      </ng-container>
+                      <ng-template #finished>
+                        {{ row.finishedTime }}
+                      </ng-template>
+                    </span>
+                  </div>
                 </div>
               </td>
               <td class="w-[80px] !text-center">
@@ -122,14 +135,18 @@
                   <button
                     pButton
                     [icon]="
-                      row.concluding ? 'pi pi-spin pi-spinner' : row.concludingRequested ? 'pi pi-check' : 'pi pi-stop'
+                      row.concluding
+                        ? 'pi pi-spin pi-spinner'
+                        : row.concludingRequested
+                          ? 'pi pi-check-circle'
+                          : 'pi pi-stop-circle'
                     "
                     class="p-button-rounded p-button-text"
-                    [ngClass]="row.concluding ? 'p-button-secondary' : 'p-button-info'"
+                    [ngClass]="row.concluding ? 'p-button-secondary' : 'p-button-danger'"
                     (click)="row.concluding ? null : startConclude(row)"
                     [disabled]="row.concluding"
                     [pTooltip]="
-                      row.concluding ? 'Finalizando...' : row.concludingRequested ? 'Finish requested' : 'View order'
+                      row.concluding ? 'Finalizando...' : row.concludingRequested ? 'Finish requested' : 'Complete task'
                     "
                     tooltipPosition="top"
                   ></button>
