@@ -80,10 +80,10 @@ export class AppComponent {
 
     const { data } = await supabase.auth.getSession();
 
-    if (!data.session && !this.router.url.startsWith('/auth')) {
-      // Só redireciona se NÃO estiver já numa rota pública
-      this.router.navigate(['/auth/login']);
-    }
+    // if (!data.session && !this.router.url.startsWith('/auth')) {
+    //   // Só redireciona se NÃO estiver já numa rota pública
+    //   this.router.navigate(['/auth/login']);
+    // }
     // Opcional: escute mudanças na sessão para logout automático!
     supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session) {
