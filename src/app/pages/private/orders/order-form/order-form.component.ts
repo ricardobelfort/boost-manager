@@ -72,6 +72,7 @@ export class OrderFormComponent {
     { label: 'Warzone', value: 'warzone' },
     { label: 'Modern Warfare 3', value: 'mw3' },
     { label: 'Black Ops 6', value: 'bo6' },
+    { label: 'Zombies', value: 'zombies' },
   ];
   choosePlatform = [
     { label: 'PC', value: 'pc' },
@@ -89,6 +90,7 @@ export class OrderFormComponent {
     { label: 'Abyss', value: 'abyss' },
     { label: 'Dark Matter', value: 'darkmatter' },
     { label: 'Nebula', value: 'nebula' },
+    { label: 'Zombies', value: 'zombies' },
   ];
   platforms = [
     { label: 'PlayStation', value: 'PlayStation' },
@@ -105,13 +107,13 @@ export class OrderFormComponent {
   // =========== FORMS ==============
   rankBoostForm = this.fb.group({
     currentRank: ['bronze1', Validators.required],
-    currentSr: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
+    currentSr: [0, [Validators.min(0), Validators.max(10000)]],
     game: ['', Validators.required],
     desiredRank: ['top250', Validators.required],
-    desiredSr: [10000, [Validators.required, Validators.min(0), Validators.max(10000)]],
+    desiredSr: [10000, [Validators.min(0), Validators.max(10000)]],
     platform: ['', Validators.required],
-    total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
-    booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
+    total_value: ['', [Validators.required, Validators.min(0), Validators.max(999999.99)]],
+    booster_value: ['', [Validators.required, Validators.min(0), Validators.max(999999.99)]],
     notes: [''],
   });
   botLobbyForm = this.fb.group({
@@ -133,7 +135,9 @@ export class OrderFormComponent {
   powerLevelingForm = this.fb.group({
     currentLevel: ['', [Validators.required, Validators.min(1)]],
     desiredLevel: ['', [Validators.required, Validators.min(1)]],
-    game: ['', Validators.required],
+    accountEmail: ['', [Validators.required, Validators.email]],
+    recoveryEmail: ['', [Validators.required, Validators.email]],
+    accountPassword: ['', Validators.required],
     platform: ['', Validators.required],
     total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
     booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
@@ -141,6 +145,7 @@ export class OrderFormComponent {
   });
   accountPremadeForm = this.fb.group({
     accountEmail: ['', [Validators.required, Validators.email]],
+    recoveryEmail: ['', [Validators.required, Validators.email]],
     accountPassword: ['', Validators.required],
     availableCamo: [''],
     total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
