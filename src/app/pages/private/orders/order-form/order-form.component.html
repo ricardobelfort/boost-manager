@@ -42,7 +42,7 @@
                   <div>
                     <div class="flex items-center gap-2 mb-4">
                       <img
-                        [src]="getRankObj(rankBoostForm.value.currentRank ?? '').image"
+                        [src]="getRankObj(rankBoostForm.value.current_rank ?? '').image"
                         width="70"
                         alt=""
                         class="mb-4"
@@ -50,7 +50,7 @@
                       <div class="mb-4">
                         <h2 class="block mb-2 text-gray-700">Current Rank</h2>
                         <p class="text-3xl font-bold text-gray-600">
-                          {{ getRankObj(rankBoostForm.value.currentRank ?? '').label }}
+                          {{ getRankObj(rankBoostForm.value.current_rank ?? '').label }}
                         </p>
                       </div>
                     </div>
@@ -59,7 +59,7 @@
                     >
                     <p-select
                       [options]="currentRankOptions"
-                      formControlName="currentRank"
+                      formControlName="current_rank"
                       styleClass="w-full"
                       placeholder="Select a rank"
                     ></p-select>
@@ -78,7 +78,7 @@
                     <input
                       type="number"
                       pInputText
-                      formControlName="currentSr"
+                      formControlName="current_sr"
                       min="0"
                       max="10000"
                       class="w-full"
@@ -109,7 +109,7 @@
                   <div>
                     <div class="flex items-center gap-2 mb-4">
                       <img
-                        [src]="getRankObj(rankBoostForm.value.desiredRank ?? '').image"
+                        [src]="getRankObj(rankBoostForm.value.desired_rank ?? '').image"
                         width="70"
                         alt=""
                         class="mb-4"
@@ -117,7 +117,7 @@
                       <div class="mb-4">
                         <h2 class="block mb-2 text-gray-700">Desired Rank</h2>
                         <p class="text-3xl font-bold text-gray-600">
-                          {{ getRankObj(rankBoostForm.value.desiredRank ?? '').label }}
+                          {{ getRankObj(rankBoostForm.value.desired_rank ?? '').label }}
                         </p>
                       </div>
                     </div>
@@ -126,7 +126,7 @@
                     >
                     <p-select
                       [options]="desiredRankOptions"
-                      formControlName="desiredRank"
+                      formControlName="desired_rank"
                       styleClass="w-full"
                       placeholder="Select a rank"
                     ></p-select>
@@ -147,7 +147,7 @@
                     <input
                       type="number"
                       pInputText
-                      formControlName="desiredSr"
+                      formControlName="desired_sr"
                       min="0"
                       max="10000"
                       class="w-full"
@@ -260,12 +260,23 @@
                     Value must be less than or equal to 999999.99.
                   </small>
                 </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700"
+                    >Supplier order</label
+                  >
+                  <input
+                    pInputText
+                    formControlName="supplier_order"
+                    class="w-full"
+                    placeholder="Supplier order number..."
+                  />
+                </div>
               </div>
               <div class="mt-6">
                 <label class="block mb-2 font-medium text-gray-700">Additional Info</label>
                 <textarea
                   pTextarea
-                  formControlName="notes"
+                  formControlName="observation"
                   rows="3"
                   class="w-full"
                   placeholder="Anything important..."
@@ -299,11 +310,11 @@
                   <label class="block mb-2 font-medium text-gray-700"
                     >Number of bot lobbies <span class="text-red-500">*</span></label
                   >
-                  <input type="number" pInputText formControlName="botLobbies" min="1" class="w-full" placeholder="1" />
+                  <input type="number" pInputText formControlName="bot_lobbies" min="1" class="w-full" placeholder="1" />
                   <small
                     *ngIf="
-                      botLobbyForm.get('botLobbies')?.errors?.['required'] &&
-                      (botLobbyForm.get('botLobbies')?.dirty || botLobbyForm.get('botLobbies')?.touched)
+                      botLobbyForm.get('bot_lobbies')?.errors?.['required'] &&
+                      (botLobbyForm.get('bot_lobbies')?.dirty || botLobbyForm.get('bot_lobbies')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -332,11 +343,11 @@
                 </div>
                 <div>
                   <label class="block mb-2 font-medium text-gray-700"
-                    >Supplier order <span class="text-red-500">*</span></label
+                    >Supplier order</label
                   >
                   <input
                     pInputText
-                    formControlName="supplierOrder"
+                    formControlName="supplier_order"
                     class="w-full"
                     placeholder="Supplier order number..."
                   />
@@ -431,7 +442,7 @@
                 <label class="block mb-2 font-medium text-gray-700">Additional Info</label>
                 <textarea
                   pTextarea
-                  formControlName="notes"
+                  formControlName="observation"
                   rows="3"
                   class="w-full"
                   placeholder="Anything important..."
@@ -467,14 +478,14 @@
                   >
                   <p-select
                     [options]="camos"
-                    formControlName="desiredCamo"
+                    formControlName="desired_camo"
                     styleClass="w-full"
                     placeholder="Select..."
                   ></p-select>
                   <small
                     *ngIf="
-                      camoServiceForm.get('desiredCamo')?.errors?.['required'] &&
-                      (camoServiceForm.get('desiredCamo')?.dirty || camoServiceForm.get('desiredCamo')?.touched)
+                      camoServiceForm.get('desired_camo')?.errors?.['required'] &&
+                      (camoServiceForm.get('desired_camo')?.dirty || camoServiceForm.get('desired_camo')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -604,12 +615,23 @@
                     Value must be less than or equal to 999999.99.
                   </small>
                 </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700"
+                    >Supplier order</label
+                  >
+                  <input
+                    pInputText
+                    formControlName="supplier_order"
+                    class="w-full"
+                    placeholder="Supplier order number..."
+                  />
+                </div>
               </div>
               <div class="mt-6">
                 <label class="block mb-2 font-medium text-gray-700">Additional Info</label>
                 <textarea
                   pTextarea
-                  formControlName="notes"
+                  formControlName="observation"
                   rows="3"
                   class="w-full"
                   placeholder="Anything important..."
@@ -638,7 +660,7 @@
               <h3 class="font-semibold text-lg text-gray-800 flex items-center gap-2">Power Leveling Details</h3>
               <p class="mb-6">Fill your details below to create a Power Leveling order.</p>
               <p-divider class="!mb-10" />
-              <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label class="block mb-2 font-medium text-gray-700"
                     >Current level <span class="text-red-500">*</span></label
@@ -646,15 +668,15 @@
                   <input
                     type="number"
                     pInputText
-                    formControlName="currentLevel"
+                    formControlName="current_level"
                     min="1"
                     class="w-full"
                     placeholder="1"
                   />
                   <small
                     *ngIf="
-                      powerLevelingForm.get('currentLevel')?.errors?.['required'] &&
-                      (powerLevelingForm.get('currentLevel')?.dirty || powerLevelingForm.get('currentLevel')?.touched)
+                      powerLevelingForm.get('current_level')?.errors?.['required'] &&
+                      (powerLevelingForm.get('current_level')?.dirty || powerLevelingForm.get('current_level')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -668,15 +690,15 @@
                   <input
                     type="number"
                     pInputText
-                    formControlName="desiredLevel"
+                    formControlName="desired_level"
                     min="1"
                     class="w-full"
                     placeholder="55"
                   />
                   <small
                     *ngIf="
-                      powerLevelingForm.get('desiredLevel')?.errors?.['required'] &&
-                      (powerLevelingForm.get('desiredLevel')?.dirty || powerLevelingForm.get('desiredLevel')?.touched)
+                      powerLevelingForm.get('desired_level')?.errors?.['required'] &&
+                      (powerLevelingForm.get('desired_level')?.dirty || powerLevelingForm.get('desired_level')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -690,14 +712,14 @@
                   <input
                     type="email"
                     pInputText
-                    formControlName="accountEmail"
+                    formControlName="account_email"
                     class="w-full"
                     placeholder="Enter account email"
                   />
                   <small
                     *ngIf="
-                      accountPremadeForm.get('accountEmail')?.errors?.['required'] &&
-                      (accountPremadeForm.get('accountEmail')?.dirty || accountPremadeForm.get('accountEmail')?.touched)
+                      accountPremadeForm.get('account_email')?.errors?.['required'] &&
+                      (accountPremadeForm.get('account_email')?.dirty || accountPremadeForm.get('account_email')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -711,15 +733,15 @@
                   <input
                     type="email"
                     pInputText
-                    formControlName="recoveryEmail"
+                    formControlName="recovery_email"
                     class="w-full"
                     placeholder="Enter recovery email"
                   />
                   <small
                     *ngIf="
-                      accountPremadeForm.get('recoveryEmail')?.errors?.['required'] &&
-                      (accountPremadeForm.get('recoveryEmail')?.dirty ||
-                        accountPremadeForm.get('recoveryEmail')?.touched)
+                      accountPremadeForm.get('recovery_email')?.errors?.['required'] &&
+                      (accountPremadeForm.get('recovery_email')?.dirty ||
+                        accountPremadeForm.get('recovery_email')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -733,15 +755,15 @@
                   <input
                     type="password"
                     pInputText
-                    formControlName="accountPassword"
+                    formControlName="account_password"
                     class="w-full"
                     placeholder="Enter account password"
                   />
                   <small
                     *ngIf="
-                      accountPremadeForm.get('accountPassword')?.errors?.['required'] &&
-                      (accountPremadeForm.get('accountPassword')?.dirty ||
-                        accountPremadeForm.get('accountPassword')?.touched)
+                      accountPremadeForm.get('account_password')?.errors?.['required'] &&
+                      (accountPremadeForm.get('account_password')?.dirty ||
+                        accountPremadeForm.get('account_password')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -853,12 +875,23 @@
                     Value must be less than or equal to 999999.99.
                   </small>
                 </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700"
+                    >Supplier order</label
+                  >
+                  <input
+                    pInputText
+                    formControlName="supplier_order"
+                    class="w-full"
+                    placeholder="Supplier order number..."
+                  />
+                </div>
               </div>
               <div class="mt-6">
                 <label class="block mb-2 font-medium text-gray-700">Additional Info</label>
                 <textarea
                   pTextarea
-                  formControlName="notes"
+                  formControlName="observation"
                   rows="3"
                   class="w-full"
                   placeholder="Anything important..."
@@ -895,14 +928,14 @@
                   <input
                     type="email"
                     pInputText
-                    formControlName="accountEmail"
+                    formControlName="account_email"
                     class="w-full"
                     placeholder="Enter account email"
                   />
                   <small
                     *ngIf="
-                      accountPremadeForm.get('accountEmail')?.errors?.['required'] &&
-                      (accountPremadeForm.get('accountEmail')?.dirty || accountPremadeForm.get('accountEmail')?.touched)
+                      accountPremadeForm.get('account_email')?.errors?.['required'] &&
+                      (accountPremadeForm.get('account_email')?.dirty || accountPremadeForm.get('account_email')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -916,15 +949,15 @@
                   <input
                     type="email"
                     pInputText
-                    formControlName="recoveryEmail"
+                    formControlName="recovery_email"
                     class="w-full"
                     placeholder="Enter recovery email"
                   />
                   <small
                     *ngIf="
-                      accountPremadeForm.get('recoveryEmail')?.errors?.['required'] &&
-                      (accountPremadeForm.get('recoveryEmail')?.dirty ||
-                        accountPremadeForm.get('recoveryEmail')?.touched)
+                      accountPremadeForm.get('recovery_email')?.errors?.['required'] &&
+                      (accountPremadeForm.get('recovery_email')?.dirty ||
+                        accountPremadeForm.get('recovery_email')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -938,15 +971,15 @@
                   <input
                     type="password"
                     pInputText
-                    formControlName="accountPassword"
+                    formControlName="account_password"
                     class="w-full"
                     placeholder="Enter account password"
                   />
                   <small
                     *ngIf="
-                      accountPremadeForm.get('accountPassword')?.errors?.['required'] &&
-                      (accountPremadeForm.get('accountPassword')?.dirty ||
-                        accountPremadeForm.get('accountPassword')?.touched)
+                      accountPremadeForm.get('account_password')?.errors?.['required'] &&
+                      (accountPremadeForm.get('account_password')?.dirty ||
+                        accountPremadeForm.get('account_password')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -959,15 +992,15 @@
                   >
                   <p-select
                     [options]="camos"
-                    formControlName="availableCamo"
+                    formControlName="available_camo"
                     styleClass="w-full"
                     placeholder="Select a camo"
                   ></p-select>
                   <small
                     *ngIf="
-                      accountPremadeForm.get('availableCamo')?.errors?.['required'] &&
-                      (accountPremadeForm.get('availableCamo')?.dirty ||
-                        accountPremadeForm.get('availableCamo')?.touched)
+                      accountPremadeForm.get('available_camo')?.errors?.['required'] &&
+                      (accountPremadeForm.get('available_camo')?.dirty ||
+                        accountPremadeForm.get('available_camo')?.touched)
                     "
                     class="text-red-500"
                   >
@@ -1062,12 +1095,23 @@
                     Value must be less than or equal to 999999.99.
                   </small>
                 </div>
+                <div>
+                  <label class="block mb-2 font-medium text-gray-700"
+                    >Supplier order</label
+                  >
+                  <input
+                    pInputText
+                    formControlName="supplier_order"
+                    class="w-full"
+                    placeholder="Supplier order number..."
+                  />
+                </div>
               </div>
               <div class="mt-6">
                 <label class="block mb-2 font-medium text-gray-700">Additional Info</label>
                 <textarea
                   pTextarea
-                  formControlName="notes"
+                  formControlName="observation"
                   rows="3"
                   class="w-full"
                   placeholder="Anything important..."
@@ -1100,15 +1144,15 @@
                 <label class="block font-medium mb-2 text-gray-700">Details <span class="text-red-500">*</span></label>
                 <textarea
                   pTextarea
-                  formControlName="notes"
+                  formControlName="observation"
                   rows="6"
                   class="w-full"
                   placeholder="Describe your custom request..."
                 ></textarea>
                 <small
                   *ngIf="
-                    customRequestForm.get('notes')?.errors?.['required'] &&
-                    (customRequestForm.get('notes')?.dirty || customRequestForm.get('notes')?.touched)
+                    customRequestForm.get('observation')?.errors?.['required'] &&
+                    (customRequestForm.get('observation')?.dirty || customRequestForm.get('observation')?.touched)
                   "
                   class="text-red-500"
                 >

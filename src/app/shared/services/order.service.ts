@@ -15,21 +15,23 @@ export class OrderService {
 
   /** Recarrega os Orders do Supabase */
   refreshOrders() {
-    from(this.supabase.from('orders').select('*').order('created_at', { ascending: false })).subscribe(({ data }) => {
+    from(
+      this.supabase.from('orders').select('*').is('deleted_at', null).order('created_at', { ascending: false })
+    ).subscribe(({ data }) => {
       if (data) this.ordersSubject.next(data as Order[]);
     });
   }
 
-  addOrder(order: Order): Observable<Order> {
+  addOrder(order: Order): Observable<{ data?: Order; error?: any }> {
     return from(
       this.supabase
         .from('orders')
         .insert(order)
         .select()
         .single()
-        .then(({ data }) => {
-          this.refreshOrders();
-          return data as Order;
+        .then((res) => {
+          if (!res.error) this.refreshOrders();
+          return { data: res.data as Order, error: res.error };
         })
     );
   }
@@ -56,30 +58,32 @@ export class OrderService {
     );
   }
 
-  updateOrder(updated: Order): Observable<Order> {
+  updateOrder(updated: Order): Observable<{ data?: Order; error?: any }> {
+    // Só atualiza pedidos que não estão soft deleted (deleted_at IS NULL)
     return from(
       this.supabase
         .from('orders')
         .update(updated)
         .eq('id', updated.id)
+        .is('deleted_at', null)
         .select()
         .single()
-        .then(({ data }) => {
-          this.refreshOrders();
-          return data as Order;
+        .then((res) => {
+          if (!res.error) this.refreshOrders();
+          return { data: res.data as Order, error: res.error };
         })
     );
   }
 
-  deleteOrder(order: Order): Observable<any> {
+  softDeleteOrder(order: Order): Observable<{ data?: any; error?: any }> {
     return from(
       this.supabase
         .from('orders')
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', order.id)
         .then((res) => {
-          this.refreshOrders();
-          return res;
+          if (!res.error) this.refreshOrders();
+          return { data: res.data, error: res.error };
         })
     );
   }

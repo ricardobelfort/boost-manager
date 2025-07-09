@@ -63,6 +63,10 @@ export class OrderListComponent implements OnInit {
     });
   }
 
+  showColumn(field: keyof Order) {
+    return this.orders.some((order) => order[field] !== undefined && order[field] !== null && order[field] !== '');
+  }
+
   get filteredOrders() {
     if (!this.search) return this.orders;
     const searchTerm = this.search.toLowerCase();
@@ -88,7 +92,7 @@ export class OrderListComponent implements OnInit {
 
   deleteOrder(order: Order) {
     this.orders = this.orders.filter((o) => o !== order);
-    this.orderService.deleteOrder(order);
+    this.orderService.softDeleteOrder(order);
     this.messageService.add({
       severity: 'success',
       summary: 'Excluído',

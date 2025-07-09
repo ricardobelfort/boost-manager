@@ -90,7 +90,6 @@ export class OrderFormComponent {
     { label: 'Abyss', value: 'abyss' },
     { label: 'Dark Matter', value: 'darkmatter' },
     { label: 'Nebula', value: 'nebula' },
-    { label: 'Zombies', value: 'zombies' },
   ];
   platforms = [
     { label: 'PlayStation', value: 'PlayStation' },
@@ -106,54 +105,58 @@ export class OrderFormComponent {
 
   // =========== FORMS ==============
   rankBoostForm = this.fb.group({
-    currentRank: ['bronze1', Validators.required],
-    currentSr: [0, [Validators.min(0), Validators.max(10000)]],
+    current_rank: ['bronze1', Validators.required],
+    current_sr: [0, [Validators.min(0), Validators.max(10000)]],
     game: ['', Validators.required],
-    desiredRank: ['top250', Validators.required],
-    desiredSr: [10000, [Validators.min(0), Validators.max(10000)]],
+    desired_rank: ['top250', Validators.required],
+    desired_sr: [10000, [Validators.min(0), Validators.max(10000)]],
     platform: ['', Validators.required],
     total_value: ['', [Validators.required, Validators.min(0), Validators.max(999999.99)]],
     booster_value: ['', [Validators.required, Validators.min(0), Validators.max(999999.99)]],
-    notes: [''],
+    supplier_order: [''],
+    observation: ['', [Validators.maxLength(500)]],
   });
   botLobbyForm = this.fb.group({
-    botLobbies: [1, [Validators.required, Validators.min(1)]],
+    bot_lobbies: [1, [Validators.required, Validators.min(1)]],
     supplier: ['', Validators.required],
-    supplierOrder: [''],
+    supplier_order: [''],
     total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
     booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
-    notes: [''],
+    observation: ['', [Validators.maxLength(500)]],
   });
   camoServiceForm = this.fb.group({
-    desiredCamo: ['', Validators.required],
+    desired_camo: ['', Validators.required],
     game: ['', Validators.required],
     platform: ['', Validators.required],
     total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
     booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
-    notes: [''],
+    supplier_order: [''],
+    observation: ['', [Validators.maxLength(500)]],
   });
   powerLevelingForm = this.fb.group({
-    currentLevel: ['', [Validators.required, Validators.min(1)]],
-    desiredLevel: ['', [Validators.required, Validators.min(1)]],
-    accountEmail: ['', [Validators.required, Validators.email]],
-    recoveryEmail: ['', [Validators.required, Validators.email]],
-    accountPassword: ['', Validators.required],
+    current_level: ['', [Validators.required, Validators.min(1)]],
+    desired_level: ['', [Validators.required, Validators.min(1)]],
+    account_email: ['', [Validators.required, Validators.email]],
+    recovery_email: ['', [Validators.required, Validators.email]],
+    account_password: ['', Validators.required],
     platform: ['', Validators.required],
     total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
     booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
-    notes: [''],
+    supplier_order: [''],
+    observation: ['', [Validators.maxLength(500)]],
   });
   accountPremadeForm = this.fb.group({
-    accountEmail: ['', [Validators.required, Validators.email]],
-    recoveryEmail: ['', [Validators.required, Validators.email]],
-    accountPassword: ['', Validators.required],
-    availableCamo: [''],
+    account_email: ['', [Validators.required, Validators.email]],
+    recovery_email: ['', [Validators.required, Validators.email]],
+    account_password: ['', Validators.required],
+    available_camo: [''],
     total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
     booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
-    notes: [''],
+    supplier_order: [''],
+    observation: ['', [Validators.maxLength(500)]],
   });
   customRequestForm = this.fb.group({
-    notes: ['', Validators.required],
+    observation: ['', [Validators.maxLength(500)]],
     total_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
     booster_value: [0, [Validators.required, Validators.min(0), Validators.max(999999.99)]],
   });
@@ -170,7 +173,6 @@ export class OrderFormComponent {
     });
   }
 
-  // ============= SUBMITS POR TAB =============
   async saveRankBoost() {
     if (this.rankBoostForm.invalid) {
       this.rankBoostForm.markAllAsTouched();
@@ -178,19 +180,38 @@ export class OrderFormComponent {
     }
     const formValue = this.rankBoostForm.value;
 
-    const { error } = await this.supabase.from('orders').insert([
-      {
-        ...formValue,
-        service_type: 'rank_boost',
-        user_id: (await this.supabase.auth.getUser()).data.user?.id,
-      },
-    ]);
-    if (!error) {
-      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Rank Boost order saved!' });
-      this.rankBoostForm.reset();
-      this.router.navigate(['/dashboard/orders']);
+    this.loadingService.show();
+    try {
+      const { error } = await this.supabase.from('orders').insert([
+        {
+          ...formValue,
+          service_type: 'rank_boost',
+          user_id: (await this.supabase.auth.getUser()).data.user?.id,
+        },
+      ]);
+
+      if (!error) {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Rank Boost order saved!' });
+        this.rankBoostForm.reset();
+        this.router.navigate(['/dashboard/orders']);
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.message || 'Failed to save order. Try again later.',
+        });
+      }
+    } catch (e: any) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Unexpected Error',
+        detail: e.message || 'Unexpected error, please try again.',
+      });
+    } finally {
+      this.loadingService.hide();
     }
   }
+
   async saveBotLobby() {
     if (this.botLobbyForm.invalid) {
       this.botLobbyForm.markAllAsTouched();
@@ -198,19 +219,38 @@ export class OrderFormComponent {
     }
     const formValue = this.botLobbyForm.value;
 
-    const { error } = await this.supabase.from('orders').insert([
-      {
-        ...formValue,
-        service_type: 'bot_lobby',
-        user_id: (await this.supabase.auth.getUser()).data.user?.id,
-      },
-    ]);
-    if (!error) {
-      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Bot Lobby order saved!' });
-      this.botLobbyForm.reset();
-      this.router.navigate(['/dashboard/orders']);
+    this.loadingService.show();
+    try {
+      const { error } = await this.supabase.from('orders').insert([
+        {
+          ...formValue,
+          service_type: 'bot_lobby',
+          user_id: (await this.supabase.auth.getUser()).data.user?.id,
+        },
+      ]);
+
+      if (!error) {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Bot Lobby order saved!' });
+        this.botLobbyForm.reset();
+        this.router.navigate(['/dashboard/orders']);
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.message || 'Failed to save order. Try again later.',
+        });
+      }
+    } catch (e: any) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Unexpected Error',
+        detail: e.message || 'Unexpected error, please try again.',
+      });
+    } finally {
+      this.loadingService.hide();
     }
   }
+
   async saveCamoService() {
     if (this.camoServiceForm.invalid) {
       this.camoServiceForm.markAllAsTouched();
@@ -218,19 +258,38 @@ export class OrderFormComponent {
     }
     const formValue = this.camoServiceForm.value;
 
-    const { error } = await this.supabase.from('orders').insert([
-      {
-        ...formValue,
-        service_type: 'camo_service',
-        user_id: (await this.supabase.auth.getUser()).data.user?.id,
-      },
-    ]);
-    if (!error) {
-      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Camo Service order saved!' });
-      this.camoServiceForm.reset();
-      this.router.navigate(['/dashboard/orders']);
+    this.loadingService.show();
+    try {
+      const { error } = await this.supabase.from('orders').insert([
+        {
+          ...formValue,
+          service_type: 'bot_lobby',
+          user_id: (await this.supabase.auth.getUser()).data.user?.id,
+        },
+      ]);
+
+      if (!error) {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Bot Lobby order saved!' });
+        this.botLobbyForm.reset();
+        this.router.navigate(['/dashboard/orders']);
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.message || 'Failed to save order. Try again later.',
+        });
+      }
+    } catch (e: any) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Unexpected Error',
+        detail: e.message || 'Unexpected error, please try again.',
+      });
+    } finally {
+      this.loadingService.hide();
     }
   }
+
   async savePowerLeveling() {
     if (this.powerLevelingForm.invalid) {
       this.powerLevelingForm.markAllAsTouched();
@@ -238,19 +297,38 @@ export class OrderFormComponent {
     }
     const formValue = this.powerLevelingForm.value;
 
-    const { error } = await this.supabase.from('orders').insert([
-      {
-        ...formValue,
-        service_type: 'power_leveling',
-        user_id: (await this.supabase.auth.getUser()).data.user?.id,
-      },
-    ]);
-    if (!error) {
-      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Power Leveling order saved!' });
-      this.powerLevelingForm.reset();
-      this.router.navigate(['/dashboard/orders']);
+    this.loadingService.show();
+    try {
+      const { error } = await this.supabase.from('orders').insert([
+        {
+          ...formValue,
+          service_type: 'bot_lobby',
+          user_id: (await this.supabase.auth.getUser()).data.user?.id,
+        },
+      ]);
+
+      if (!error) {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Bot Lobby order saved!' });
+        this.botLobbyForm.reset();
+        this.router.navigate(['/dashboard/orders']);
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.message || 'Failed to save order. Try again later.',
+        });
+      }
+    } catch (e: any) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Unexpected Error',
+        detail: e.message || 'Unexpected error, please try again.',
+      });
+    } finally {
+      this.loadingService.hide();
     }
   }
+
   async saveAccountPremade() {
     if (this.accountPremadeForm.invalid) {
       this.accountPremadeForm.markAllAsTouched();
@@ -258,19 +336,38 @@ export class OrderFormComponent {
     }
     const formValue = this.accountPremadeForm.value;
 
-    const { error } = await this.supabase.from('orders').insert([
-      {
-        ...formValue,
-        service_type: 'account_premade',
-        user_id: (await this.supabase.auth.getUser()).data.user?.id,
-      },
-    ]);
-    if (!error) {
-      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Account Premade order saved!' });
-      this.accountPremadeForm.reset();
-      this.router.navigate(['/dashboard/orders']);
+    this.loadingService.show();
+    try {
+      const { error } = await this.supabase.from('orders').insert([
+        {
+          ...formValue,
+          service_type: 'bot_lobby',
+          user_id: (await this.supabase.auth.getUser()).data.user?.id,
+        },
+      ]);
+
+      if (!error) {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Bot Lobby order saved!' });
+        this.botLobbyForm.reset();
+        this.router.navigate(['/dashboard/orders']);
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.message || 'Failed to save order. Try again later.',
+        });
+      }
+    } catch (e: any) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Unexpected Error',
+        detail: e.message || 'Unexpected error, please try again.',
+      });
+    } finally {
+      this.loadingService.hide();
     }
   }
+
   async saveCustomRequest() {
     if (this.customRequestForm.invalid) {
       this.customRequestForm.markAllAsTouched();
@@ -278,17 +375,35 @@ export class OrderFormComponent {
     }
     const formValue = this.customRequestForm.value;
 
-    const { error } = await this.supabase.from('orders').insert([
-      {
-        ...formValue,
-        service_type: 'custom_request',
-        user_id: (await this.supabase.auth.getUser()).data.user?.id,
-      },
-    ]);
-    if (!error) {
-      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Custom Request saved!' });
-      this.customRequestForm.reset();
-      this.router.navigate(['/dashboard/orders']);
+    this.loadingService.show();
+    try {
+      const { error } = await this.supabase.from('orders').insert([
+        {
+          ...formValue,
+          service_type: 'bot_lobby',
+          user_id: (await this.supabase.auth.getUser()).data.user?.id,
+        },
+      ]);
+
+      if (!error) {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Bot Lobby order saved!' });
+        this.botLobbyForm.reset();
+        this.router.navigate(['/dashboard/orders']);
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.message || 'Failed to save order. Try again later.',
+        });
+      }
+    } catch (e: any) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Unexpected Error',
+        detail: e.message || 'Unexpected error, please try again.',
+      });
+    } finally {
+      this.loadingService.hide();
     }
   }
 

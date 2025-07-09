@@ -27,25 +27,28 @@
   >
     <ng-template pTemplate="header">
       <tr>
-        <th class="!text-gray-400">Booster</th>
-        <th class="!text-gray-400">Service</th>
-        <th class="!text-gray-400">#Order</th>
-        <th class="!text-gray-400" pSortableColumn="status">Status <p-sortIcon field="status" /></th>
-        <th class="!text-gray-400" pSortableColumn="start_date">Start <p-sortIcon field="start_date" /></th>
-        <th class="!text-gray-400" pSortableColumn="end_date">End <p-sortIcon field="end_date" /></th>
-        <th class="!text-gray-400" pSortableColumn="total_value">Total <p-sortIcon field="total_value" /></th>
-        <th class="!text-gray-400" pSortableColumn="booster_value">
-          Booster Price <p-sortIcon field="booster_value" />
-        </th>
-        <th class="!text-gray-400 w-[140px]"></th>
+        <th>#Order</th>
+        <th>Service</th>
+        <th>Status</th>
+        <!-- <th>Game</th> -->
+        <th *ngIf="showColumn('booster')">Booster</th>
+        <th>Platform</th>
+        <th>Rank (from → to)</th>
+        <th>SR (from → to)</th>
+        <th *ngIf="showColumn('bot_lobbies')">Bot Lobbies</th>
+        <th *ngIf="showColumn('desired_camo')">Camo</th>
+        <th *ngIf="showColumn('account_email')">Account Email</th>
+        <th>Total</th>
+        <!-- <th>Booster Price</th> -->
+        <th>Supplier</th>
+        <th class="!w-[150px] !text-center">Actions</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-order>
       <tr>
-        <td class="text-sm">{{ order.booster }}</td>
-        <td class="text-sm">{{ order.service_type }}</td>
-        <td class="text-sm">#{{ order.order_number }}</td>
-        <td class="text-sm">
+        <td>#{{ order.order_number }}</td>
+        <td>{{ order.service_type }}</td>
+        <td>
           <span
             class="px-2 py-1 rounded-lg font-medium"
             [ngClass]="{
@@ -58,10 +61,29 @@
             {{ order.status }}
           </span>
         </td>
-        <td class="text-sm">{{ order.start_date ? (order.start_date | date: 'dd/MM/yy' : '' : 'pt-BR') : '-' }}</td>
-        <td class="text-sm">{{ order.end_date ? (order.end_date | date: 'dd/MM/yy' : '' : 'pt-BR') : '-' }}</td>
-        <td class="text-sm">{{ order.total_value | currency: 'USD' : 'symbol' : '1.2-2' : 'en-US' }}</td>
-        <td class="text-sm">{{ order.booster_value | currency: 'USD' : 'symbol' : '1.2-2' : 'en-US' }}</td>
+        <!-- <td>{{ order.game }}</td> -->
+        <td *ngIf="showColumn('booster')">{{ order.booster }}</td>
+        <td>{{ order.platform }}</td>
+        <td>
+          <ng-container *ngIf="order.current_rank || order.desired_rank">
+            {{ order.current_rank ? (order.current_rank | titlecase) : '-' }}
+            <span *ngIf="order.current_rank && order.desired_rank">→</span>
+            {{ order.desired_rank ? (order.desired_rank | titlecase) : '-' }}
+          </ng-container>
+        </td>
+        <td>
+          <ng-container *ngIf="order.current_sr || order.desired_sr">
+            {{ order.current_sr || '-' }}
+            <span *ngIf="order.current_sr && order.desired_sr">→</span>
+            {{ order.desired_sr || '-' }}
+          </ng-container>
+        </td>
+        <td *ngIf="showColumn('bot_lobbies')">{{ order.bot_lobbies }}</td>
+        <td *ngIf="showColumn('desired_camo')">{{ order.desired_camo }}</td>
+        <td *ngIf="showColumn('account_email')">{{ order.account_email }}</td>
+        <td>{{ order.total_value | currency: 'USD' : 'symbol' : '1.2-2' : 'en-US' }}</td>
+        <!-- <td>{{ order.booster_value | currency: 'USD' : 'symbol' : '1.2-2' : 'en-US' }}</td> -->
+        <td>{{ order.supplier }}</td>
         <td class="!text-right">
           <p-button
             icon="pi pi-tag"
@@ -126,17 +148,22 @@
 >
   <ng-container *ngIf="orderToView">
     <div class="flex flex-col gap-3">
-      <div><b>Order number:</b> #{{ orderToView.order_number }}</div>
-      <div><b>Booster:</b> {{ orderToView.booster }}</div>
-      <div><b>Service type:</b> {{ orderToView.service_type }}</div>
-      <div *ngIf="orderToView.weapon_quantity"><b>Qty. Weapons:</b> {{ orderToView.weapon_quantity }}</div>
-      <div><b>Supplier:</b> {{ orderToView.supplier }}</div>
+      <div><b>Order #:</b> #{{ orderToView.order_number }}</div>
+      <div><b>Service:</b> {{ orderToView.service_type }}</div>
       <div><b>Status:</b> {{ orderToView.status }}</div>
-      <div><b>Start date:</b> {{ orderToView.start_date | date: 'dd/MM/yyyy HH:mm' }}</div>
-      <div><b>End date:</b> {{ orderToView.end_date | date: 'dd/MM/yyyy HH:mm' }}</div>
-      <div><b>Total value:</b> R$ {{ orderToView.total_value | number: '1.2-2' }}</div>
-      <div><b>Booster value:</b> R$ {{ orderToView.booster_value | number: '1.2-2' }}</div>
-      <div><b>Notes:</b> {{ orderToView.observation }}</div>
+      <div><b>Game:</b> {{ orderToView.game }}</div>
+      <div><b>Platform:</b> {{ orderToView.platform }}</div>
+      <div><b>Rank from:</b> {{ orderToView.current_rank }}</div>
+      <div><b>Rank to:</b> {{ orderToView.desired_rank }}</div>
+      <div><b>SR from:</b> {{ orderToView.current_sr }}</div>
+      <div><b>SR to:</b> {{ orderToView.desired_sr }}</div>
+      <div><b>Bot lobbies:</b> {{ orderToView.bot_lobbies }}</div>
+      <div><b>Desired camo:</b> {{ orderToView.desired_camo }}</div>
+      <div><b>Account Email:</b> {{ orderToView.account_email }}</div>
+      <div><b>Supplier:</b> {{ orderToView.supplier }}</div>
+      <div><b>Total value:</b> {{ orderToView.total_value | currency: 'USD' : 'symbol' : '1.2-2' : 'en-US' }}</div>
+      <div><b>Booster value:</b> {{ orderToView.booster_value | currency: 'USD' : 'symbol' : '1.2-2' : 'en-US' }}</div>
+      <div><b>Observation:</b> {{ orderToView.observation }}</div>
     </div>
   </ng-container>
 </p-dialog>
