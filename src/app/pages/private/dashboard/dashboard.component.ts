@@ -53,21 +53,21 @@ export class DashboardComponent {
   activeBoosters = [
     {
       orderId: 1,
-      name: 'Matheus',
+      name: 'Joaozinho',
       boosterId: '123',
       amount: 350,
       avatar: 'https://primefaces.org/cdn/primeng/images/demo/avatar/onyamalimba.png',
     },
     {
       orderId: 2,
-      name: 'Murillo',
+      name: 'Zezinho',
       boosterId: '123',
       amount: 425,
       avatar: 'https://primefaces.org/cdn/primeng/images/demo/avatar/ionibowcher.png',
     },
     {
       orderId: 3,
-      name: 'Erick',
+      name: 'Luizinho',
       boosterId: '123',
       amount: 850,
       avatar: 'https://primefaces.org/cdn/primeng/images/demo/avatar/xuxuefeng.png',
@@ -76,7 +76,7 @@ export class DashboardComponent {
 
   ordersInProgress: OrderInProgress[] = [
     {
-      boosterName: 'Matheus',
+      boosterName: 'Joaozinho',
       serviceName: 'Valorant Boost - Platinum I',
       progress: 68,
       progressLabel: '%68',
@@ -96,7 +96,7 @@ export class DashboardComponent {
       concluded: false,
     },
     {
-      boosterName: 'Murillo',
+      boosterName: 'Zezinho',
       serviceName: 'LoL Boost - Gold IV',
       progress: 35,
       progressLabel: '%35',
@@ -115,7 +115,7 @@ export class DashboardComponent {
       concluded: false,
     },
     {
-      boosterName: 'Erick',
+      boosterName: 'Luizinho',
       serviceName: 'LoL Boost - Gold IV',
       progress: 85,
       progressLabel: '%85',
